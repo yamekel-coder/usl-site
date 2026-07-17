@@ -2359,6 +2359,18 @@ html {
   }
 }
 
+/* Fix <select> option visibility (white-on-white dropdown bug) */
+
+select option,
+select optgroup {
+  background-color: #111111;
+  color: #ffffff;
+}
+
+select {
+  color-scheme: dark;
+}
+
 .selection\:bg-white *::-moz-selection {
   --tw-bg-opacity: 1;
   background-color: rgb(255 255 255 / var(--tw-bg-opacity, 1));

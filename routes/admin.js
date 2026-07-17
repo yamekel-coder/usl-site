@@ -28,7 +28,12 @@ router.get('/', modRequired, function (req, res) {
   const submissions = db.getSubmissions(type || null, status || null);
   const applicationStatus = Object.prototype.hasOwnProperty.call(req.query, 'applicationStatus') ? req.query.applicationStatus : 'pending';
   const moderatorApplications = db.getSubmissions('moderator', applicationStatus || null);
-  const users = db.getUsers();
+  const allUsers = db.getUsers();
+  const USER_PAGE_SIZE = 25;
+  const userPage = Math.max(1, parseInt(req.query.page, 10) || 1);
+  const userTotalPages = Math.max(1, Math.ceil(allUsers.length / USER_PAGE_SIZE));
+  const safeUserPage = Math.min(userPage, userTotalPages);
+  const users = allUsers.slice((safeUserPage - 1) * USER_PAGE_SIZE, safeUserPage * USER_PAGE_SIZE);
   const team = db.getTeamMembers();
   const demons = db.getDemons();
   const records = db.getRecords(50);
@@ -78,6 +83,9 @@ router.get('/', modRequired, function (req, res) {
     moderatorApplications: moderatorApplications.map(formatSubmission),
     applicationStatus: applicationStatus,
     users: users,
+    userPage: safeUserPage,
+    userTotalPages: userTotalPages,
+    allUsersCount: allUsers.length,
     team: team,
     demons: demons,
     records: records,

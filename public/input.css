@@ -341,3 +341,13 @@
     scroll-behavior: auto !important;
   }
 }
+
+/* Fix <select> option visibility (white-on-white dropdown bug) */
+select option,
+select optgroup {
+  background-color: #111111;
+  color: #ffffff;
+}
+select {
+  color-scheme: dark;
+}

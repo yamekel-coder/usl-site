@@ -645,6 +645,29 @@
           </div>
         </div>
 
+        <!-- Users Pagination -->
+        <% if (userTotalPages > 1) { %>
+          <div class="mt-5 flex items-center justify-between gap-4 flex-wrap">
+            <span class="text-white/40 text-xs">Page <%= userPage %> of <%= userTotalPages %> · <%= (userPage - 1) * 25 + 1 %>–<%= Math.min(userPage * 25, allUsersCount) %> of <%= allUsersCount %></span>
+            <div class="flex items-center gap-2">
+              <% if (userPage > 1) { %>
+                <a href="/admin?section=users&page=<%= userPage - 1 %>" class="h-9 px-4 rounded-xl bg-white/10 text-white/80 text-sm font-medium hover:bg-white/20 transition-all">← Prev</a>
+              <% } %>
+              <% var startPage = Math.max(1, userPage - 2); var endPage = Math.min(userTotalPages, userPage + 2); %>
+              <% for (var p = startPage; p <= endPage; p++) { %>
+                <% if (p === userPage) { %>
+                  <span class="h-9 px-3.5 rounded-xl bg-white text-dark text-sm font-bold flex items-center"><%= p %></span>
+                <% } else { %>
+                  <a href="/admin?section=users&page=<%= p %>" class="h-9 px-3.5 rounded-xl bg-white/10 text-white/70 text-sm font-medium hover:bg-white/20 transition-all flex items-center"><%= p %></a>
+                <% } %>
+              <% } %>
+              <% if (userPage < userTotalPages) { %>
+                <a href="/admin?section=users&page=<%= userPage + 1 %>" class="h-9 px-4 rounded-xl bg-white/10 text-white/80 text-sm font-medium hover:bg-white/20 transition-all">Next →</a>
+              <% } %>
+            </div>
+          </div>
+        <% } %>
+
         <!-- Grant Record -->
         <div class="mt-8 rounded-2xl bg-white/[0.02] border border-white/10 overflow-hidden p-6" style="background:rgba(255,255,255,0.02);border-color:rgba(255,255,255,0.1)">
           <h3 class="text-lg font-bold text-white mb-1">Grant Record Manually</h3>

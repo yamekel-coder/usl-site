@@ -212,9 +212,9 @@ function getPlayerRating(userId) {
   const diffPoints = { easy: 100, medium: 150, hard: 200, insane: 300, extreme: 500 };
   let rating = 0;
   for (const r of rows) {
+    if (r.status !== 'verified') continue;
     const base = diffPoints[String(r.difficulty).toLowerCase()] || 100;
-    if (r.status === 'verified') rating += base;
-    else if (r.status === 'pending') rating += Math.round(base * 0.25);
+    rating += base;
   }
   return rating;
 }
