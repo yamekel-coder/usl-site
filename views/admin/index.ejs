@@ -600,11 +600,7 @@
                     <td class="px-5 py-3">
                       <% if (user && user.role === 'admin' && u.id !== user.id) { %>
                         <form method="POST" action="/admin/users/<%= u.id %>/role" class="flex items-center gap-1.5">
-                          <select name="role" class="h-8 px-2 rounded-lg border border-white/10 bg-white/5 text-white text-[11px] focus:outline-none focus:border-white/20" style="background:rgba(255,255,255,0.05);border-color:rgba(255,255,255,0.1)">
-                            <option value="user" <%= u.role==='user' ? 'selected' : '' %>>user</option>
-                            <option value="moderator" <%= u.role==='moderator' ? 'selected' : '' %>>moderator</option>
-                            <option value="admin" <%= u.role==='admin' ? 'selected' : '' %>>admin</option>
-                          </select>
+                          <div class="usl-select !min-w-[130px]" data-name="role" data-current="<%= u.role %>" data-options='[{"code":"","name":"user"},{"code":"","name":"moderator"},{"code":"","name":"admin"}]'></div>
                           <button type="submit" class="h-8 px-2 rounded-lg bg-white/10 text-white/80 text-[11px] font-medium hover:bg-white/20 transition-all" data-i18n="admin.setBtn">Set</button>
                         </form>
                       <% } else { %>
