@@ -506,6 +506,12 @@ function setUserCountry(userId, country) {
   ).run(country || null, userId);
 }
 
+function setUserPassword(userId, hash) {
+  return get().prepare(
+    "UPDATE users SET password_hash = ?, updated_at = datetime('now') WHERE id = ?"
+  ).run(hash, userId);
+}
+
 function createRecord(userId, record) {
   const info = get().prepare(
     "INSERT INTO records (user_id, demon_id, progress, status, youtube_url, raw_footage_url, platform, comment) " +
@@ -658,7 +664,7 @@ module.exports = {
   init, get, getStats, getDemons, getDemonById, getDemonRecords, calculateDemonPoints,
   getRecords, getPlayers, getPlayerRating, getPlayerRecords, getCountries,
   createSubmission, getSubmissions, updateSubmissionStatus, getUserById, getUserByEmail,
-  setUserRole, getUsers, getTeamMembers, getUsersByRole, addDemon, updateDemon, deleteDemon, setUserCountry,
+  setUserRole, getUsers, getTeamMembers, getUsersByRole, addDemon, updateDemon, deleteDemon, setUserCountry, setUserPassword,
   createRecord, getPendingRecords, getRecordById, approveRecord, rejectRecord,
   getLevelRequests, approveLevelRequest, createNews, getNews,
   getRegistrationCount, recordRegistration, normalizeCountry, getCountryFlag,

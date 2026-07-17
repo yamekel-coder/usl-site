@@ -126,6 +126,51 @@
         <p class="text-center text-xs text-white/25 mb-6" data-i18n="profile.uploadHint">Hover the avatar to change it · PNG, JPG, GIF or WebP</p>
       <% } %>
 
+      <!-- Settings (own profile only) -->
+      <% if (user && user.id === profile.id) { %>
+        <% if (success) { %>
+          <div class="rounded-2xl border px-5 py-3 mb-6 text-sm
+            <%= success === 'country-updated' || success === 'password-updated' ? 'border-green-500/30 bg-green-500/10 text-green-300' : 'border-red-500/30 bg-red-500/10 text-red-300' %>"
+            style="border-color:<%= success === 'country-updated' || success === 'password-updated' ? 'rgba(34,197,94,0.3)' : 'rgba(239,68,68,0.3)' %>;background:<%= success === 'country-updated' || success === 'password-updated' ? 'rgba(34,197,94,0.1)' : 'rgba(239,68,68,0.1)' %>">
+            <% if (success === 'country-updated') { %>Region updated.<% } %>
+            <% if (success === 'password-updated') { %>Password changed.<% } %>
+            <% if (success === 'wrong-password') { %>Current password is incorrect.<% } %>
+            <% if (success === 'password-short') { %>New password must be at least 6 characters.<% } %>
+            <% if (success === 'password-mismatch') { %>New passwords do not match.<% } %>
+            <% if (success === 'invalid-country') { %>Invalid region selected.<% } %>
+          </div>
+        <% } %>
+
+        <div class="grid gap-6 md:grid-cols-2 mb-6">
+          <!-- Change region -->
+          <div class="rounded-3xl bg-white/[0.015] border border-white/[0.06] backdrop-blur-2xl p-6">
+            <h3 class="text-lg font-bold text-white mb-1" data-i18n="profile.changeRegion">Change Region</h3>
+            <p class="text-white/40 text-sm mb-5" data-i18n="profile.changeRegionSub">Update the country shown on your profile and leaderboards.</p>
+            <form method="POST" action="/profile/country" class="space-y-3">
+              <select name="country" class="w-full h-11 px-4 rounded-xl bg-white/5 border border-white/10 text-white text-sm focus:outline-none focus:border-white/20">
+                <option value="" <%= !profile.country ? 'selected' : '' %>>—</option>
+                <% countries.forEach(function (c) { %>
+                  <option value="<%= c.name %>" <%= profile.country === c.name ? 'selected' : '' %>><%= c.name %></option>
+                <% }); %>
+              </select>
+              <button type="submit" class="w-full h-11 rounded-xl bg-white text-dark font-semibold text-sm hover:bg-white/90 transition-all duration-300" data-i18n="profile.saveRegion">Save Region</button>
+            </form>
+          </div>
+
+          <!-- Change password -->
+          <div class="rounded-3xl bg-white/[0.015] border border-white/[0.06] backdrop-blur-2xl p-6">
+            <h3 class="text-lg font-bold text-white mb-1" data-i18n="profile.changePassword">Change Password</h3>
+            <p class="text-white/40 text-sm mb-5" data-i18n="profile.changePasswordSub">Enter your current password to set a new one.</p>
+            <form method="POST" action="/profile/password" class="space-y-3">
+              <input type="password" name="current" required placeholder="Current password" data-i18n-placeholder="profile.currentPassword" class="w-full h-11 px-4 rounded-xl bg-white/5 border border-white/10 text-white text-sm placeholder:text-white/20 focus:outline-none focus:border-white/20">
+              <input type="password" name="next" required minlength="6" placeholder="New password" data-i18n-placeholder="profile.newPassword" class="w-full h-11 px-4 rounded-xl bg-white/5 border border-white/10 text-white text-sm placeholder:text-white/20 focus:outline-none focus:border-white/20">
+              <input type="password" name="confirm" required minlength="6" placeholder="Confirm new password" data-i18n-placeholder="profile.confirmPassword" class="w-full h-11 px-4 rounded-xl bg-white/5 border border-white/10 text-white text-sm placeholder:text-white/20 focus:outline-none focus:border-white/20">
+              <button type="submit" class="w-full h-11 rounded-xl bg-white text-dark font-semibold text-sm hover:bg-white/90 transition-all duration-300" data-i18n="profile.savePassword">Change Password</button>
+            </form>
+          </div>
+        </div>
+      <% } %>
+
       <div class="text-center mt-8">
         <a href="/" class="text-sm text-white/30 hover:text-white transition-colors duration-300" data-i18n="profile.back">← Back to Home</a>
       </div>

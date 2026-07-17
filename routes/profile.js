@@ -2,8 +2,10 @@ const express = require('express');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
+const bcrypt = require('bcrypt');
 const db = require('../database/db');
 const auth = require('../middleware/auth');
+const COUNTRIES = require('../database/countries');
 
 const router = express.Router();
 
@@ -62,7 +64,9 @@ router.get('/', auth.authRequired, function (req, res) {
     record_count: recordCount,
     rating: db.getPlayerRating(user.id),
     records: records,
-    error: null
+    countries: COUNTRIES,
+    error: null,
+    success: req.query.success || null
   });
 });
 
@@ -149,6 +153,41 @@ router.post('/avatar', auth.authRequired, function (req, res) {
 
     res.redirect('/profile');
   });
+});
+
+// POST /profile/country — change region
+router.post('/country', auth.authRequired, function (req, res) {
+  var country = typeof req.body.country === 'string' ? req.body.country.trim() : '';
+  if (country && !COUNTRIES.some(function (c) { return c.name === country; })) {
+    return res.redirect('/profile?success=invalid-country');
+  }
+  db.setUserCountry(req.user.id, country || null);
+  res.redirect('/profile?success=country-updated');
+});
+
+// POST /profile/password — change password
+router.post('/password', auth.authRequired, function (req, res) {
+  var current = req.body.current || '';
+  var next = req.body.next || '';
+  var confirm = req.body.confirm || '';
+
+  var dbInstance = db.get();
+  var user = dbInstance.prepare(
+    'SELECT id, password_hash FROM users WHERE id = ?'
+  ).get(req.user.id);
+
+  if (!user || !bcrypt.compareSync(current, user.password_hash)) {
+    return res.redirect('/profile?success=wrong-password');
+  }
+  if (next.length < 6) {
+    return res.redirect('/profile?success=password-short');
+  }
+  if (next !== confirm) {
+    return res.redirect('/profile?success=password-mismatch');
+  }
+
+  db.setUserPassword(req.user.id, bcrypt.hashSync(next, 10));
+  res.redirect('/profile?success=password-updated');
 });
 
 module.exports = router;
