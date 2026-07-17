@@ -311,3 +311,33 @@
     display: none;
   }
 }
+
+/* Mobile performance: disable expensive effects on small screens */
+@media (max-width: 768px) {
+  #bg-container::before {
+    filter: brightness(0.22) grayscale(0.6);
+  }
+  .glass,
+  .glass-strong {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+  .gd-btn {
+    animation: none;
+  }
+  #noise {
+    display: none;
+  }
+  .stat-card,
+  .feature-card,
+  .change-item {
+    transition: none;
+  }
+  .stat-card:hover,
+  .feature-card:hover {
+    transform: none;
+  }
+  * {
+    scroll-behavior: auto !important;
+  }
+}

@@ -176,6 +176,7 @@
             <table class="w-full text-sm">
               <thead>
                 <tr class="text-white/30 text-xs uppercase tracking-wider text-left border-b border-white/5">
+                  <th class="px-5 py-4 font-medium">ID</th>
                   <th class="px-5 py-4 font-medium" data-i18n="admin.col.hash">#</th>
                   <th class="px-5 py-4 font-medium" data-i18n="admin.col.name">Name</th>
                   <th class="px-5 py-4 font-medium" data-i18n="admin.col.creator">Creator</th>
@@ -187,6 +188,7 @@
               <tbody>
                 <% demons.forEach(function (d) { %>
                   <tr class="border-b border-white/[0.04] hover:bg-white/[0.02]" style="border-color:rgba(255,255,255,0.04)">
+                    <td class="px-5 py-3 text-white/30 text-xs"><%= d.id %></td>
                     <td class="px-5 py-3 text-white/50"><%= d.position || '—' %></td>
                     <td class="px-5 py-3 text-white font-medium"><%= d.name %></td>
                     <td class="px-5 py-3 text-white/50"><%= d.creator || '—' %></td>
@@ -642,6 +644,55 @@
             </table>
           </div>
         </div>
+
+        <!-- Grant Record -->
+        <div class="mt-8 rounded-2xl bg-white/[0.02] border border-white/10 overflow-hidden p-6" style="background:rgba(255,255,255,0.02);border-color:rgba(255,255,255,0.1)">
+          <h3 class="text-lg font-bold text-white mb-1">Grant Record Manually</h3>
+          <p class="text-white/40 text-sm mb-5">Select a user and an existing level to grant them a verified completion (counts toward their points & leaderboard).</p>
+          <form method="POST" action="/admin/users/0/add-record" id="grant-form" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
+            <div class="lg:col-span-1">
+              <label class="block text-white/40 text-xs uppercase tracking-wider mb-1.5">User</label>
+              <select name="user_id" id="grant-user" class="w-full h-11 px-3 rounded-xl border border-white/10 bg-white/5 text-white text-sm focus:outline-none focus:border-white/20" style="background:rgba(255,255,255,0.05);border-color:rgba(255,255,255,0.1)" required>
+                <option value="">Select user…</option>
+                <% users.forEach(function (u) { %><option value="<%= u.id %>"><%= u.username %> (<%= u.id %>)</option><% }); %>
+              </select>
+            </div>
+            <div class="lg:col-span-1">
+              <label class="block text-white/40 text-xs uppercase tracking-wider mb-1.5">Level</label>
+              <select name="demon_id" id="grant-demon" class="w-full h-11 px-3 rounded-xl border border-white/10 bg-white/5 text-white text-sm focus:outline-none focus:border-white/20" style="background:rgba(255,255,255,0.05);border-color:rgba(255,255,255,0.1)" required>
+                <option value="">Select level…</option>
+                <% demons.forEach(function (d) { %><option value="<%= d.id %>" data-req="<%= d.requirement || 100 %>"><%= d.position ? (d.position + '. ') : '' %><%= d.name %> (<%= d.difficulty %>)</option><% }); %>
+              </select>
+            </div>
+            <div class="lg:col-span-1">
+              <label class="block text-white/40 text-xs uppercase tracking-wider mb-1.5">Percent</label>
+              <input type="number" name="percent" id="grant-percent" min="0" max="100" value="100" class="w-full h-11 px-3 rounded-xl border border-white/10 bg-white/5 text-white text-sm focus:outline-none focus:border-white/20" style="background:rgba(255,255,255,0.05);border-color:rgba(255,255,255,0.1)">
+            </div>
+            <div class="lg:col-span-1">
+              <button type="submit" class="w-full h-11 rounded-xl bg-rose-500/90 hover:bg-rose-500 text-white text-sm font-semibold transition-all" onclick="return prepareGrant()">Grant Record</button>
+            </div>
+            <div class="lg:col-span-4 grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <input type="text" name="youtube_url" placeholder="YouTube URL (optional)" class="h-11 px-3 rounded-xl border border-white/10 bg-white/5 text-white text-sm placeholder:text-white/20 focus:outline-none focus:border-white/20" style="background:rgba(255,255,255,0.05);border-color:rgba(255,255,255,0.1)">
+              <input type="text" name="raw_footage_url" placeholder="Raw footage URL (optional)" class="h-11 px-3 rounded-xl border border-white/10 bg-white/5 text-white text-sm placeholder:text-white/20 focus:outline-none focus:border-white/20" style="background:rgba(255,255,255,0.05);border-color:rgba(255,255,255,0.1)">
+              <input type="text" name="comment" placeholder="Comment (optional)" class="h-11 px-3 rounded-xl border border-white/10 bg-white/5 text-white text-sm placeholder:text-white/20 focus:outline-none focus:border-white/20" style="background:rgba(255,255,255,0.05);border-color:rgba(255,255,255,0.1)">
+            </div>
+          </form>
+          <script>
+          function prepareGrant() {
+            var uid = document.getElementById('grant-user').value;
+            if (!uid) { alert('Select a user first'); return false; }
+            document.getElementById('grant-form').action = '/admin/users/' + uid + '/add-record';
+            var sel = document.getElementById('grant-demon');
+            var opt = sel.options[sel.selectedIndex];
+            if (opt && opt.dataset.req) {
+              var p = document.getElementById('grant-percent');
+              if (!p.value) p.value = opt.dataset.req;
+            }
+            return true;
+          }
+          </script>
+        </div>
+
         <script>
         function filterUsers(q) {
           var low = q.toLowerCase();

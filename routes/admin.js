@@ -380,4 +380,32 @@ router.post('/users/:id/delete', adminRequired, function (req, res) {
   back(res, 'User deleted', '/admin?section=users');
 });
 
+// ---- Manual record granting (mod + admin) ----
+router.post('/users/:id/add-record', modRequired, function (req, res) {
+  const userId = parseInt(req.params.id, 10);
+  const demonId = parseInt(req.body.demon_id, 10);
+  const percent = parseInt(req.body.percent, 10);
+  const youtube = sanitizeStr(req.body.youtube_url, 500);
+  const raw = sanitizeStr(req.body.raw_footage_url, 500);
+  const platform = sanitizeStr(req.body.platform, 50);
+  const comment = sanitizeStr(req.body.comment, 500);
+
+  const user = db.getUserById(userId);
+  if (!user) return back(res, 'User not found', '/admin?section=users');
+  const demon = db.getDemonById(demonId);
+  if (!demon) return back(res, 'Level not found', '/admin?section=users');
+
+  const progress = isNaN(percent) ? (demon.requirement || 100) : Math.max(0, Math.min(100, percent));
+  const recordId = db.createRecord(userId, {
+    demon_id: demon.id,
+    progress: progress,
+    youtube_url: youtube || null,
+    raw_footage_url: raw || null,
+    platform: platform || null,
+    comment: comment || null
+  });
+  db.approveRecord(recordId);
+  back(res, 'Record granted to ' + user.username, '/admin?section=users');
+});
+
 module.exports = router;
