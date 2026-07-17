@@ -3,6 +3,7 @@ const path = require('path');
 const cookieParser = require('cookie-parser');
 const crypto = require('crypto');
 const db = require('./database/db');
+const COUNTRIES = require('./database/countries');
 const auth = require('./middleware/auth');
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -96,6 +97,7 @@ app.use(function (req, res, next) {
   res.locals.telegramInvite = process.env.TELEGRAM_INVITE || 'https://t.me/slyenew';
   res.locals.twitterInvite = process.env.TWITTER_INVITE || 'https://x.com/ultimateshlist';
   res.locals.youtubeId = function (input) { return db.youtubeId(input); };
+  res.locals.countries = COUNTRIES;
 
   // Pass captcha to all pages (for auth modal)
   var captcha = generateCaptcha();

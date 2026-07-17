@@ -66,34 +66,7 @@
       </div>
       <div>
         <label class="block text-xs text-white/30 uppercase tracking-wider mb-2" data-i18n="auth.countryLabel">Country</label>
-        <select name="country"
-          class="w-full h-12 px-4 rounded-xl bg-white/5 border border-white/10 text-white text-sm focus:outline-none focus:border-white/20 focus:bg-white/[0.03] transition-all duration-300 appearance-none">
-          <option value="" class="bg-dark">—</option>
-          <option value="Russia" class="bg-dark">Russia</option>
-          <option value="Ukraine" class="bg-dark">Ukraine</option>
-          <option value="Belarus" class="bg-dark">Belarus</option>
-          <option value="Kazakhstan" class="bg-dark">Kazakhstan</option>
-          <option value="Uzbekistan" class="bg-dark">Uzbekistan</option>
-          <option value="Armenia" class="bg-dark">Armenia</option>
-          <option value="Georgia" class="bg-dark">Georgia</option>
-          <option value="Moldova" class="bg-dark">Moldova</option>
-          <option value="Latvia" class="bg-dark">Latvia</option>
-          <option value="Lithuania" class="bg-dark">Lithuania</option>
-          <option value="Estonia" class="bg-dark">Estonia</option>
-          <option value="Poland" class="bg-dark">Poland</option>
-          <option value="Germany" class="bg-dark">Germany</option>
-          <option value="France" class="bg-dark">France</option>
-          <option value="United Kingdom" class="bg-dark">United Kingdom</option>
-          <option value="Spain" class="bg-dark">Spain</option>
-          <option value="Italy" class="bg-dark">Italy</option>
-          <option value="Netherlands" class="bg-dark">Netherlands</option>
-          <option value="Turkey" class="bg-dark">Turkey</option>
-          <option value="United States" class="bg-dark">United States</option>
-          <option value="Canada" class="bg-dark">Canada</option>
-          <option value="Brazil" class="bg-dark">Brazil</option>
-          <option value="Australia" class="bg-dark">Australia</option>
-          <option value="Other" class="bg-dark">Other</option>
-        </select>
+        <div class="usl-select" data-name="country" data-current="" data-options='<%= JSON.stringify(countries) %>'></div>
       </div>
 
       <!-- Captcha -->
