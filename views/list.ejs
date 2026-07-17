@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<%- include('partials/head') %>
+<body class="bg-dark text-white font-inter antialiased selection:bg-white selection:text-dark overflow-x-hidden">
+  <%- include('partials/navbar') %>
+  <div id="noise"></div>
+  <div id="bg-container"></div>
+
+  <main class="pt-32 pb-20 min-h-screen">
+    <div class="max-w-7xl mx-auto px-6 lg:px-8">
+      <div class="flex items-center gap-4 mb-6">
+        <div class="w-12 h-px bg-white/10"></div>
+        <span class="text-xs text-white/30 uppercase tracking-[0.2em] font-medium" data-i18n="nav.list">List</span>
+      </div>
+      <h1 class="text-5xl font-black text-white tracking-tight mb-4">
+        <span data-i18n="leaderboard.listTitle1">Demon</span> <span class="text-white/20" data-i18n="leaderboard.listTitle2">List</span>
+      </h1>
+      <p class="text-white/30 text-lg max-w-xl mb-8" data-i18n="leaderboard.listSub">The ranking of the hardest Geometry Dash levels.</p>
+
+      <div id="usl-toast" class="fixed left-1/2 -translate-x-1/2 bottom-6 z-[10001] hidden rounded-xl bg-white text-dark text-sm font-semibold px-5 py-3 shadow-2xl" style="display:none"></div>
+
+      <div data-leaderboard="list" data-api="/api/demons" class="flex flex-col lg:flex-row gap-6 items-start">
+        <div class="w-full lg:w-80 shrink-0 rounded-3xl bg-white/[0.015] border border-white/[0.06] backdrop-blur-2xl p-3 overflow-y-auto" style="max-height: 72vh">
+          <div class="relative mb-2">
+            <svg class="w-4 h-4 text-white/30 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="position:absolute;left:12px;top:50%;transform:translateY(-50%)"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"/></svg>
+            <input type="text" data-search-players placeholder="" data-i18n-placeholder="list.searchPlaceholder"
+              class="w-full h-10 rounded-xl bg-white/5 border border-white/10 text-white text-sm placeholder:text-white/20 focus:outline-none focus:border-white/20 focus:bg-white/[0.03] transition-all duration-300" style="padding-left:36px;padding-right:12px">
+          </div>
+          <div class="space-y-1">
+            <% if (demons.length === 0) { %>
+              <div class="p-6 text-center text-sm text-white/20" data-i18n="list.emptyTitle">No levels yet</div>
+            <% } else { %>
+              <% demons.forEach(function (d, i) { %>
+                <button type="button" data-select-id="<%= d.id %>" data-name="<%= d.name.toLowerCase() %>" class="demon-row w-full flex items-center gap-3 px-3 py-3 rounded-2xl text-left transition-all duration-200 <%= i === 0 ? 'bg-white/10' : 'hover:bg-white/5' %>">
+                  <div class="w-14 h-10 rounded-lg overflow-hidden bg-white/5 border border-white/10 shrink-0 flex items-center justify-center">
+                    <% if (d.banner_url) { %>
+                      <img src="<%= d.banner_url %>" class="w-full h-full object-cover" alt="<%= d.name %>">
+                    <% } else { %>
+                      <span class="text-[10px] font-bold text-white/30">#<%= d.position %></span>
+                    <% } %>
+                  </div>
+                  <div class="min-w-0 flex-1">
+                    <div class="flex items-center gap-2">
+                      <span class="text-[10px] font-bold text-white/30 shrink-0">#<%= d.position %></span>
+                      <span class="text-sm font-semibold text-white truncate"><%= d.name %></span>
+                    </div>
+                    <div class="text-[11px] text-white/30 truncate"><%= d.creator || '—' %></div>
+                  </div>
+                  <div class="text-sm font-bold text-white/80 shrink-0"><%= d.points %></div>
+                </button>
+              <% }); %>
+            <% } %>
+          </div>
+        </div>
+
+        <div data-detail class="flex-1 min-w-0">
+          <% if (selected) { %>
+            <%- include('partials/demon-detail', { demon: selected, records: records }) %>
+          <% } else { %>
+            <div class="rounded-3xl bg-white/[0.015] border border-white/[0.06] backdrop-blur-2xl p-10 text-center text-white/20" data-i18n="list.emptyTitle">No levels yet</div>
+          <% } %>
+        </div>
+      </div>
+    </div>
+  </main>
+
+<%- include('partials/submit-modals') %>
+<%- include('partials/footer') %>
+<%- include('partials/scripts') %>
+<script src="/js/admin.js"></script>
+</body>
+</html>

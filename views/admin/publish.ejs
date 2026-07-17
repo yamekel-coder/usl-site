@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<%- include('../partials/head') %>
+<body class="bg-dark text-white font-inter antialiased selection:bg-white selection:text-dark overflow-x-hidden">
+  <%- include('../partials/navbar') %>
+  <div id="noise"></div>
+  <div id="bg-container"></div>
+
+  <main class="pt-32 pb-20 min-h-screen" style="position:relative;z-index:1">
+    <div class="mx-auto px-6 lg:px-8" style="max-width:56rem">
+      <div class="flex items-center gap-4 mb-6">
+        <div class="w-12 h-1px bg-white/10"></div>
+        <span class="text-xs text-white/30 uppercase tracking-[0.2em] font-medium" data-i18n="admin.publishKicker">Publish Level</span>
+      </div>
+
+      <div class="flex items-center justify-between gap-4 mb-8">
+        <div>
+          <% if (mode === 'new') { %>
+            <h1 class="text-3xl font-black text-white tracking-tight" data-i18n="admin.publishNewTitle">Create New Level</h1>
+            <p class="text-white/30 text-sm mt-1" data-i18n="admin.publishNewSubtitle">Fill in the details to publish a new level directly to the list.</p>
+          <% } else { %>
+            <h1 class="text-3xl font-black text-white tracking-tight"><span data-i18n="admin.publishTitle">Publish</span> "<%= data.name || request.id %>"</h1>
+            <p class="text-white/30 text-sm mt-1">
+              <span data-i18n="admin.publishFrom">Submitted by</span> <%= request.username %>
+              · <span data-i18n="admin.publishDifficulty">Difficulty</span>: <%= data.difficulty || '—' %>
+            </p>
+          <% } %>
+        </div>
+        <a href="/admin?section=publish" class="text-sm text-white/40 hover:text-white transition-colors" data-i18n="admin.backToPublish">← Back</a>
+      </div>
+
+      <form method="POST" action="<%= mode === 'new' ? '/admin/publish-new' : '/admin/publish/' + request.id %>" class="rounded-3xl bg-white/[0.015] border border-white/[0.06] backdrop-blur-2xl p-8" style="display:flex;flex-direction:column;gap:1.5rem">
+
+        <!-- Banner Preview -->
+        <div id="banner-preview" class="w-full rounded-2xl overflow-hidden bg-white/5 border border-white/10" style="aspect-ratio:16/9;display:none">
+          <img id="banner-img" src="" class="w-full h-full object-cover" alt="">
+        </div>
+
+        <div>
+          <label class="block text-xs text-white/30 uppercase tracking-wider mb-2" data-i18n="admin.field.levelName">Level Name</label>
+          <input type="text" name="name" value="<%= data.name || '' %>" required class="w-full h-12 px-4 rounded-xl bg-white/5 border border-white/10 text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-white/20">
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs text-white/30 uppercase tracking-wider mb-2" data-i18n="submit.creatorsLabel">Creator(s)</label>
+            <input type="text" name="creator" value="<%= data.creators || '' %>" class="w-full h-12 px-4 rounded-xl bg-white/5 border border-white/10 text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-white/20" placeholder="Creator1, Creator2">
+          </div>
+          <div>
+            <label class="block text-xs text-white/30 uppercase tracking-wider mb-2" data-i18n="submit.verifierLabel">Verifier</label>
+            <input type="text" name="verifier" value="<%= data.verifier || '' %>" class="w-full h-12 px-4 rounded-xl bg-white/5 border border-white/10 text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-white/20" placeholder="Verifier">
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs text-white/30 uppercase tracking-wider mb-2" data-i18n="admin.field.bannerUrl">Banner Image URL</label>
+          <input type="url" name="banner_url" id="banner-input" value="<%= data.banner_url || '' %>" class="w-full h-12 px-4 rounded-xl bg-white/5 border border-white/10 text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-white/20" placeholder="https://i.imgur.com/...">
+          <p class="text-[11px] text-white/20 mt-1" data-i18n="admin.field.bannerHint">Paste a link to the level's banner or thumbnail image</p>
+        </div>
+
+        <div>
+          <label class="block text-xs text-white/30 uppercase tracking-wider mb-2" data-i18n="submit.videoLabel">YouTube Completion Link</label>
+          <input type="url" name="video_url" value="<%= data.video_url || '' %>" required class="w-full h-12 px-4 rounded-xl bg-white/5 border border-white/10 text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-white/20" placeholder="https://youtube.com/watch?v=...">
+        </div>
+
+        <div class="grid grid-cols-3 gap-4">
+          <div>
+            <label class="block text-xs text-white/30 uppercase tracking-wider mb-2" data-i18n="submit.difficultyLabel">Difficulty</label>
+            <select name="difficulty" class="w-full h-12 px-4 rounded-xl bg-white/5 border border-white/10 text-sm text-white focus:outline-none focus:border-white/20 appearance-none">
+              <% ['Easy','Medium','Hard','Insane','Extreme'].forEach(function(d) { %>
+                <option value="<%= d %>" <%= data.difficulty === d ? 'selected' : '' %>><%= d %></option>
+              <% }); %>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs text-white/30 uppercase tracking-wider mb-2" data-i18n="admin.field.position">Position</label>
+            <input type="number" name="position" min="1" value="<%= nextPosition %>" class="w-full h-12 px-4 rounded-xl bg-white/5 border border-white/10 text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-white/20" placeholder="#1">
+          </div>
+          <div>
+            <label class="block text-xs text-white/30 uppercase tracking-wider mb-2" data-i18n="submit.requirementLabel">List Percent</label>
+            <input type="number" name="requirement" min="1" max="100" value="<%= data.requirement || 100 %>" class="w-full h-12 px-4 rounded-xl bg-white/5 border border-white/10 text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-white/20">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs text-white/30 uppercase tracking-wider mb-2" data-i18n="submit.levelIdLabel">Level ID</label>
+            <input type="text" name="level_id" value="<%= data.level_id || '' %>" class="w-full h-12 px-4 rounded-xl bg-white/5 border border-white/10 text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-white/20" placeholder="GD level ID (optional)">
+          </div>
+          <div>
+            <label class="block text-xs text-white/30 uppercase tracking-wider mb-2" data-i18n="admin.publishEstimatedPoints">Estimated Points</label>
+            <div id="estimated-points" class="w-full h-12 px-4 rounded-xl bg-white/[0.03] border border-white/10 text-sm text-white/50 flex items-center">—</div>
+          </div>
+        </div>
+
+        <% if (data.comment) { %>
+          <div class="rounded-xl bg-white/[0.03] border border-white/10 p-4">
+            <div class="text-[11px] text-white/25 uppercase tracking-wider mb-1" data-i18n="submit.commentLabel">Comment from submitter</div>
+            <div class="text-sm text-white/50"><%= data.comment %></div>
+          </div>
+        <% } %>
+
+        <div class="flex gap-3 pt-2">
+          <a href="/admin?section=publish" class="h-12 px-6 rounded-xl border border-white/10 text-white/50 text-sm font-medium hover:bg-white/5 transition-all flex items-center" data-i18n="admin.cancel">Cancel</a>
+          <button type="submit" class="flex-1 h-12 rounded-xl bg-white text-dark font-semibold text-sm hover:bg-white/90 transition-all" data-i18n="admin.publishLevel">Publish Level</button>
+        </div>
+      </form>
+    </div>
+  </main>
+
+<%- include('../partials/footer') %>
+<%- include('../partials/scripts') %>
+<script>
+(function() {
+  var POINTS = {
+    calc: function(p) {
+      if (!p || p <= 0) return 0;
+      if (p === 1) return 1000;
+      if (p <= 9) return Math.max(0, 1000 - (p - 1) * 40);
+      if (p <= 19) return Math.max(0, 600 - (p - 10) * 20);
+      if (p <= 49) return Math.max(0, 400 - (p - 20) * 4);
+      if (p <= 74) return Math.max(0, 280 - (p - 50) * 7);
+      if (p <= 150) return Math.max(0, 75 - (p - 75));
+      return Math.max(0, Math.round((0 - (p - 151) * 0.20) * 100) / 100);
+    }
+  };
+
+  var posInput = document.querySelector('input[name="position"]');
+  var pointsEl = document.getElementById('estimated-points');
+  var bannerInput = document.getElementById('banner-input');
+  var bannerPreview = document.getElementById('banner-preview');
+  var bannerImg = document.getElementById('banner-img');
+
+  function updatePoints() {
+    var pos = parseInt(posInput.value, 10);
+    pointsEl.textContent = pos ? POINTS.calc(pos) + ' pts' : '—';
+  }
+  posInput.addEventListener('input', updatePoints);
+  updatePoints();
+
+  function updateBanner() {
+    var url = bannerInput.value.trim();
+    if (url) {
+      bannerImg.src = url;
+      bannerPreview.style.display = 'block';
+      bannerImg.onerror = function() { bannerPreview.style.display = 'none'; };
+    } else {
+      bannerPreview.style.display = 'none';
+    }
+  }
+  bannerInput.addEventListener('input', updateBanner);
+  updateBanner();
+})();
+</script>
+</body>
+</html>

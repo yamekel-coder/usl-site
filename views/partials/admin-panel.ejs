@@ -1,0 +1,290 @@
+<%
+  var pendingCount = (pendingRecords || []).length;
+  var reqCount = (levelRequests || []).length;
+  var modCount = (modApplications || []).length;
+  function safeParse(str) { try { return JSON.parse(str); } catch (e) { return {}; } }
+  function safeUrl(url) {
+    if (!url) return '#';
+    var u = String(url).trim();
+    if (/^https?:\/\//i.test(u)) return u;
+    return '#';
+  }
+%>
+
+<!-- ===================== Admin / Mod Panel ===================== -->
+<div class="rounded-3xl border border-white/10 p-4 sm:p-5 mb-8" style="background:rgba(255,255,255,0.03)">
+  <div class="flex items-center justify-between mb-4">
+    <div class="flex items-center gap-3">
+      <div class="w-9 h-9 rounded-xl bg-white/10 flex items-center justify-center text-white/80 font-bold text-sm">
+        <%= isAdmin ? 'A' : 'M' %>
+      </div>
+      <div>
+        <div class="text-xs text-white/30 uppercase tracking-[0.2em] font-medium" data-i18n="admin.kicker">Control</div>
+        <div class="text-sm font-semibold text-white"><%= isAdmin ? 'Admin Panel' : 'Moderator Panel' %></div>
+      </div>
+    </div>
+    <span class="text-[11px] uppercase tracking-wider text-white/30 px-2.5 py-1 rounded-full border border-white/10" data-i18n="admin.role.<%= isAdmin ? 'admin' : 'moderator' %>"><%= isAdmin ? 'Admin' : 'Moderator' %></span>
+  </div>
+
+  <div class="flex flex-wrap gap-2.5">
+    <button type="button" data-modal-open="add-level" class="gd-panel-btn" data-i18n="admin.addLevel">Add Level</button>
+    <button type="button" data-modal-open="review-records" class="gd-panel-btn">
+      <span data-i18n="admin.reviewRecords">Review Records</span>
+      <% if (pendingCount > 0) { %><span class="ml-1.5 px-1.5 py-0.5 rounded-full bg-white text-dark text-[10px] font-bold"><%= pendingCount %></span><% } %>
+    </button>
+    <button type="button" data-modal-open="write-news" class="gd-panel-btn" data-i18n="admin.writeNews">Write News</button>
+    <button type="button" data-modal-open="level-requests" class="gd-panel-btn">
+      <span data-i18n="admin.levelRequests">Level Requests</span>
+      <% if (reqCount > 0) { %><span class="ml-1.5 px-1.5 py-0.5 rounded-full bg-white text-dark text-[10px] font-bold"><%= reqCount %></span><% } %>
+    </button>
+    <% if (isAdmin) { %>
+      <button type="button" data-modal-open="mod-applications" class="gd-panel-btn">
+        <span data-i18n="admin.modApps">Moderator Apps</span>
+        <% if (modCount > 0) { %><span class="ml-1.5 px-1.5 py-0.5 rounded-full bg-white text-dark text-[10px] font-bold"><%= modCount %></span><% } %>
+      </button>
+      <button type="button" data-modal-open="users" class="gd-panel-btn" data-i18n="admin.users">Users</button>
+    <% } %>
+  </div>
+</div>
+
+<!-- ===================== Add Level Modal ===================== -->
+<div class="usl-modal hidden" data-modal="add-level" style="z-index:10000;background:rgba(0,0,0,0.72);backdrop-filter:blur(6px)">
+  <div class="glass-strong rounded-3xl w-full max-w-lg max-h-[88vh] overflow-y-auto p-6 sm:p-8" style="margin:auto">
+    <div class="flex items-start justify-between mb-6">
+      <h2 class="text-2xl font-black text-white" data-i18n="admin.modal.addLevelTitle">Add a Level</h2>
+      <button type="button" class="usl-modal-close w-9 h-9 rounded-lg text-white/40 hover:text-white hover:bg-white/10 transition-all duration-300" data-i18n="gd.close">Close</button>
+    </div>
+    <form action="/admin/levels" method="POST" style="display:flex;flex-direction:column;gap:1.25rem">
+      <div>
+        <label class="block text-xs text-white/30 uppercase tracking-wider mb-2" data-i18n="submit.levelName">Level name</label>
+        <input type="text" name="name" required class="w-full h-12 px-4 rounded-xl bg-white/5 border border-white/10 text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-white/20" placeholder="Level name">
+      </div>
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="block text-xs text-white/30 uppercase tracking-wider mb-2" data-i18n="submit.creatorsLabel">Creator(s)</label>
+          <input type="text" name="creator" class="w-full h-12 px-4 rounded-xl bg-white/5 border border-white/10 text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-white/20" placeholder="Creator">
+        </div>
+        <div>
+          <label class="block text-xs text-white/30 uppercase tracking-wider mb-2" data-i18n="submit.verifierLabel">Verifier</label>
+          <input type="text" name="verifier" class="w-full h-12 px-4 rounded-xl bg-white/5 border border-white/10 text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-white/20" placeholder="Verifier" data-i18n-placeholder="submit.verifierPlaceholder">
+        </div>
+      </div>
+      <div>
+        <label class="block text-xs text-white/30 uppercase tracking-wider mb-2" data-i18n="admin.field.bannerUrl">Banner image URL</label>
+        <input type="url" name="banner_url" class="w-full h-12 px-4 rounded-xl bg-white/5 border border-white/10 text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-white/20" placeholder="https://i.imgur.com/..." data-i18n-placeholder="admin.field.bannerUrlPlaceholder">
+      </div>
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="block text-xs text-white/30 uppercase tracking-wider mb-2" data-i18n="submit.levelIdLabel">Level ID</label>
+          <input type="text" name="level_id" class="w-full h-12 px-4 rounded-xl bg-white/5 border border-white/10 text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-white/20" placeholder="GD level ID">
+        </div>
+        <div>
+          <label class="block text-xs text-white/30 uppercase tracking-wider mb-2" data-i18n="admin.field.position">Position</label>
+          <input type="number" name="position" min="1" placeholder="#1" class="w-full h-12 px-4 rounded-xl bg-white/5 border border-white/10 text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-white/20">
+        </div>
+      </div>
+      <div>
+        <label class="block text-xs text-white/30 uppercase tracking-wider mb-2" data-i18n="submit.videoLabel">YouTube completion link</label>
+        <input type="url" name="video_url" required class="w-full h-12 px-4 rounded-xl bg-white/5 border border-white/10 text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-white/20" placeholder="https://youtube.com/watch?v=..." data-i18n-placeholder="submit.videoPlaceholder">
+      </div>
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="block text-xs text-white/30 uppercase tracking-wider mb-2" data-i18n="submit.requirementLabel">List percent</label>
+          <input type="number" name="requirement" min="1" max="100" value="100" class="w-full h-12 px-4 rounded-xl bg-white/5 border border-white/10 text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-white/20">
+        </div>
+        <div>
+          <label class="block text-xs text-white/30 uppercase tracking-wider mb-2" data-i18n="submit.difficultyLabel">Difficulty</label>
+          <select name="difficulty" class="w-full h-12 px-4 rounded-xl bg-white/5 border border-white/10 text-sm text-white focus:outline-none focus:border-white/20 appearance-none">
+            <option value="Easy">Easy</option>
+            <option value="Medium">Medium</option>
+            <option value="Hard">Hard</option>
+            <option value="Insane">Insane</option>
+            <option value="Extreme">Extreme</option>
+          </select>
+        </div>
+      </div>
+      <button type="submit" class="w-full h-12 rounded-xl bg-white text-dark font-semibold text-sm hover:bg-white/90 transition-all duration-300" data-i18n="admin.addBtn">Add to List</button>
+    </form>
+  </div>
+</div>
+
+<!-- ===================== Review Records Modal ===================== -->
+<div class="usl-modal hidden" data-modal="review-records" style="z-index:10000;background:rgba(0,0,0,0.72);backdrop-filter:blur(6px)">
+  <div class="glass-strong rounded-3xl w-full max-w-2xl max-h-[88vh] overflow-y-auto p-6 sm:p-8" style="margin:auto">
+    <div class="flex items-start justify-between mb-6">
+      <h2 class="text-2xl font-black text-white" data-i18n="admin.reviewRecords">Review Records</h2>
+      <button type="button" class="usl-modal-close w-9 h-9 rounded-lg text-white/40 hover:text-white hover:bg-white/10 transition-all duration-300" data-i18n="gd.close">Close</button>
+    </div>
+    <% if (!pendingRecords || pendingRecords.length === 0) { %>
+      <div class="text-center text-sm text-white/30 py-10" data-i18n="admin.emptyRecords">No pending records.</div>
+    <% } else { %>
+      <div class="flex flex-col gap-3">
+        <% pendingRecords.forEach(function (r) { %>
+          <div class="rounded-2xl border border-white/10 p-4" style="background:rgba(255,255,255,0.02)">
+            <button type="button" class="w-full flex items-center justify-between text-left" data-toggle="rec-<%= r.id %>">
+              <span class="text-sm font-semibold text-white"><%= r.username %> <span class="text-white/30 font-normal">—</span> <%= r.demon_name %></span>
+              <span class="text-white/30 text-xs"><%= r.progress %>% · #<%= r.demon_position %></span>
+            </button>
+            <div id="rec-<%= r.id %>" class="hidden mt-4 pt-4 border-t border-white/10" style="display:none">
+              <div class="grid grid-cols-2 gap-y-2 gap-x-4 text-sm mb-4">
+                <div class="text-white/40"><span data-i18n="admin.field.progress">Progress</span>: <span class="text-white"><%= r.progress %>%</span></div>
+                <div class="text-white/40"><span data-i18n="admin.field.platform">Platform</span>: <span class="text-white"><%= r.platform || '—' %></span></div>
+                <div class="text-white/40 col-span-2"><span data-i18n="admin.field.youtube">YouTube</span>: <a href="<%= safeUrl(r.youtube_url) %>" target="_blank" rel="noopener" class="text-white/80 hover:text-white underline break-all"><%= r.youtube_url || '—' %></a></div>
+                <div class="text-white/40 col-span-2"><span data-i18n="admin.field.raw">Raw footage</span>: <a href="<%= safeUrl(r.raw_footage_url) %>" target="_blank" rel="noopener" class="text-white/80 hover:text-white underline break-all"><%= r.raw_footage_url || '—' %></a></div>
+                <% if (r.comment) { %><div class="text-white/40 col-span-2"><span data-i18n="admin.field.comment">Comment</span>: <span class="text-white"><%= r.comment %></span></div><% } %>
+              </div>
+              <div class="flex gap-2.5">
+                <form action="/admin/records/<%= r.id %>/approve" method="POST" class="flex-1">
+                  <button type="submit" class="w-full h-10 rounded-xl bg-white text-dark text-sm font-semibold hover:bg-white/90 transition-all" data-i18n="admin.approve">Approve</button>
+                </form>
+                <form action="/admin/records/<%= r.id %>/reject" method="POST" class="flex-1">
+                  <button type="submit" class="w-full h-10 rounded-xl border border-white/20 text-white/70 text-sm font-medium hover:bg-white/5 transition-all" data-i18n="admin.reject">Reject</button>
+                </form>
+              </div>
+            </div>
+          </div>
+        <% }); %>
+      </div>
+    <% } %>
+  </div>
+</div>
+
+<!-- ===================== Write News Modal ===================== -->
+<div class="usl-modal hidden" data-modal="write-news" style="z-index:10000;background:rgba(0,0,0,0.72);backdrop-filter:blur(6px)">
+  <div class="glass-strong rounded-3xl w-full max-w-lg max-h-[88vh] overflow-y-auto p-6 sm:p-8" style="margin:auto">
+    <div class="flex items-start justify-between mb-6">
+      <h2 class="text-2xl font-black text-white" data-i18n="admin.writeNews">Write News</h2>
+      <button type="button" class="usl-modal-close w-9 h-9 rounded-lg text-white/40 hover:text-white hover:bg-white/10 transition-all duration-300" data-i18n="gd.close">Close</button>
+    </div>
+    <form action="/admin/news" method="POST" style="display:flex;flex-direction:column;gap:1.25rem">
+      <div>
+        <label class="block text-xs text-white/30 uppercase tracking-wider mb-2" data-i18n="admin.field.newsTitle">News title</label>
+        <input type="text" name="title" required class="w-full h-12 px-4 rounded-xl bg-white/5 border border-white/10 text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-white/20" placeholder="Update title">
+      </div>
+      <div>
+        <label class="block text-xs text-white/30 uppercase tracking-wider mb-2" data-i18n="admin.field.newsDesc">Description</label>
+        <textarea name="description" required rows="5" class="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-white/20" style="resize:none" placeholder="What changed?"></textarea>
+      </div>
+      <button type="submit" class="w-full h-12 rounded-xl bg-white text-dark font-semibold text-sm hover:bg-white/90 transition-all duration-300" data-i18n="admin.publishBtn">Publish</button>
+    </form>
+  </div>
+</div>
+
+<!-- ===================== Level Requests Modal ===================== -->
+<div class="usl-modal hidden" data-modal="level-requests" style="z-index:10000;background:rgba(0,0,0,0.72);backdrop-filter:blur(6px)">
+  <div class="glass-strong rounded-3xl w-full max-w-2xl max-h-[88vh] overflow-y-auto p-6 sm:p-8" style="margin:auto">
+    <div class="flex items-start justify-between mb-6">
+      <h2 class="text-2xl font-black text-white" data-i18n="admin.levelRequests">Level Requests</h2>
+      <button type="button" class="usl-modal-close w-9 h-9 rounded-lg text-white/40 hover:text-white hover:bg-white/10 transition-all duration-300" data-i18n="gd.close">Close</button>
+    </div>
+    <% if (!levelRequests || levelRequests.length === 0) { %>
+      <div class="text-center text-sm text-white/30 py-10" data-i18n="admin.emptyRequests">No pending level requests.</div>
+    <% } else { %>
+      <div class="flex flex-col gap-3">
+        <% levelRequests.forEach(function (s) { var d = safeParse(s.data); %>
+          <div class="rounded-2xl border border-white/10 p-4" style="background:rgba(255,255,255,0.02)">
+            <button type="button" class="w-full flex items-center justify-between text-left" data-toggle="lr-<%= s.id %>">
+              <span class="text-sm font-semibold text-white"><%= s.username %> <span class="text-white/30 font-normal">—</span> <%= d.name || 'level' %></span>
+              <span class="text-white/30 text-xs"><%= d.difficulty || '' %></span>
+            </button>
+            <div id="lr-<%= s.id %>" class="hidden mt-4 pt-4 border-t border-white/10" style="display:none">
+              <div class="grid grid-cols-2 gap-y-2 gap-x-4 text-sm mb-4">
+                <div class="text-white/40"><span data-i18n="admin.field.creators">Creator(s)</span>: <span class="text-white"><%= d.creators || '—' %></span></div>
+                <div class="text-white/40"><span data-i18n="admin.field.verifier">Verifier</span>: <span class="text-white"><%= d.verifier || '—' %></span></div>
+                <div class="text-white/40"><span data-i18n="admin.field.requirement">List percent</span>: <span class="text-white"><%= d.requirement || 100 %>%</span></div>
+                <div class="text-white/40"><span data-i18n="submit.levelIdLabel">Level ID</span>: <span class="text-white"><%= d.level_id || '—' %></span></div>
+                <div class="text-white/40 col-span-2"><span data-i18n="admin.field.video">Video</span>: <a href="<%= safeUrl(d.video_url) %>" target="_blank" rel="noopener" class="text-white/80 hover:text-white underline break-all"><%= d.video_url || '—' %></a></div>
+                <% if (d.comment) { %><div class="text-white/40 col-span-2"><span data-i18n="admin.field.comment">Comment</span>: <span class="text-white"><%= d.comment %></span></div><% } %>
+              </div>
+              <div class="flex gap-2.5">
+                <form action="/admin/level-requests/<%= s.id %>/approve" method="POST" class="flex-1">
+                  <button type="submit" class="w-full h-10 rounded-xl bg-white text-dark text-sm font-semibold hover:bg-white/90 transition-all" data-i18n="admin.approve">Approve</button>
+                </form>
+                <form action="/admin/level-requests/<%= s.id %>/reject" method="POST" class="flex-1">
+                  <button type="submit" class="w-full h-10 rounded-xl border border-white/20 text-white/70 text-sm font-medium hover:bg-white/5 transition-all" data-i18n="admin.reject">Reject</button>
+                </form>
+              </div>
+            </div>
+          </div>
+        <% }); %>
+      </div>
+    <% } %>
+  </div>
+</div>
+
+<% if (isAdmin) { %>
+<!-- ===================== Moderator Applications Modal ===================== -->
+<div class="usl-modal hidden" data-modal="mod-applications" style="z-index:10000;background:rgba(0,0,0,0.72);backdrop-filter:blur(6px)">
+  <div class="glass-strong rounded-3xl w-full max-w-2xl max-h-[88vh] overflow-y-auto p-6 sm:p-8" style="margin:auto">
+    <div class="flex items-start justify-between mb-6">
+      <h2 class="text-2xl font-black text-white" data-i18n="admin.modApps">Moderator Applications</h2>
+      <button type="button" class="usl-modal-close w-9 h-9 rounded-lg text-white/40 hover:text-white hover:bg-white/10 transition-all duration-300" data-i18n="gd.close">Close</button>
+    </div>
+    <% if (!modApplications || modApplications.length === 0) { %>
+      <div class="text-center text-sm text-white/30 py-10" data-i18n="admin.emptyApps">No pending applications.</div>
+    <% } else { %>
+      <div class="flex flex-col gap-3">
+        <% modApplications.forEach(function (s) { var d = safeParse(s.data); %>
+          <div class="rounded-2xl border border-white/10 p-4" style="background:rgba(255,255,255,0.02)">
+            <button type="button" class="w-full flex items-center justify-between text-left" data-toggle="ma-<%= s.id %>">
+              <span class="text-sm font-semibold text-white"><%= s.username %></span>
+              <span class="text-white/30 text-xs"><%= d.age || '' %> · <%= d.timezone || '' %></span>
+            </button>
+            <div id="ma-<%= s.id %>" class="hidden mt-4 pt-4 border-t border-white/10" style="display:none">
+              <div class="grid grid-cols-2 gap-y-2 gap-x-4 text-sm mb-4">
+                <div class="text-white/40 col-span-2"><span data-i18n="admin.field.hardest">Hardest level</span>: <span class="text-white"><%= d.hardest_level || '—' %></span></div>
+                <div class="text-white/40 col-span-2"><span data-i18n="admin.field.modBefore">Mod experience</span>: <span class="text-white"><%= d.mod_before || '—' %></span></div>
+                <div class="text-white/40 col-span-2"><span data-i18n="admin.field.hours">Hours/day</span>: <span class="text-white"><%= d.hours || '—' %></span></div>
+                <div class="text-white/40 col-span-2"><span data-i18n="admin.field.responsibility">Responsibility</span>: <span class="text-white"><%= d.responsibility || '—' %></span></div>
+              </div>
+              <div class="flex gap-2.5">
+                <form action="/admin/mod-applications/<%= s.id %>/approve" method="POST" class="flex-1">
+                  <button type="submit" class="w-full h-10 rounded-xl bg-white text-dark text-sm font-semibold hover:bg-white/90 transition-all" data-i18n="admin.approve">Approve</button>
+                </form>
+                <form action="/admin/mod-applications/<%= s.id %>/reject" method="POST" class="flex-1">
+                  <button type="submit" class="w-full h-10 rounded-xl border border-white/20 text-white/70 text-sm font-medium hover:bg-white/5 transition-all" data-i18n="admin.reject">Reject</button>
+                </form>
+              </div>
+            </div>
+          </div>
+        <% }); %>
+      </div>
+    <% } %>
+  </div>
+</div>
+
+<!-- ===================== Users Modal ===================== -->
+<div class="usl-modal hidden" data-modal="users" style="z-index:10000;background:rgba(0,0,0,0.72);backdrop-filter:blur(6px)">
+  <div class="glass-strong rounded-3xl w-full max-w-2xl max-h-[88vh] overflow-y-auto p-6 sm:p-8" style="margin:auto">
+    <div class="flex items-start justify-between mb-6">
+      <h2 class="text-2xl font-black text-white" data-i18n="admin.users">Users</h2>
+      <button type="button" class="usl-modal-close w-9 h-9 rounded-lg text-white/40 hover:text-white hover:bg-white/10 transition-all duration-300" data-i18n="gd.close">Close</button>
+    </div>
+    <div class="flex flex-col gap-2">
+      <% (users || []).forEach(function (u) { %>
+        <div class="flex items-center gap-3 rounded-xl border border-white/10 p-3" style="background:rgba(255,255,255,0.02)">
+          <div class="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center overflow-hidden border border-white/10 shrink-0">
+            <% if (u.avatar_url) { %><img src="<%= u.avatar_url %>" class="w-full h-full object-cover"><% } else { %><span class="text-[11px] font-bold text-white/70"><%= u.username.charAt(0).toUpperCase() %></span><% } %>
+          </div>
+          <div class="min-w-0 flex-1">
+            <div class="text-sm font-medium text-white truncate"><%= u.username %></div>
+            <div class="text-[11px] text-white/30 truncate"><%= u.email %></div>
+          </div>
+          <form action="/admin/users/<%= u.id %>/role" method="POST" class="flex items-center gap-2">
+            <select name="role" class="h-9 px-2 rounded-lg bg-white/5 border border-white/10 text-sm text-white focus:outline-none focus:border-white/20">
+              <option value="user" <%= u.role === 'user' ? 'selected' : '' %>>user</option>
+              <option value="moderator" <%= u.role === 'moderator' ? 'selected' : '' %>>moderator</option>
+              <option value="admin" <%= u.role === 'admin' ? 'selected' : '' %>>admin</option>
+            </select>
+            <button type="submit" class="h-9 px-3 rounded-lg bg-white/10 text-white/80 text-xs font-medium hover:bg-white/20 transition-all" data-i18n="admin.setBtn">Set</button>
+          </form>
+          <form action="/admin/users/<%= u.id %>/country" method="POST" class="flex items-center gap-2">
+            <input type="text" name="country" value="<%= u.country || '' %>" placeholder="Country" class="h-9 w-28 px-2 rounded-lg bg-white/5 border border-white/10 text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-white/20">
+            <button type="submit" class="h-9 px-3 rounded-lg bg-white/10 text-white/80 text-xs font-medium hover:bg-white/20 transition-all" data-i18n="admin.setBtn">Set</button>
+          </form>
+        </div>
+      <% }); %>
+    </div>
+  </div>
+</div>
+<% } %>

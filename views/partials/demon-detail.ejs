@@ -1,0 +1,72 @@
+<div class="rounded-3xl bg-white/[0.015] border border-white/[0.06] backdrop-blur-2xl overflow-hidden">
+  <% var ytId = youtubeId(demon.video_url); %>
+  <% if (ytId) { %>
+    <div class="relative w-full" style="padding-top:56.25%">
+      <iframe src="https://www.youtube.com/embed/<%= ytId %>" class="absolute inset-0 w-full h-full" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen style="border-radius: 1.5rem 1.5rem 0 0"></iframe>
+    </div>
+  <% } %>
+
+  <div class="p-8">
+    <div class="flex items-center gap-4 mb-6">
+      <div class="flex items-center justify-center w-14 h-14 rounded-2xl bg-white/5 border border-white/10 shrink-0">
+        <span class="text-xl font-black text-white/60">#<%= demon.position || '?' %></span>
+      </div>
+      <div class="min-w-0">
+        <h2 class="text-2xl font-bold text-white truncate"><%= demon.name %></h2>
+        <div class="flex items-center gap-3 mt-1 text-sm text-white/40">
+          <span><span class="text-white/25" data-i18n="list.creator">Creator</span> <%= demon.creator || '—' %></span>
+          <% if (demon.verifier) { %>
+            <span>·</span>
+            <span><span class="text-white/25" data-i18n="list.verifier">Verifier</span> <%= demon.verifier %></span>
+          <% } %>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-3 gap-4 mb-8">
+      <div class="p-4 rounded-2xl bg-white/[0.02] border border-white/[0.06] text-center">
+        <div class="text-2xl font-black text-white">#<%= demon.position || '—' %></div>
+        <div class="text-xs text-white/30 uppercase tracking-wider mt-1" data-i18n="list.position">Position</div>
+      </div>
+      <div class="p-4 rounded-2xl bg-white/[0.02] border border-white/[0.06] text-center">
+        <div class="text-2xl font-black text-white"><%= demon.points %></div>
+        <div class="text-xs text-white/30 uppercase tracking-wider mt-1" data-i18n="leaderboard.points">Points</div>
+      </div>
+      <div class="p-4 rounded-2xl bg-white/[0.02] border border-white/[0.06] text-center">
+        <div class="text-2xl font-black text-white"><%= records.length %></div>
+        <div class="text-xs text-white/30 uppercase tracking-wider mt-1" data-i18n="list.records">Records</div>
+      </div>
+    </div>
+
+    <div class="mb-4">
+      <div class="flex items-center gap-2 text-[11px] text-white/25 uppercase tracking-wider">
+        <span>ID #<%= demon.id %></span>
+        <span>·</span>
+        <span><%= demon.difficulty %></span>
+      </div>
+    </div>
+
+    <div>
+      <h3 class="text-lg font-semibold text-white/80 mb-4" data-i18n="list.recordsList">Records</h3>
+      <% if (records.length === 0) { %>
+        <div class="py-10 text-center text-sm text-white/20" data-i18n="list.noRecords">No records yet.</div>
+      <% } else { %>
+        <div class="space-y-2">
+          <% records.forEach(function (r) { %>
+            <div class="flex items-center gap-3 px-4 py-3 rounded-xl bg-white/[0.02] border border-white/[0.04]">
+              <div class="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center overflow-hidden border border-white/10 shrink-0">
+                <% if (r.avatar_url) { %>
+                  <img src="<%= r.avatar_url %>" class="w-full h-full object-cover" alt="<%= r.username %>">
+                <% } else { %>
+                  <span class="text-[10px] font-bold text-white/70"><%= r.username.charAt(0).toUpperCase() %></span>
+                <% } %>
+              </div>
+              <span class="text-sm text-white truncate min-w-0 flex-1"><%= r.username %></span>
+              <span class="text-sm font-bold text-white/80 shrink-0"><%= r.progress %>%</span>
+            </div>
+          <% }); %>
+        </div>
+      <% } %>
+    </div>
+  </div>
+</div>

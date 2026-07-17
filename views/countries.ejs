@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<%- include('partials/head') %>
+<body class="bg-dark text-white font-inter antialiased selection:bg-white selection:text-dark overflow-x-hidden">
+  <%- include('partials/navbar') %>
+  <div id="noise"></div>
+  <div id="bg-container"></div>
+
+  <main class="pt-32 pb-20 min-h-screen">
+    <div class="max-w-7xl mx-auto px-6 lg:px-8">
+      <div class="flex items-center gap-4 mb-6">
+        <div class="w-12 h-px bg-white/10"></div>
+        <span class="text-xs text-white/30 uppercase tracking-[0.2em] font-medium" data-i18n="nav.countries">Countries</span>
+      </div>
+      <h1 class="text-5xl font-black text-white tracking-tight mb-4">
+        <span data-i18n="leaderboard.countriesTitle1">Top</span> <span class="text-white/20" data-i18n="leaderboard.countriesTitle2">Countries</span>
+      </h1>
+      <p class="text-white/30 text-lg max-w-xl mb-12" data-i18n="leaderboard.countriesSub">Points are the sum of every player's points from this country.</p>
+
+      <div data-leaderboard="countries" data-api="/api/countries" class="flex flex-col lg:flex-row gap-6 items-start">
+        <div class="w-full lg:w-80 shrink-0 rounded-3xl bg-white/[0.015] border border-white/[0.06] backdrop-blur-2xl p-3 overflow-y-auto" style="max-height: 72vh">
+          <div class="relative mb-2">
+            <svg class="w-4 h-4 text-white/30 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="position:absolute;left:12px;top:50%;transform:translateY(-50%)"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"/></svg>
+            <input type="text" data-search-players placeholder="" data-i18n-placeholder="leaderboard.searchCountries"
+              class="w-full h-10 rounded-xl bg-white/5 border border-white/10 text-white text-sm placeholder:text-white/20 focus:outline-none focus:border-white/20 focus:bg-white/[0.03] transition-all duration-300" style="padding-left:36px;padding-right:12px">
+          </div>
+          <div class="space-y-1">
+            <% if (countries.length === 0) { %>
+              <div class="p-6 text-center text-sm text-white/20" data-i18n="leaderboard.noCountries">No countries yet</div>
+            <% } else { %>
+              <% countries.forEach(function (c, i) { %>
+                <button type="button" data-select-id="<%= c.country %>" data-name="<%= c.country.toLowerCase() %>" class="player-row w-full flex items-center gap-3 px-3 py-3 rounded-2xl text-left transition-all duration-200 <%= i === 0 ? 'bg-white/10' : 'hover:bg-white/5' %>">
+                  <span class="w-6 text-right text-sm font-bold text-white/30 shrink-0"><%= i + 1 %></span>
+                  <div class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center overflow-hidden border border-white/10 shrink-0 text-xl">
+                    <% if (c.flag) { %><%= c.flag %><% } else { %>
+                    <svg class="w-5 h-5 text-white/60" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9 9 0 100-18 9 9 0 000 18z" />
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M3.6 9h16.8M3.6 15h16.8M12 3a15 15 0 010 18M12 3a15 15 0 000 18" />
+                    </svg>
+                    <% } %>
+                  </div>
+                  <div class="min-w-0 flex-1">
+                    <div class="text-sm font-semibold text-white truncate" data-country="<%= c.country %>"><%= c.country %></div>
+                    <div class="text-[11px] text-white/30 truncate"><%= c.players %> <span data-i18n="leaderboard.playersShort">players</span></div>
+                  </div>
+                  <div class="text-sm font-bold text-white/80 shrink-0"><%= c.points %></div>
+                </button>
+              <% }); %>
+            <% } %>
+          </div>
+        </div>
+
+        <div data-detail class="flex-1 min-w-0">
+          <% if (selected) { %>
+            <%- include('partials/country-detail', { country: selected }) %>
+          <% } else { %>
+            <div class="rounded-3xl bg-white/[0.015] border border-white/[0.06] backdrop-blur-2xl p-10 text-center text-white/20" data-i18n="leaderboard.noCountries">No countries yet</div>
+          <% } %>
+        </div>
+      </div>
+    </div>
+  </main>
+
+<%- include('partials/footer') %>
+<%- include('partials/scripts') %>
+</body>
+</html>

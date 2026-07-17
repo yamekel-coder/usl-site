@@ -1,0 +1,71 @@
+<div class="rounded-3xl bg-white/[0.015] border border-white/[0.06] backdrop-blur-2xl p-8">
+  <div class="flex items-center gap-5">
+    <div style="width:80px;height:80px;border-radius:9999px;overflow:hidden;flex-shrink:0" class="bg-white/5 border border-white/10 flex items-center justify-center">
+      <% if (player.avatar_url) { %>
+        <img src="<%= player.avatar_url %>" style="width:100%;height:100%;object-fit:cover" alt="<%= player.username %>">
+      <% } else { %>
+        <span class="text-3xl font-black text-white/20"><%= player.username.charAt(0).toUpperCase() %></span>
+      <% } %>
+    </div>
+    <div class="min-w-0">
+      <div class="flex items-center gap-3 flex-wrap">
+        <h2 class="text-3xl font-bold text-white truncate"><%= player.username %></h2>
+        <%
+          var roleClass = {
+            'admin': 'border-white text-white',
+            'moderator': 'border-white/70 text-white/85',
+            'user': 'border-white/30 text-white/40'
+          };
+          var rc = roleClass[player.role] || 'border-white/30 text-white/40';
+          var roleKey = 'profile.role' + player.role.charAt(0).toUpperCase() + player.role.slice(1);
+        %>
+        <span class="inline-flex px-2.5 py-0.5 rounded-full border text-[11px] uppercase tracking-wider <%= rc %>" data-i18n="<%= roleKey %>"><%= player.role %></span>
+      </div>
+      <% if (player.country) { %>
+        <div class="mt-1 text-sm text-white/40"><span class="text-white/25" data-i18n="profile.country">Country</span> <span data-country="<%= player.country %>"><%= player.country %></span></div>
+      <% } %>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-2 gap-4 mt-8">
+    <div class="p-4 rounded-2xl bg-white/[0.02] border border-white/[0.06] text-center">
+      <div class="text-3xl font-black text-white"><%= player.rating %></div>
+      <div class="text-xs text-white/30 uppercase tracking-wider mt-1" data-i18n="leaderboard.points">Points</div>
+    </div>
+    <div class="p-4 rounded-2xl bg-white/[0.02] border border-white/[0.06] text-center">
+      <div class="text-3xl font-black text-white"><%= records.length %></div>
+      <div class="text-xs text-white/30 uppercase tracking-wider mt-1" data-i18n="leaderboard.completed">Completed</div>
+    </div>
+  </div>
+
+  <div class="mt-8">
+    <h3 class="text-lg font-semibold text-white/80 mb-4" data-i18n="leaderboard.achievements">Achievements</h3>
+    <% if (records.length === 0) { %>
+      <div class="py-10 text-center text-sm text-white/20" data-i18n="leaderboard.noAchievements">No completed levels yet.</div>
+    <% } else { %>
+      <div class="space-y-2">
+        <% records.forEach(function (r) { %>
+          <%
+            var stClass = {
+              'verified': 'border-white text-white',
+              'pending': 'border-white/30 text-white/40',
+              'rejected': 'border-white/20 text-white/20 line-through'
+            };
+            var sc = stClass[r.status] || 'border-white/40 text-white/60';
+            var stKey = 'records.status' + r.status.charAt(0).toUpperCase() + r.status.slice(1);
+          %>
+          <div class="flex items-center justify-between gap-4 px-4 py-3 rounded-xl bg-white/[0.02] border border-white/[0.04]">
+            <div class="min-w-0">
+              <div class="text-white truncate"><%= r.demon_name %></div>
+              <div class="text-[11px] uppercase tracking-wider text-white/30"><%= r.difficulty %></div>
+            </div>
+            <div class="text-white/70 text-sm shrink-0"><%= r.progress %>%</div>
+            <div class="shrink-0">
+              <span class="inline-flex px-2.5 py-0.5 rounded-full border text-[11px] uppercase tracking-wider <%= sc %>" data-i18n="<%= stKey %>"><%= r.status %></span>
+            </div>
+          </div>
+        <% }); %>
+      </div>
+    <% } %>
+  </div>
+</div>

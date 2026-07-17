@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<%- include('../partials/head') %>
+<body class="bg-dark text-white font-inter antialiased selection:bg-white selection:text-dark overflow-x-hidden">
+  <%- include('../partials/navbar') %>
+  <div id="noise"></div>
+  <div id="bg-container"></div>
+
+  <main class="pt-32 pb-20 min-h-screen flex items-center justify-center" style="position:relative;z-index:1">
+    <div class="text-center" style="max-width:28rem">
+      <div class="text-6xl font-black text-white/10 mb-4">403</div>
+      <h1 class="text-2xl font-bold text-white mb-2" data-i18n="admin.accessDenied">Access Denied</h1>
+      <p class="text-white/40 mb-8" data-i18n="admin.accessDeniedText">You do not have permission to view the admin panel.</p>
+      <a href="/" class="inline-flex items-center px-5 h-11 rounded-xl bg-white text-dark text-sm font-semibold hover:bg-white/90 transition-all" data-i18n="admin.backHome">Back to Home</a>
+    </div>
+  </main>
+
+<%- include('../partials/footer') %>
+<%- include('../partials/scripts') %>
+</body>
+</html>

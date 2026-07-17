@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<%- include('partials/head') %>
+<body class="bg-dark text-white font-inter antialiased selection:bg-white selection:text-dark overflow-x-hidden">
+  <%- include('partials/navbar') %>
+  <div id="noise"></div>
+  <div id="bg-container"></div>
+
+  <main class="pt-32 pb-20 min-h-screen">
+    <div class="max-w-3xl mx-auto px-6 lg:px-8">
+      <div class="flex items-center gap-4 mb-6">
+        <div class="w-12 h-px bg-white/10"></div>
+        <span class="text-xs text-white/30 uppercase tracking-[0.2em] font-medium" data-i18n="profile.kicker">Profile</span>
+      </div>
+
+      <div class="rounded-3xl bg-white/[0.015] border border-white/[0.06] backdrop-blur-2xl p-8 mb-6 text-center">
+        <!-- Avatar above name -->
+        <% if (user && user.id === profile.id) { %>
+          <form action="/profile/avatar" method="POST" enctype="multipart/form-data" class="group relative mx-auto mb-6" style="width:128px;height:128px">
+            <label class="block cursor-pointer" style="width:128px;height:128px">
+              <div class="bg-white/5 border border-white/10 flex items-center justify-center overflow-hidden" style="width:128px;height:128px;border-radius:9999px">
+                <% if (profile.avatarUrl) { %>
+                  <img src="<%= profile.avatarUrl %>?<%= Date.now() %>" class="object-cover" style="width:128px;height:128px" alt="avatar">
+                <% } else { %>
+                  <span class="text-6xl font-black text-white/20"><%= profile.username.charAt(0).toUpperCase() %></span>
+                <% } %>
+              </div>
+              <div class="absolute inset-0 flex flex-col items-center justify-center cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity duration-300" style="border-radius:9999px;background-color:rgba(0,0,0,0.6)">
+                <svg class="w-6 h-6 text-white/80 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" />
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0zM18.75 10.5h.008v.008h-.008V10.5z" />
+                </svg>
+                <span class="text-[11px] uppercase tracking-wider text-white/80" data-i18n="profile.changeAvatar">Change</span>
+              </div>
+              <input type="file" name="avatar" accept="image/png,image/jpeg,image/gif,image/webp" class="hidden" onchange="this.closest('form').submit()">
+            </label>
+          </form>
+        <% } else { %>
+          <div class="bg-white/5 border border-white/10 flex items-center justify-center overflow-hidden mx-auto mb-6" style="width:128px;height:128px;border-radius:9999px">
+            <% if (profile.avatarUrl) { %>
+              <img src="<%= profile.avatarUrl %>?<%= Date.now() %>" class="object-cover" style="width:128px;height:128px" alt="avatar">
+            <% } else { %>
+              <span class="text-6xl font-black text-white/20"><%= profile.username.charAt(0).toUpperCase() %></span>
+            <% } %>
+          </div>
+        <% } %>
+
+        <div class="flex items-center justify-center gap-3 flex-wrap">
+          <h2 class="text-3xl font-bold text-white"><%= profile.username %></h2>
+          <%
+            var roleClass = {
+              'admin': 'border-white text-white',
+              'moderator': 'border-white/70 text-white/85',
+              'user': 'border-white/30 text-white/40'
+            };
+            var rc = roleClass[profile.role] || 'border-white/30 text-white/40';
+            var roleKey = 'profile.role' + profile.role.charAt(0).toUpperCase() + profile.role.slice(1);
+          %>
+          <span class="inline-flex px-2.5 py-0.5 rounded-full border text-[11px] uppercase tracking-wider <%= rc %>" data-i18n="<%= roleKey %>"><%= profile.role %></span>
+        </div>
+
+        <div class="mt-3">
+          <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full border border-white/20 text-white/50 text-[11px] uppercase tracking-wider">ID #<%= profile.id %></span>
+        </div>
+
+        <div class="mt-4 flex flex-col gap-2 text-sm text-white/40 items-center">
+          <span><span class="text-white/25" data-i18n="profile.joined">Joined</span> <%= new Date(profile.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) %></span>
+          <% if (profile.country) { %>
+            <span><span class="text-white/25" data-i18n="profile.country">Country</span> <%= profile.country %></span>
+          <% } %>
+          <% if (user && user.id === profile.id) { %>
+            <span class="truncate"><span class="text-white/25" data-i18n="profile.email">Email</span> <%= profile.email %></span>
+          <% } %>
+        </div>
+
+        <!-- Stats -->
+        <div class="grid grid-cols-3 gap-4 mt-8">
+          <div class="p-4 rounded-2xl bg-white/[0.02] border border-white/[0.06] text-center">
+            <div class="text-3xl font-black text-white"><%= rating %></div>
+            <div class="text-xs text-white/30 uppercase tracking-wider mt-1" data-i18n="profile.rating">Rating</div>
+          </div>
+          <div class="p-4 rounded-2xl bg-white/[0.02] border border-white/[0.06] text-center">
+            <div class="text-2xl font-black text-white truncate"><%= profile.country ? profile.country : '—' %></div>
+            <div class="text-xs text-white/30 uppercase tracking-wider mt-1" data-i18n="profile.country">Country</div>
+          </div>
+          <div class="p-4 rounded-2xl bg-white/[0.02] border border-white/[0.06] text-center">
+            <div class="text-3xl font-black text-white">#<%= profile.id %></div>
+            <div class="text-xs text-white/30 uppercase tracking-wider mt-1" data-i18n="profile.id">ID</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recent records -->
+      <div class="rounded-3xl bg-white/[0.015] border border-white/[0.06] backdrop-blur-2xl overflow-hidden mb-6">
+        <div class="px-6 py-4 border-b border-white/[0.04] text-sm font-medium text-white/70" data-i18n="profile.recentTitle">Recent Records</div>
+        <% if (records.length === 0) { %>
+          <div class="px-6 py-10 text-center text-sm text-white/20" data-i18n="profile.noRecords">No records submitted yet.</div>
+        <% } else { %>
+          <% records.forEach(function (r) { %>
+            <%
+              var stClass = {
+                'verified': 'border-white text-white',
+                'pending': 'border-white/30 text-white/40',
+                'rejected': 'border-white/20 text-white/20 line-through'
+              };
+              var sc = stClass[r.status] || 'border-white/40 text-white/60';
+              var stKey = 'records.status' + r.status.charAt(0).toUpperCase() + r.status.slice(1);
+            %>
+            <div class="flex items-center justify-between gap-4 px-6 py-4 border-b border-white/[0.03] last:border-0">
+              <div class="min-w-0">
+                <div class="text-white truncate"><%= r.demon_name %></div>
+                <div class="text-[11px] uppercase tracking-wider text-white/30"><%= r.difficulty %></div>
+              </div>
+              <div class="text-white/70 text-sm shrink-0"><%= r.progress %>%</div>
+              <div class="shrink-0">
+                <span class="inline-flex px-2.5 py-0.5 rounded-full border text-[11px] uppercase tracking-wider <%= sc %>" data-i18n="<%= stKey %>"><%= r.status %></span>
+              </div>
+              <div class="text-white/30 text-xs shrink-0 hidden sm:block"><%= r.created_at.substring(0, 10) %></div>
+            </div>
+          <% }); %>
+        <% } %>
+      </div>
+
+      <!-- Avatar upload hint (own profile only) -->
+      <% if (user && user.id === profile.id) { %>
+        <p class="text-center text-xs text-white/25 mb-6" data-i18n="profile.uploadHint">Hover the avatar to change it · PNG, JPG, GIF or WebP</p>
+      <% } %>
+
+      <div class="text-center mt-8">
+        <a href="/" class="text-sm text-white/30 hover:text-white transition-colors duration-300" data-i18n="profile.back">← Back to Home</a>
+      </div>
+    </div>
+  </main>
+
+<%- include('partials/footer') %>
+<%- include('partials/scripts') %>
+</body>
+</html>

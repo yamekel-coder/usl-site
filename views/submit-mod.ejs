@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<%- include('partials/head') %>
+<body class="bg-dark text-white font-inter antialiased selection:bg-white selection:text-dark overflow-x-hidden">
+  <%- include('partials/navbar') %>
+  <div id="noise"></div>
+  <div id="bg-container"></div>
+
+  <main class="pt-32 pb-20 min-h-screen">
+    <div class="mx-auto px-6 lg:px-8" style="max-width:42rem">
+      <div class="flex items-center gap-4 mb-6">
+        <div class="w-12 h-px bg-white/10"></div>
+        <span class="text-xs text-white/30 uppercase tracking-[0.2em] font-medium" data-i18n="nav.players">Players</span>
+      </div>
+      <h1 class="text-4xl font-black text-white tracking-tight mb-4" data-i18n="submit.modTitle">Apply for Moderator</h1>
+      <p class="text-white/30 text-lg max-w-xl mb-10" data-i18n="submit.modSub">Fill out the form below to apply for a moderator position.</p>
+
+      <% if (typeof success !== 'undefined' && success) { %>
+        <div class="rounded-2xl bg-white/[0.03] border border-white/10 p-8 text-center">
+          <svg class="w-12 h-12 text-white/40 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <h2 class="text-xl font-bold text-white mb-2" data-i18n="submit.modSuccess">Application sent!</h2>
+          <p class="text-white/40 text-sm" data-i18n="submit.modSuccessDesc">Your application is now pending review.</p>
+        </div>
+      <% } else { %>
+        <% if (error) { %>
+          <div class="mb-6 p-4 rounded-xl bg-red-500/5 border border-red-500/10 text-red-300 text-sm"><%= error %></div>
+        <% } %>
+        <form action="/submit/moderator" method="POST" class="rounded-3xl bg-white/[0.015] border border-white/[0.06] backdrop-blur-2xl p-8" style="display:flex;flex-direction:column;gap:1.5rem">
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs text-white/30 uppercase tracking-wider mb-2" data-i18n="submit.ageLabel">Age</label>
+              <input type="number" name="age" required min="13" max="99"
+                class="w-full h-12 px-4 rounded-xl bg-white/5 border border-white/10 text-white text-sm placeholder:text-white/20 focus:outline-none focus:border-white/20 focus:bg-white/[0.03] transition-all duration-300"
+                placeholder="16">
+            </div>
+            <div>
+              <label class="block text-xs text-white/30 uppercase tracking-wider mb-2" data-i18n="submit.timezoneLabel">Timezone</label>
+              <input type="text" name="timezone" required
+                class="w-full h-12 px-4 rounded-xl bg-white/5 border border-white/10 text-white text-sm placeholder:text-white/20 focus:outline-none focus:border-white/20 focus:bg-white/[0.03] transition-all duration-300"
+                placeholder="UTC+3" data-i18n-placeholder="submit.timezonePlaceholder">
+            </div>
+          </div>
+          <div>
+            <label class="block text-xs text-white/30 uppercase tracking-wider mb-2" data-i18n="submit.hardestLabel">Your hardest completed level</label>
+            <input type="text" name="hardest_level" required
+              class="w-full h-12 px-4 rounded-xl bg-white/5 border border-white/10 text-white text-sm placeholder:text-white/20 focus:outline-none focus:border-white/20 focus:bg-white/[0.03] transition-all duration-300"
+              placeholder="Level name" data-i18n-placeholder="submit.hardestPlaceholder">
+          </div>
+
+          <div class="border-t border-white/[0.06] pt-6">
+            <h3 class="text-sm font-semibold text-white/60 mb-4" data-i18n="submit.questionsTitle">Questions</h3>
+            <div class="space-y-5">
+              <div>
+                <label class="block text-sm text-white/50 mb-2" data-i18n="submit.q1">Have you worked as a moderator elsewhere?</label>
+                <textarea name="mod_before" rows="2" required
+                  class="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white text-sm placeholder:text-white/20 focus:outline-none focus:border-white/20 focus:bg-white/[0.03] transition-all duration-300" style="resize:none"
+                  placeholder="Yes/No, details..." data-i18n-placeholder="submit.q1Placeholder"></textarea>
+              </div>
+              <div>
+                <label class="block text-sm text-white/50 mb-2" data-i18n="submit.q2">How many hours can you dedicate to the work?</label>
+                <input type="text" name="hours" required
+                  class="w-full h-12 px-4 rounded-xl bg-white/5 border border-white/10 text-white text-sm placeholder:text-white/20 focus:outline-none focus:border-white/20 focus:bg-white/[0.03] transition-all duration-300"
+                  placeholder="e.g. 2-3 hours daily">
+              </div>
+              <div>
+                <label class="block text-sm text-white/50 mb-2" data-i18n="submit.q3">Are you ready to take on the responsibilities of a moderator?</label>
+                <textarea name="responsibility" rows="2" required
+                  class="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white text-sm placeholder:text-white/20 focus:outline-none focus:border-white/20 focus:bg-white/[0.03] transition-all duration-300" style="resize:none"
+                  placeholder="Your answer" data-i18n-placeholder="submit.q3Placeholder"></textarea>
+              </div>
+            </div>
+          </div>
+
+          <div class="flex items-start gap-3 pt-2">
+            <input type="checkbox" name="agree" id="agree-rules" required
+              class="mt-1 w-4 h-4 rounded bg-white/5 border border-white/10 text-white focus:ring-white/20 focus:ring-offset-0">
+            <label for="agree-rules" class="text-sm text-white/40 leading-relaxed">
+              <span data-i18n="submit.agreePrefix">I agree with</span>
+              <a href="<%= discordInvite %>" target="_blank" rel="noopener" class="text-white/70 hover:text-white underline underline-offset-2 transition-colors" data-i18n="submit.rulesLink">the list rules</a>
+            </label>
+          </div>
+
+          <button type="submit"
+            class="w-full h-12 rounded-xl bg-white text-dark font-semibold text-sm hover:bg-white/90 transition-all duration-300" data-i18n="submit.send">
+            Send
+          </button>
+        </form>
+      <% } %>
+    </div>
+  </main>
+
+<%- include('partials/footer') %>
+<%- include('partials/scripts') %>
+</body>
+</html>

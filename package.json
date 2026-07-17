@@ -1,0 +1,25 @@
+{
+  "name": "ultimate-shitty-list",
+  "version": "1.0.0",
+  "description": "Ultimate Shitty List - Premium Demon Ranking",
+  "main": "server.js",
+  "scripts": {
+    "build:css": "tailwindcss -i ./public/input.css -o ./public/css/style.css",
+    "start": "npm run build:css && node server.js",
+    "dev": "tailwindcss -i ./public/input.css -o ./public/css/style.css --watch & nodemon server.js"
+  },
+  "dependencies": {
+    "bcrypt": "^6.0.0",
+    "better-sqlite3": "^12.11.1",
+    "cookie-parser": "^1.4.7",
+    "ejs": "^3.1.10",
+    "express": "^4.21.0",
+    "multer": "^2.2.0",
+    "autoprefixer": "^10.4.20",
+    "postcss": "^8.4.45",
+    "tailwindcss": "^3.4.10"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.4"
+  }
+}

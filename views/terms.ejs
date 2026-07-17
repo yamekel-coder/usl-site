@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<%- include('partials/head') %>
+<body class="bg-dark text-white font-inter antialiased selection:bg-white selection:text-dark overflow-x-hidden">
+  <%- include('partials/navbar') %>
+  <div id="noise"></div>
+  <div id="bg-container"></div>
+
+  <main class="pt-32 pb-20 min-h-screen" style="position:relative;z-index:1">
+    <div class="max-w-3xl mx-auto px-6 lg:px-8">
+      <div class="flex items-center gap-4 mb-6">
+        <div class="w-12 h-px bg-white/10"></div>
+        <span class="text-xs text-white/30 uppercase tracking-[0.2em] font-medium" data-i18n="footer.terms">Terms of Service</span>
+      </div>
+      <h1 class="text-4xl font-black text-white tracking-tight mb-8" data-i18n="terms.title">Terms of Service</h1>
+
+      <div style="display:flex;flex-direction:column;gap:2rem">
+        <div>
+          <h2 class="text-xl font-bold text-white mb-3" data-i18n="terms.s1Title">1. Acceptance of Terms</h2>
+          <p class="text-white/40 leading-relaxed" data-i18n="terms.s1Text">By using Ultimate Shitty List (USL), you agree to these terms. If you do not agree, please do not use the service.</p>
+        </div>
+
+        <div>
+          <h2 class="text-xl font-bold text-white mb-3" data-i18n="terms.s2Title">2. Account Responsibilities</h2>
+          <p class="text-white/40 leading-relaxed" data-i18n="terms.s2Text">You are responsible for maintaining the security of your account. Do not share your password with anyone. You must be at least 13 years old to create an account.</p>
+        </div>
+
+        <div>
+          <h2 class="text-xl font-bold text-white mb-3" data-i18n="terms.s3Title">3. Content Submission</h2>
+          <p class="text-white/40 leading-relaxed" data-i18n="terms.s3Text">When you submit records, levels, or moderator applications, you confirm that the information is accurate and truthful. False submissions may result in account suspension.</p>
+        </div>
+
+        <div>
+          <h2 class="text-xl font-bold text-white mb-3" data-i18n="terms.s4Title">4. Fair Play</h2>
+          <p class="text-white/40 leading-relaxed" data-i18n="terms.s4Text">Manipulation of rankings, submitting fake records, or any form of cheating is strictly prohibited and will result in permanent account ban.</p>
+        </div>
+
+        <div>
+          <h2 class="text-xl font-bold text-white mb-3" data-i18n="terms.s5Title">5. Moderation</h2>
+          <p class="text-white/40 leading-relaxed" data-i18n="terms.s5Text">Moderators and administrators have the right to review, approve, or reject any submission. Their decisions are final.</p>
+        </div>
+
+        <div>
+          <h2 class="text-xl font-bold text-white mb-3" data-i18n="terms.s6Title">6. Termination</h2>
+          <p class="text-white/40 leading-relaxed" data-i18n="terms.s6Text">We reserve the right to suspend or terminate accounts that violate these terms without prior notice.</p>
+        </div>
+
+        <div>
+          <h2 class="text-xl font-bold text-white mb-3" data-i18n="terms.s7Title">7. Disclaimer</h2>
+          <p class="text-white/40 leading-relaxed" data-i18n="terms.s7Text">USL is not affiliated with RobTop Games. We are a community-driven project. The service is provided "as is" without warranties of any kind.</p>
+        </div>
+
+        <div>
+          <h2 class="text-xl font-bold text-white mb-3" data-i18n="terms.s8Title">8. Contact</h2>
+          <p class="text-white/40 leading-relaxed" data-i18n="terms.s8Text">For questions about these terms, join our <a href="<%= discordInvite %>" target="_blank" rel="noopener" class="text-white/60 hover:text-white underline underline-offset-2 transition-colors">Discord server</a>.</p>
+        </div>
+      </div>
+
+      <div class="mt-12 pt-8 border-t border-white/[0.04]">
+        <a href="/" class="text-sm text-white/30 hover:text-white transition-colors" data-i18n="profile.back">← Back to Home</a>
+      </div>
+    </div>
+  </main>
+
+<%- include('partials/footer') %>
+<%- include('partials/scripts') %>
+</body>
+</html>

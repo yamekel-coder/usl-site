@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<%- include('partials/head') %>
+<body class="bg-dark text-white font-inter antialiased selection:bg-white selection:text-dark overflow-x-hidden">
+  <%- include('partials/navbar') %>
+  <div id="noise"></div>
+  <div id="bg-container"></div>
+
+  <main class="pt-32 pb-20 min-h-screen" style="position:relative;z-index:1">
+    <div class="max-w-3xl mx-auto px-6 lg:px-8">
+      <div class="flex items-center gap-4 mb-6">
+        <div class="w-12 h-px bg-white/10"></div>
+        <span class="text-xs text-white/30 uppercase tracking-[0.2em] font-medium" data-i18n="footer.privacy">Privacy Policy</span>
+      </div>
+      <h1 class="text-4xl font-black text-white tracking-tight mb-8" data-i18n="privacy.title">Privacy Policy</h1>
+
+      <div style="display:flex;flex-direction:column;gap:2rem">
+        <div>
+          <h2 class="text-xl font-bold text-white mb-3" data-i18n="privacy.s1Title">1. Information We Collect</h2>
+          <p class="text-white/40 leading-relaxed" data-i18n="privacy.s1Text">When you create an account, we collect your username, email address, and password (stored securely as a hash). We may also collect your country and avatar if you provide them voluntarily.</p>
+        </div>
+
+        <div>
+          <h2 class="text-xl font-bold text-white mb-3" data-i18n="privacy.s2Title">2. How We Use Your Information</h2>
+          <p class="text-white/40 leading-relaxed" data-i18n="privacy.s2Text">We use your information to operate the ranking system, display your profile and achievements, and communicate with you about your account. We do not sell or share your personal information with third parties.</p>
+        </div>
+
+        <div>
+          <h2 class="text-xl font-bold text-white mb-3" data-i18n="privacy.s3Title">3. Cookies</h2>
+          <p class="text-white/40 leading-relaxed" data-i18n="privacy.s3Text">We use cookies solely for session management (keeping you logged in). No tracking or advertising cookies are used.</p>
+        </div>
+
+        <div>
+          <h2 class="text-xl font-bold text-white mb-3" data-i18n="privacy.s4Title">4. Data Security</h2>
+          <p class="text-white/40 leading-relaxed" data-i18n="privacy.s4Text">We implement reasonable security measures to protect your data. However, no method of transmission over the Internet is 100% secure, and we cannot guarantee absolute security.</p>
+        </div>
+
+        <div>
+          <h2 class="text-xl font-bold text-white mb-3" data-i18n="privacy.s5Title">5. Your Rights</h2>
+          <p class="text-white/40 leading-relaxed" data-i18n="privacy.s5Text">You can request deletion of your account and all associated data at any time by contacting us through Discord.</p>
+        </div>
+
+        <div>
+          <h2 class="text-xl font-bold text-white mb-3" data-i18n="privacy.s6Title">6. Changes to This Policy</h2>
+          <p class="text-white/40 leading-relaxed" data-i18n="privacy.s6Text">We may update this privacy policy from time to time. Significant changes will be announced on our Discord server.</p>
+        </div>
+      </div>
+
+      <div class="mt-12 pt-8 border-t border-white/[0.04]">
+        <a href="/" class="text-sm text-white/30 hover:text-white transition-colors" data-i18n="profile.back">← Back to Home</a>
+      </div>
+    </div>
+  </main>
+
+<%- include('partials/footer') %>
+<%- include('partials/scripts') %>
+</body>
+</html>

@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Register — USL</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+  <style>
+    .captcha-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
+    .captcha-emoji-btn {
+      width:100%; aspect-ratio:1; display:flex; align-items:center; justify-content:center;
+      font-size:2rem; border-radius:0.75rem; border:2px solid rgba(255,255,255,0.1);
+      background:rgba(255,255,255,0.03); cursor:pointer; transition:all 0.2s ease;
+    }
+    .captcha-emoji-btn:hover { border-color:rgba(255,255,255,0.3); background:rgba(255,255,255,0.06); }
+    .captcha-emoji-btn.selected { border-color:rgba(255,255,255,0.8); background:rgba(255,255,255,0.1); }
+    .captcha-text-display {
+      font-family:monospace; font-size:1.5rem; font-weight:bold; letter-spacing:0.3em;
+      padding:0.75rem 1.25rem; border-radius:0.75rem; background:rgba(255,255,255,0.06);
+      border:1px solid rgba(255,255,255,0.1); display:inline-block;
+      user-select:none; text-transform:uppercase;
+      background-image:repeating-linear-gradient(0deg,rgba(255,255,255,0.03) 0px,rgba(255,255,255,0.03) 1px,transparent 1px,transparent 3px);
+    }
+    .captcha-type-label {
+      font-size:0.65rem; text-transform:uppercase; letter-spacing:0.12em;
+      color:rgba(255,255,255,0.25); font-weight:600;
+    }
+  </style>
+</head>
+<body class="bg-dark text-white font-inter antialiased selection:bg-white selection:text-dark overflow-x-hidden">
+  <div id="noise"></div>
+  <div id="bg-container"></div>
+
+  <nav class="fixed top-0 left-0 right-0 z-50" style="background: rgba(10,10,10,0.8); backdrop-filter: blur(32px); border-bottom: 1px solid rgba(255,255,255,0.04);">
+    <div class="max-w-7xl mx-auto px-6 lg:px-8">
+      <div class="flex items-center justify-between h-20">
+        <a href="/" class="flex items-center gap-3">
+          <div class="w-9 h-9 rounded-lg bg-white/10 backdrop-blur-xl border border-white/10 flex items-center justify-center overflow-hidden">
+            <img src="/uploads/site-logo.png" onerror="this.style.display='none'" class="w-full h-full object-cover" alt="USL">
+            <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+          </div>
+          <span class="text-lg font-bold tracking-tight text-white">USL</span>
+        </a>
+      </div>
+    </div>
+  </nav>
+
+  <main class="min-h-screen flex items-center justify-center pt-20 pb-20">
+    <div class="w-full max-w-md mx-auto px-6">
+      <div class="text-center mb-10">
+        <h1 class="text-4xl font-black text-white tracking-tight">Create Account</h1>
+        <p class="mt-3 text-white/30">Join the Ultimate Shitty List community</p>
+      </div>
+
+      <div class="rounded-3xl bg-white/[0.015] border border-white/[0.06] backdrop-blur-2xl p-8">
+        <% if (error) { %>
+          <div class="mb-6 p-4 rounded-xl bg-red-500/5 border border-red-500/10 text-red-300 text-sm"><%= error %></div>
+        <% } %>
+
+        <form action="/auth/register" method="POST" class="space-y-5">
+          <div>
+            <label class="block text-xs text-white/30 uppercase tracking-wider mb-2">Username</label>
+            <input type="text" name="username" required minlength="3" maxlength="24"
+              class="w-full h-12 px-4 rounded-xl bg-white/5 border border-white/10 text-white text-sm placeholder:text-white/20 focus:outline-none focus:border-white/20 focus:bg-white/[0.03] transition-all duration-300"
+              placeholder="Enter username">
+          </div>
+          <div>
+            <label class="block text-xs text-white/30 uppercase tracking-wider mb-2">Email</label>
+            <input type="email" name="email" required
+              class="w-full h-12 px-4 rounded-xl bg-white/5 border border-white/10 text-white text-sm placeholder:text-white/20 focus:outline-none focus:border-white/20 focus:bg-white/[0.03] transition-all duration-300"
+              placeholder="Enter email">
+          </div>
+          <div>
+            <label class="block text-xs text-white/30 uppercase tracking-wider mb-2">Password</label>
+            <input type="password" name="password" required minlength="6"
+              class="w-full h-12 px-4 rounded-xl bg-white/5 border border-white/10 text-white text-sm placeholder:text-white/20 focus:outline-none focus:border-white/20 focus:bg-white/[0.03] transition-all duration-300"
+              placeholder="Min 6 characters">
+          </div>
+          <div>
+            <label class="block text-xs text-white/30 uppercase tracking-wider mb-2">Confirm Password</label>
+            <input type="password" name="confirm" required minlength="6"
+              class="w-full h-12 px-4 rounded-xl bg-white/5 border border-white/10 text-white text-sm placeholder:text-white/20 focus:outline-none focus:border-white/20 focus:bg-white/[0.03] transition-all duration-300"
+              placeholder="Repeat password">
+          </div>
+
+          <!-- CAPTCHA -->
+          <div class="rounded-xl border border-white/10 p-4" style="background:rgba(255,255,255,0.02)">
+            <div class="flex items-center justify-between mb-3">
+              <span class="captcha-type-label">
+                <% if (captcha.type === 'math') { %>Math<% } %>
+                <% if (captcha.type === 'text') { %>Type the text<% } %>
+                <% if (captcha.type === 'emoji') { %>Select the emoji<% } %>
+                <% if (captcha.type === 'word') { %>Unscramble the word<% } %>
+                <% if (captcha.type === 'logic') { %>Odd one out<% } %>
+              </span>
+              <span class="text-[10px] text-white/15 uppercase tracking-wider">Captcha</span>
+            </div>
+
+            <% if (captcha.type === 'math') { %>
+              <div class="text-center mb-3">
+                <div class="text-2xl font-bold text-white tracking-wider"><%= captcha.question %></div>
+              </div>
+              <input type="text" name="captcha_answer" required autocomplete="off"
+                class="w-full h-11 px-4 rounded-xl bg-white/5 border border-white/10 text-white text-sm text-center placeholder:text-white/20 focus:outline-none focus:border-white/20 transition-all"
+                placeholder="Your answer" inputmode="numeric">
+
+            <% } else if (captcha.type === 'text') { %>
+              <div class="text-center mb-3">
+                <div class="captcha-text-display"><%= captcha.question %></div>
+              </div>
+              <input type="text" name="captcha_answer" required autocomplete="off"
+                class="w-full h-11 px-4 rounded-xl bg-white/5 border border-white/10 text-white text-sm text-center placeholder:text-white/20 focus:outline-none focus:border-white/20 transition-all tracking-widest uppercase"
+                placeholder="Type the text above" maxlength="6">
+
+            <% } else if (captcha.type === 'emoji') { %>
+              <div class="text-center mb-2">
+                <div class="text-xs text-white/40 mb-2">Find this emoji:</div>
+                <div class="text-3xl mb-3"><%= captcha.question %></div>
+              </div>
+              <div class="captcha-grid">
+                <% captcha.options.forEach(function (e) { %>
+                  <button type="button" class="captcha-emoji-btn" data-emoji="<%= e %>" onclick="selectEmoji(this)"><%= e %></button>
+                <% }); %>
+              </div>
+              <input type="hidden" name="captcha_answer" id="emoji-answer" value="">
+
+            <% } else if (captcha.type === 'word') { %>
+              <div class="text-center mb-3">
+                <div class="text-lg font-bold text-white/80 tracking-wider mb-1" style="font-family:monospace"><%= captcha.question %></div>
+                <div class="text-[11px] text-white/25">Type the original word</div>
+              </div>
+              <input type="text" name="captcha_answer" required autocomplete="off"
+                class="w-full h-11 px-4 rounded-xl bg-white/5 border border-white/10 text-white text-sm text-center placeholder:text-white/20 focus:outline-none focus:border-white/20 transition-all"
+                placeholder="Original word">
+
+            <% } else if (captcha.type === 'logic') { %>
+              <div class="text-center mb-3">
+                <div class="text-xs text-white/40 mb-2">Which number doesn't belong?</div>
+                <div class="flex flex-wrap justify-center gap-2">
+                  <% captcha.question.split(', ').forEach(function (n) { %>
+                    <button type="button" class="captcha-emoji-btn !w-auto !aspect-auto !text-base !px-4 !py-2 !rounded-lg" data-logic="<%= n %>" onclick="selectLogic(this)"><%= n %></button>
+                  <% }); %>
+                </div>
+              </div>
+              <input type="hidden" name="captcha_answer" id="logic-answer" value="">
+
+            <% } %>
+          </div>
+
+          <label class="flex items-start gap-3 text-sm text-white/40">
+            <input type="checkbox" name="agree" required class="mt-1 w-4 h-4 rounded bg-white/5 border border-white/10">
+            <span>I agree with <a href="/rules" class="text-white/70 hover:text-white underline">the list rules</a></span>
+          </label>
+
+          <button type="submit"
+            class="w-full h-12 rounded-xl bg-white text-dark font-semibold text-sm hover:bg-white/90 transition-all duration-300">
+            Create Account
+          </button>
+        </form>
+
+        <div class="mt-6 text-center">
+          <span class="text-sm text-white/20">Already have an account?</span>
+          <a href="/auth/login" class="text-sm text-white/50 hover:text-white ml-1 transition-colors duration-300">Sign In</a>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <div id="scroll-progress"></div>
+  <script src="/js/navbar.js"></script>
+  <script src="/js/background.js"></script>
+  <script>
+    function selectEmoji(btn) {
+      document.querySelectorAll('.captcha-emoji-btn').forEach(function(b) { b.classList.remove('selected'); });
+      btn.classList.add('selected');
+      document.getElementById('emoji-answer').value = btn.dataset.emoji;
+    }
+    function selectLogic(btn) {
+      document.querySelectorAll('[data-logic]').forEach(function(b) { b.classList.remove('selected'); });
+      btn.classList.add('selected');
+      document.getElementById('logic-answer').value = btn.dataset.logic;
+    }
+  </script>
+</body>
+</html>

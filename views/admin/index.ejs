@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<%- include('../partials/head') %>
+<%
+  function safeUrl(url) {
+    if (!url) return '#';
+    var u = String(url).trim();
+    if (/^https?:\/\//i.test(u)) return u;
+    return '#';
+  }
+%>
+<body class="bg-dark text-white font-inter antialiased selection:bg-white selection:text-dark overflow-x-hidden">
+  <%- include('../partials/navbar') %>
+  <div id="noise"></div>
+  <div id="bg-container"></div>
+
+  <main class="pt-32 pb-20 min-h-screen" style="position:relative;z-index:1">
+    <div class="mx-auto px-6 lg:px-8" style="max-width:80rem">
+      <!-- Header -->
+      <div class="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6 mb-8">
+        <div>
+          <div class="flex items-center gap-4 mb-4">
+            <div class="w-12 h-px bg-white/10"></div>
+            <span class="text-xs text-white/30 uppercase tracking-[0.2em] font-medium" data-i18n="admin.control">Control</span>
+          </div>
+          <h1 class="text-4xl font-black text-white tracking-tight" data-i18n="admin.title">Admin Panel</h1>
+          <p class="text-white/30 text-lg mt-2" data-i18n="admin.subtitle">Manage submissions, demons and users.</p>
+        </div>
+        <div class="flex flex-wrap gap-3">
+          <div class="flex-1 min-w-[120px] max-w-[180px] rounded-2xl bg-white/[0.03] border border-white/10 px-5 py-3 text-center" style="background:rgba(255,255,255,0.03)">
+            <div class="text-2xl font-bold text-white"><%= stats ? stats.players : 0 %></div>
+            <div class="text-xs text-white/30 uppercase tracking-wider mt-1" data-i18n="admin.stat.players">Players</div>
+          </div>
+          <div class="flex-1 min-w-[120px] max-w-[180px] rounded-2xl bg-white/[0.03] border border-white/10 px-5 py-3 text-center" style="background:rgba(255,255,255,0.03)">
+            <div class="text-2xl font-bold text-white"><%= stats ? stats.levels : 0 %></div>
+            <div class="text-xs text-white/30 uppercase tracking-wider mt-1" data-i18n="admin.stat.levels">Levels</div>
+          </div>
+          <div class="flex-1 min-w-[120px] max-w-[180px] rounded-2xl bg-white/[0.03] border border-white/10 px-5 py-3 text-center" style="background:rgba(255,255,255,0.03)">
+            <div class="text-2xl font-bold text-white"><%= stats ? stats.records : 0 %></div>
+            <div class="text-xs text-white/30 uppercase tracking-wider mt-1" data-i18n="admin.stat.records">Records</div>
+          </div>
+        </div>
+      </div>
+
+      <% if (flash) { %>
+        <div class="mb-6 p-4 rounded-xl bg-white/[0.04] border border-white/10 text-sm text-white/70 flex items-center gap-3" style="background:rgba(255,255,255,0.04);border-color:rgba(255,255,255,0.1)">
+          <span class="w-1.5 h-1.5 rounded-full bg-white/60"></span>
+          <% if (flash === 'approved') { %><span data-i18n="admin.flash.approved">Submission approved</span><% } %>
+          <% if (flash === 'rejected') { %><span data-i18n="admin.flash.rejected">Submission rejected</span><% } %>
+          <% if (flash === 'notfound') { %><span data-i18n="admin.flash.notfound">Submission not found</span><% } %>
+          <% if (flash === 'alreadydone') { %><span data-i18n="admin.flash.alreadydone">Submission was already processed</span><% } %>
+          <% if (flash === 'roleupdated') { %><span data-i18n="admin.flash.roleupdated">User role updated</span><% } %>
+          <% if (flash === 'badrole') { %><span data-i18n="admin.flash.badrole">Invalid role</span><% } %>
+          <% if (flash === 'self') { %><span data-i18n="admin.flash.self">You cannot demote yourself</span><% } %>
+          <% if (flash === 'banned') { %><span data-i18n="admin.flash.banned">User banned</span><% } %>
+          <% if (flash === 'unbanned') { %><span data-i18n="admin.flash.unbanned">User unbanned</span><% } %>
+          <% if (flash === 'deleted') { %><span data-i18n="admin.flash.deleted">User deleted</span><% } %>
+          <% if (['approved','rejected','notfound','alreadydone','roleupdated','badrole','self','banned','unbanned','deleted'].indexOf(flash) === -1) { %><span><%= flash %></span><% } %>
+        </div>
+      <% } %>
+
+      <% if (section === 'dashboard') { %>
+        <!-- Dashboard -->
+        <div class="grid gap-6" style="grid-template-columns:repeat(auto-fit,minmax(280px,1fr))">
+          <!-- Pending Stats -->
+          <div class="rounded-2xl bg-white/[0.02] border border-white/10 p-6" style="background:rgba(255,255,255,0.02);border-color:rgba(255,255,255,0.1)">
+            <h3 class="text-sm font-semibold text-white mb-4" data-i18n="admin.pendingReview">Pending Review</h3>
+            <div class="space-y-3">
+              <div class="flex justify-between items-center">
+                <span class="text-white/50" data-i18n="admin.pendingRecords">Pending Records</span>
+                <span class="text-white font-semibold"><%= (pendingRecords || []).length %></span>
+              </div>
+              <div class="flex justify-between items-center">
+                <span class="text-white/50" data-i18n="admin.levelRequests">Level Requests</span>
+                <span class="text-white font-semibold"><%= (levelRequests || []).length %></span>
+              </div>
+              <div class="flex justify-between items-center">
+                <span class="text-white/50" data-i18n="admin.modApps">Moderator Apps</span>
+                <span class="text-white font-semibold"><%= submissions.filter(function(s) { return s.type === 'moderator' && s.status === 'pending'; }).length %></span>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Quick Actions -->
+          <div class="rounded-2xl bg-white/[0.02] border border-white/10 p-6" style="background:rgba(255,255,255,0.02);border-color:rgba(255,255,255,0.1)">
+            <h3 class="text-sm font-semibold text-white mb-4" data-i18n="admin.quickActions">Quick Actions</h3>
+            <div class="flex flex-wrap gap-2">
+              <a href="/admin?section=submissions&status=pending" class="admin-action-btn" data-i18n="admin.pendingSubmissions">Pending Submissions</a>
+              <a href="/admin?section=publish" class="admin-action-btn" data-i18n="admin.publishLevels">Publish Levels</a>
+              <% if (user && user.role === 'admin') { %><a href="/admin?section=applications&applicationStatus=pending" class="admin-action-btn" data-i18n="admin.moderatorApplications">Moderator Applications</a><% } %>
+              <a href="/admin?section=levels" class="admin-action-btn" data-i18n="admin.allLevels">All Levels</a>
+              <a href="/admin?section=news" class="admin-action-btn" data-i18n="admin.manageNews">Manage News</a>
+              <a href="/admin?section=team" class="admin-action-btn" data-i18n="admin.team">Team</a>
+              <a href="/admin?section=roles" class="admin-action-btn" data-i18n="admin.roles">Roles</a>
+              <% if (user && user.role === 'admin') { %><a href="/admin?section=users" class="admin-action-btn" data-i18n="admin.users">Users</a><% } %>
+            </div>
+          </div>
+
+          <!-- Recent Submissions -->
+          <div class="rounded-2xl bg-white/[0.02] border border-white/10 p-6" style="background:rgba(255,255,255,0.02);border-color:rgba(255,255,255,0.1)">
+            <h3 class="text-sm font-semibold text-white mb-4" data-i18n="admin.recentActivity">Recent Activity</h3>
+            <% var recentSubs = submissions.slice(0, 5); %>
+            <% if (recentSubs.length > 0) { %>
+              <div class="space-y-2">
+                <% recentSubs.forEach(function(s) { %>
+                  <div class="flex justify-between items-center text-sm">
+                    <span class="text-white/50"><%= s.type %> <span data-i18n="admin.by">by</span> <%= s.username %></span>
+                    <span class="text-white/30 text-xs"><%= s.status %></span>
+                  </div>
+                <% }); %>
+              </div>
+            <% } else { %>
+              <p class="text-white/30 text-sm" data-i18n="admin.noActivity">No recent activity</p>
+            <% } %>
+          </div>
+        </div>
+      <% } else if (section === 'publish') { %>
+        <!-- Level Publisher -->
+        <div class="flex items-center justify-between gap-4 mb-6">
+          <div>
+            <h2 class="text-2xl font-bold text-white" data-i18n="admin.publishSectionTitle">Publish Levels</h2>
+            <p class="text-white/40 text-sm mt-1" data-i18n="admin.publishSectionSubtitle">Review submitted levels or create new ones directly.</p>
+          </div>
+          <a href="/admin/publish-new" class="h-10 px-5 rounded-xl bg-white text-dark text-sm font-semibold hover:bg-white/90 transition-all flex items-center gap-2 shrink-0">
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+            <span data-i18n="admin.createNewLevel">Create New Level</span>
+          </a>
+        </div>
+
+        <% var pendingLevels = submissions.filter(function(s) { return s.type === 'level-request' && s.status === 'pending'; }); %>
+        <% if (pendingLevels.length === 0) { %>
+          <div class="rounded-2xl bg-white/[0.02] border border-white/10 p-12 text-center text-white/30" style="background:rgba(255,255,255,0.02);border-color:rgba(255,255,255,0.1)" data-i18n="admin.noPendingLevels">No pending level requests to publish.</div>
+        <% } else { %>
+          <div class="grid gap-4" style="grid-template-columns:repeat(auto-fill,minmax(min(360px,100%),1fr));align-items:start;">
+            <% pendingLevels.forEach(function (s) { %>
+              <div class="rounded-2xl bg-white/[0.02] border border-white/10 overflow-hidden" style="background:rgba(255,255,255,0.02);border-color:rgba(255,255,255,0.1)">
+                <% if (s.data.banner_url) { %>
+                  <div class="w-full" style="aspect-ratio:16/9">
+                    <img src="<%= s.data.banner_url %>" class="w-full h-full object-cover" alt="<%= s.data.name %>">
+                  </div>
+                <% } %>
+                <div class="p-5">
+                  <div class="flex items-start justify-between gap-3 mb-3">
+                    <div class="min-w-0">
+                      <div class="text-lg font-bold text-white truncate"><%= s.data.name || 'Unnamed' %></div>
+                      <div class="text-xs text-white/40"><span data-i18n="admin.by">by</span> <%= s.username %></div>
+                    </div>
+                    <span class="shrink-0 text-[10px] uppercase tracking-wider px-2.5 py-1 rounded-full border border-yellow-500/30 bg-yellow-500/10 text-yellow-300" style="border-color:rgba(234,179,8,0.3);background:rgba(234,179,8,0.1)"><%= s.data.difficulty || '—' %></span>
+                  </div>
+                  <div class="space-y-1 text-sm mb-4">
+                    <div class="text-white/40"><span data-i18n="submit.creatorsLabel">Creator</span>: <span class="text-white/70"><%= s.data.creators || '—' %></span></div>
+                    <div class="text-white/40"><span data-i18n="submit.verifierLabel">Verifier</span>: <span class="text-white/70"><%= s.data.verifier || '—' %></span></div>
+                    <div class="text-white/40"><span data-i18n="submit.requirementLabel">Percent</span>: <span class="text-white/70"><%= s.data.requirement || 100 %>%</span></div>
+                    <% if (s.data.video_url) { %>
+                      <div class="text-white/40 truncate"><span data-i18n="admin.field.video">Video</span>: <a href="<%= safeUrl(s.data.video_url) %>" target="_blank" class="text-white/70 hover:text-white underline"><%= s.data.video_url %></a></div>
+                    <% } %>
+                    <% if (s.data.comment) { %>
+                      <div class="text-white/30 text-xs mt-2 italic">"<%= s.data.comment %>"</div>
+                    <% } %>
+                  </div>
+                  <div class="flex gap-2">
+                    <a href="/admin/publish/<%= s.id %>" class="flex-1 h-10 rounded-xl bg-white text-dark text-sm font-semibold hover:bg-white/90 transition-all flex items-center justify-center" data-i18n="admin.publishLevel">Publish Level</a>
+                    <form method="POST" action="/admin/submissions/<%= s.id %>/reject" class="flex-1">
+                      <button type="submit" class="w-full h-10 rounded-xl border border-white/10 text-white/50 text-sm font-medium hover:bg-white/5 transition-all" data-i18n="admin.reject">Reject</button>
+                    </form>
+                  </div>
+                </div>
+              </div>
+            <% }); %>
+          </div>
+        <% } %>
+      <% } else if (section === 'levels') { %>
+        <!-- Levels Management -->
+        <div class="rounded-2xl bg-white/[0.02] border border-white/10 overflow-hidden" style="background:rgba(255,255,255,0.02);border-color:rgba(255,255,255,0.1)">
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+              <thead>
+                <tr class="text-white/30 text-xs uppercase tracking-wider text-left border-b border-white/5">
+                  <th class="px-5 py-4 font-medium" data-i18n="admin.col.hash">#</th>
+                  <th class="px-5 py-4 font-medium" data-i18n="admin.col.name">Name</th>
+                  <th class="px-5 py-4 font-medium" data-i18n="admin.col.creator">Creator</th>
+                  <th class="px-5 py-4 font-medium" data-i18n="admin.col.verifier">Verifier</th>
+                  <th class="px-5 py-4 font-medium" data-i18n="admin.col.difficulty">Difficulty</th>
+                  <th class="px-5 py-4 font-medium" data-i18n="admin.col.actions">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% demons.forEach(function (d) { %>
+                  <tr class="border-b border-white/[0.04] hover:bg-white/[0.02]" style="border-color:rgba(255,255,255,0.04)">
+                    <td class="px-5 py-3 text-white/50"><%= d.position || '—' %></td>
+                    <td class="px-5 py-3 text-white font-medium"><%= d.name %></td>
+                    <td class="px-5 py-3 text-white/50"><%= d.creator || '—' %></td>
+                    <td class="px-5 py-3 text-white/50"><%= d.verifier || '—' %></td>
+                    <td class="px-5 py-3">
+                      <span class="text-[11px] uppercase tracking-wider px-2.5 py-1 rounded-full border border-white/10 text-white/50" style="border-color:rgba(255,255,255,0.1)"><%= d.difficulty %></span>
+                    </td>
+                    <td class="px-5 py-3">
+                      <details class="text-left">
+                        <summary class="cursor-pointer text-white/60 hover:text-white text-xs" data-i18n="admin.edit">Edit</summary>
+                        <form method="POST" action="/admin/levels/<%= d.id %>" class="mt-3 grid gap-2 min-w-64">
+                          <input name="name" value="<%= d.name %>" required class="admin-input">
+                          <input name="creator" value="<%= d.creator || '' %>" placeholder="Creator" data-i18n-placeholder="admin.field.creators" class="admin-input">
+                          <input name="verifier" value="<%= d.verifier || '' %>" placeholder="Verifier" data-i18n-placeholder="admin.field.verifier" class="admin-input">
+                          <input name="banner_url" value="<%= d.banner_url || '' %>" placeholder="Banner image URL" data-i18n-placeholder="admin.field.bannerUrl" class="admin-input">
+                          <input name="video_url" value="<%= d.video_url || '' %>" placeholder="YouTube link" class="admin-input">
+                          <div class="grid grid-cols-2 gap-2">
+                            <input name="position" type="number" min="1" value="<%= d.position || '' %>" placeholder="Position" data-i18n-placeholder="admin.field.position" class="admin-input">
+                            <input name="requirement" type="number" min="1" max="100" value="<%= d.requirement || 100 %>" placeholder="Percent" data-i18n-placeholder="admin.field.requirement" class="admin-input">
+                          </div>
+                          <select name="difficulty" class="admin-input">
+                            <option value="Easy" <%= d.difficulty === 'Easy' ? 'selected' : '' %>>Easy</option>
+                            <option value="Medium" <%= d.difficulty === 'Medium' ? 'selected' : '' %>>Medium</option>
+                            <option value="Hard" <%= d.difficulty === 'Hard' ? 'selected' : '' %>>Hard</option>
+                            <option value="Insane" <%= d.difficulty === 'Insane' ? 'selected' : '' %>>Insane</option>
+                            <option value="Extreme" <%= d.difficulty === 'Extreme' ? 'selected' : '' %>>Extreme</option>
+                          </select>
+                          <button type="submit" class="admin-primary-btn" data-i18n="admin.save">Save</button>
+                        </form>
+                      </details>
+                      <form method="POST" action="/admin/levels/<%= d.id %>/delete" onsubmit="return confirm('Delete this level?')" class="mt-2">
+                        <button type="submit" class="text-red-300/70 hover:text-red-300 text-xs" data-i18n="admin.delete">Delete</button>
+                      </form>
+                    </td>
+                  </tr>
+                <% }); %>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      <% } else if (section === 'records') { %>
+        <!-- Records -->
+        <div class="rounded-2xl bg-white/[0.02] border border-white/10 overflow-hidden" style="background:rgba(255,255,255,0.02);border-color:rgba(255,255,255,0.1)">
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+              <thead>
+                <tr class="text-white/30 text-xs uppercase tracking-wider text-left border-b border-white/5">
+                  <th class="px-5 py-4 font-medium" data-i18n="admin.player">Player</th>
+                  <th class="px-5 py-4 font-medium" data-i18n="admin.level">Level</th>
+                  <th class="px-5 py-4 font-medium" data-i18n="admin.col.progress">Progress</th>
+                  <th class="px-5 py-4 font-medium" data-i18n="admin.status">Status</th>
+                  <th class="px-5 py-4 font-medium" data-i18n="admin.actions">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% records.forEach(function (r) { %>
+                  <tr class="border-b border-white/[0.04] hover:bg-white/[0.02]" style="border-color:rgba(255,255,255,0.04)">
+                    <td class="px-5 py-3 text-white/80"><%= r.username || 'Unknown' %></td>
+                    <td class="px-5 py-3 text-white/50"><%= r.demon_name || '—' %></td>
+                    <td class="px-5 py-3 text-white/50"><%= r.progress %>%</td>
+                    <td class="px-5 py-3">
+                      <span class="text-[11px] uppercase tracking-wider px-2.5 py-1 rounded-full border border-white/10 <%= r.status === 'verified' ? 'bg-green-500/20 text-green-300' : 'bg-yellow-500/20 text-yellow-300' %>" style="border-color:rgba(255,255,255,0.1)"><%= r.status %></span>
+                    </td>
+                    <td class="px-5 py-3">
+                      <% if (r.status !== 'verified') { %>
+                        <form method="POST" action="/admin/records/<%= r.id %>/approve" class="inline">
+                          <button type="submit" class="text-green-300/70 hover:text-green-300 text-xs mr-2" data-i18n="admin.approve">Approve</button>
+                        </form>
+                        <form method="POST" action="/admin/records/<%= r.id %>/reject" class="inline">
+                          <button type="submit" class="text-red-300/50 hover:text-red-300 text-xs" data-i18n="admin.reject">Reject</button>
+                        </form>
+                      <% } else { %>
+                        <span class="text-white/30 text-xs">—</span>
+                      <% } %>
+                    </td>
+                  </tr>
+                <% }); %>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      <% } else if (section === 'news') { %>
+        <!-- News -->
+        <div class="mb-6">
+          <form method="POST" action="/admin/news" class="rounded-2xl bg-white/[0.02] border border-white/10 p-6" style="background:rgba(255,255,255,0.02);border-color:rgba(255,255,255,0.1)">
+            <h3 class="text-sm font-semibold text-white mb-4" data-i18n="admin.createNews">Create News</h3>
+            <div class="flex flex-col gap-4">
+              <input type="text" name="title" required placeholder="News title" data-i18n-placeholder="admin.field.newsTitle" class="h-11 px-4 rounded-xl bg-white/5 border border-white/10 text-white text-sm placeholder:text-white/20 focus:outline-none focus:border-white/20">
+              <textarea name="description" required placeholder="News content" data-i18n-placeholder="admin.newsContent" rows="3" class="px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white text-sm placeholder:text-white/20 focus:outline-none focus:border-white/20" style="resize:none"></textarea>
+              <button type="submit" class="w-32 h-10 rounded-xl bg-white text-dark text-sm font-semibold hover:bg-white/90 transition-all" data-i18n="admin.publishBtn">Publish</button>
+            </div>
+          </form>
+        </div>
+        <div class="rounded-2xl bg-white/[0.02] border border-white/10 overflow-hidden" style="background:rgba(255,255,255,0.02);border-color:rgba(255,255,255,0.1)">
+          <div class="overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead>
+              <tr class="text-white/30 text-xs uppercase tracking-wider text-left border-b border-white/5">
+                <th class="px-5 py-4 font-medium" data-i18n="admin.col.title">Title</th>
+                <th class="px-5 py-4 font-medium" data-i18n="admin.col.author">Author</th>
+                <th class="px-5 py-4 font-medium" data-i18n="admin.col.date">Date</th>
+                <th class="px-5 py-4 font-medium" data-i18n="admin.actions">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% news.forEach(function (n) { %>
+                <tr class="border-b border-white/[0.04] hover:bg-white/[0.02]" style="border-color:rgba(255,255,255,0.04)">
+                  <td class="px-5 py-3 text-white font-medium"><%= n.title %></td>
+                  <td class="px-5 py-3 text-white/50"><%= n.username || '—' %></td>
+                  <td class="px-5 py-3 text-white/50"><%= n.created_at ? n.created_at.substring(0, 10) : '—' %></td>
+                  <td class="px-5 py-3">
+                    <form method="POST" action="/admin/news/<%= n.id %>/delete" onsubmit="return confirm('Delete this news?')">
+                      <button type="submit" class="text-red-300/50 hover:text-red-300 text-xs" data-i18n="admin.delete">Delete</button>
+                    </form>
+                  </td>
+                </tr>
+              <% }); %>
+            </tbody>
+          </table>
+          </div>
+        </div>
+      <% } else if (section === 'applications') { %>
+        <div class="flex items-center justify-between gap-4 mb-6">
+          <div>
+            <h2 class="text-2xl font-bold text-white" data-i18n="admin.applicationTitle">Moderator applications</h2>
+            <p class="text-white/40 text-sm mt-1" data-i18n="admin.applicationSubtitle">Review the complete application and close it when a decision is made.</p>
+          </div>
+          <form method="GET" action="/admin" class="flex items-center gap-2">
+            <input type="hidden" name="section" value="applications">
+            <select name="applicationStatus" onchange="this.form.submit()" class="h-10 px-3 rounded-xl bg-white/5 border border-white/10 text-white text-sm">
+              <option value="pending" <%= applicationStatus === 'pending' ? 'selected' : '' %> data-i18n="admin.applicationPending">Pending</option>
+              <option value="approved" <%= applicationStatus === 'approved' ? 'selected' : '' %> data-i18n="admin.applicationApproved">Approved</option>
+              <option value="rejected" <%= applicationStatus === 'rejected' ? 'selected' : '' %> data-i18n="admin.applicationClosed">Closed</option>
+              <option value="" <%= applicationStatus === '' ? 'selected' : '' %> data-i18n="admin.applicationAll">All</option>
+            </select>
+          </form>
+        </div>
+        <% if (!moderatorApplications || moderatorApplications.length === 0) { %>
+          <div class="admin-empty-state" data-i18n="admin.noApplications">No moderator applications found.</div>
+        <% } else { %>
+          <div class="grid gap-4" style="grid-template-columns:repeat(auto-fill,minmax(min(340px,100%),1fr));align-items:start;">
+            <% moderatorApplications.forEach(function (app) { %>
+              <article class="admin-card">
+                <div class="flex items-start justify-between gap-3 mb-4">
+                  <div>
+                    <h3 class="text-lg font-bold text-white"><%= app.username %></h3>
+                    <p class="text-xs text-white/35"><span data-i18n="admin.application">Application</span> #<%= app.id %> · <%= app.created_at || '—' %></p>
+                  </div>
+                  <span class="admin-status"><%= app.status === 'rejected' ? 'closed' : app.status %></span>
+                </div>
+                <div class="space-y-2 text-sm">
+                  <% Object.keys(app.data || {}).forEach(function (key) { var value = app.data[key]; if (value !== null && value !== undefined && String(value).trim() !== '') { %>
+                    <div class="flex flex-col gap-1 border-b border-white/5 pb-2">
+                      <span class="text-xs uppercase tracking-wider text-white/30"><%= key.replace(/_/g, ' ') %></span>
+                      <span class="text-white/80 whitespace-pre-wrap break-words"><%= value %></span>
+                    </div>
+                  <% } }); %>
+                </div>
+                <% if (app.status === 'pending') { %>
+                  <div class="flex gap-2 mt-5">
+                    <form method="POST" action="/admin/mod-applications/<%= app.id %>/approve" class="flex-1">
+                      <button type="submit" class="admin-primary-btn" data-i18n="admin.approvePromote">Approve &amp; promote</button>
+                    </form>
+                    <form method="POST" action="/admin/mod-applications/<%= app.id %>/close" class="flex-1">
+                      <button type="submit" class="admin-secondary-btn" data-i18n="admin.closeApplication">Close</button>
+                    </form>
+                  </div>
+                <% } %>
+              </article>
+            <% }); %>
+          </div>
+        <% } %>
+      <% } else if (section === 'submissions') { %>
+        <!-- Filter bar -->
+        <form method="GET" action="/admin" class="flex flex-wrap items-center gap-3 mb-6">
+          <input type="hidden" name="section" value="submissions">
+          <select name="type" onchange="this.form.submit()" class="h-10 px-3 rounded-xl bg-white/5 border border-white/10 text-white text-sm focus:outline-none focus:border-white/20" style="background:rgba(255,255,255,0.05);border-color:rgba(255,255,255,0.1)">
+            <option value="" data-i18n="admin.filter.allTypes">All types</option>
+            <option value="level" data-i18n="admin.filter.levels">Levels</option>
+            <option value="moderator" data-i18n="admin.filter.mods">Moderator apps</option>
+          </select>
+          <select name="status" onchange="this.form.submit()" class="h-10 px-3 rounded-xl bg-white/5 border border-white/10 text-white text-sm focus:outline-none focus:border-white/20" style="background:rgba(255,255,255,0.05);border-color:rgba(255,255,255,0.1)">
+            <option value="pending" data-i18n="admin.filter.pending">Pending</option>
+            <option value="approved" data-i18n="admin.filter.approved">Approved</option>
+            <option value="rejected" data-i18n="admin.filter.rejected">Rejected</option>
+            <option value="" data-i18n="admin.filter.all">All</option>
+          </select>
+        </form>
+
+        <% if (!submissions || submissions.length === 0) { %>
+          <div class="rounded-2xl bg-white/[0.02] border border-white/10 p-12 text-center text-white/30" style="background:rgba(255,255,255,0.02);border-color:rgba(255,255,255,0.1)" data-i18n="admin.noSubmissions">No submissions found.</div>
+        <% } else { %>
+          <div class="grid gap-4" style="grid-template-columns:repeat(auto-fill,minmax(min(320px,100%),1fr));align-items:start;">
+            <% submissions.forEach(function (s) { %>
+              <div class="rounded-2xl bg-white/[0.02] border border-white/10 p-5 flex flex-col" style="background:rgba(255,255,255,0.02);border-color:rgba(255,255,255,0.1);gap:0.875rem;">
+                <div class="flex items-start justify-between gap-3">
+                  <div class="min-w-0">
+                    <span class="text-[10px] uppercase tracking-[0.15em] text-white/30" data-i18n="<%= s.type === 'moderator' ? 'admin.type.moderator' : 'admin.type.level' %>"><%= s.type === 'moderator' ? 'Moderator' : 'Level' %></span>
+                    <div class="text-lg font-bold text-white truncate"><%= s.title %></div>
+                    <div class="text-xs text-white/40"><span data-i18n="admin.by">by</span> <%= s.username %></div>
+                  </div>
+                  <span class="shrink-0 text-[10px] uppercase tracking-wider px-2.5 py-1 rounded-full border border-white/10 text-white/40" style="border-color:rgba(255,255,255,0.1)"><%= s.status %></span>
+                </div>
+                <div class="rounded-xl bg-white/[0.02] border border-white/[0.06] p-3 flex-1" style="background:rgba(255,255,255,0.02);border-color:rgba(255,255,255,0.06);display:flex;flex-direction:column;gap:0.4rem;">
+                  <% if (s.fields && s.fields.length) { %>
+                    <% s.fields.forEach(function (f) { %>
+                      <% if (f.value) { %>
+                        <div class="flex justify-between gap-3 text-sm">
+                          <span class="text-white/30 shrink-0"><%= f.label %></span>
+                          <span class="text-white/70 text-right break-all"><%= f.value %></span>
+                        </div>
+                      <% } %>
+                    <% }); %>
+                  <% } %>
+                </div>
+                <% if (s.status === 'pending') { %>
+                  <div class="flex gap-2 mt-1">
+                    <form method="POST" action="/admin/submissions/<%= s.id %>/approve" class="flex-1">
+                      <button type="submit" class="w-full h-10 rounded-xl bg-white text-dark text-sm font-semibold hover:bg-white/90 transition-all" data-i18n="admin.approve">Approve</button>
+                    </form>
+                    <form method="POST" action="/admin/submissions/<%= s.id %>/reject" class="flex-1">
+                      <button type="submit" class="w-full h-10 rounded-xl border border-white/15 text-white/70 text-sm font-medium hover:bg-white/5 transition-all" style="border-color:rgba(255,255,255,0.15)" data-i18n="admin.reject">Reject</button>
+                    </form>
+                  </div>
+                <% } %>
+              </div>
+            <% }); %>
+          </div>
+        <% } %>
+      <% } else if (section === 'team') { %>
+        <!-- Team Management -->
+        <div class="mb-6">
+          <h2 class="text-2xl font-bold text-white" data-i18n="admin.teamTitle">Team</h2>
+          <p class="text-white/40 text-sm mt-1" data-i18n="admin.teamSubtitle">All administrators and moderators.</p>
+        </div>
+        <% if (!team || team.length === 0) { %>
+          <div class="admin-empty-state" data-i18n="admin.noTeam">No team members found.</div>
+        <% } else { %>
+          <div class="grid gap-4" style="grid-template-columns:repeat(auto-fill,minmax(min(320px,100%),1fr));align-items:start;">
+            <% team.forEach(function (m) { %>
+              <div class="rounded-2xl bg-white/[0.02] border border-white/10 p-5 flex flex-col gap-4" style="background:rgba(255,255,255,0.02);border-color:rgba(255,255,255,0.1)">
+                <div class="flex items-center gap-4">
+                  <div class="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center overflow-hidden border border-white/10 shrink-0" style="background:rgba(255,255,255,0.1);border-color:rgba(255,255,255,0.1)">
+                    <% if (m.avatar_url) { %><img src="<%= m.avatar_url %>" class="w-full h-full object-cover" alt=""><% } else { %><span class="text-lg font-bold text-white/70"><%= m.username.charAt(0).toUpperCase() %></span><% } %>
+                  </div>
+                  <div class="min-w-0">
+                    <div class="text-white font-semibold text-lg truncate"><%= m.username %></div>
+                    <div class="text-white/40 text-sm"><%= m.email %></div>
+                  </div>
+                  <span class="ml-auto shrink-0 text-[11px] uppercase tracking-wider px-3 py-1.5 rounded-full border text-white/60
+                    <% if (m.role === 'admin') { %>border-red-500/30 bg-red-500/10 text-red-300<% } else { %>border-yellow-500/30 bg-yellow-500/10 text-yellow-300<% } %>" style="border-color:<%= m.role === 'admin' ? 'rgba(239,68,68,0.3)' : 'rgba(234,179,8,0.3)' %>;background:<%= m.role === 'admin' ? 'rgba(239,68,68,0.1)' : 'rgba(234,179,8,0.1)' %>"><%= m.role %></span>
+                </div>
+                <div class="grid grid-cols-2 gap-3 text-sm">
+                  <div>
+                    <span class="text-white/30 text-xs uppercase tracking-wider" data-i18n="admin.col.country">Country</span>
+                    <div class="text-white/60 mt-0.5"><%= m.country || '—' %></div>
+                  </div>
+                  <div>
+                    <span class="text-white/30 text-xs uppercase tracking-wider" data-i18n="admin.joined">Joined</span>
+                    <div class="text-white/60 mt-0.5"><%= m.created_at ? m.created_at.substring(0, 10) : '—' %></div>
+                  </div>
+                </div>
+                <% if (user && user.role === 'admin' && m.id !== user.id) { %>
+                  <div class="flex gap-2 pt-2 border-t border-white/5">
+                    <% if (m.role === 'moderator') { %>
+                      <form method="POST" action="/admin/users/<%= m.id %>/role" class="flex-1">
+                        <input type="hidden" name="role" value="admin">
+                        <button type="submit" class="admin-primary-btn w-full" data-i18n="admin.promoteToAdmin">Promote to Admin</button>
+                      </form>
+                    <% } %>
+                    <% if (m.role === 'admin') { %>
+                      <form method="POST" action="/admin/users/<%= m.id %>/role" class="flex-1">
+                        <input type="hidden" name="role" value="moderator">
+                        <button type="submit" class="admin-secondary-btn w-full" data-i18n="admin.demoteToMod">Demote to Moderator</button>
+                      </form>
+                    <% } %>
+                    <form method="POST" action="/admin/users/<%= m.id %>/role" class="flex-1">
+                      <input type="hidden" name="role" value="user">
+                      <button type="submit" class="w-full h-10 rounded-xl border border-red-500/30 bg-red-500/10 text-red-300 text-sm font-medium hover:bg-red-500/20 transition-all" data-i18n="admin.demoteToUser">Demote to User</button>
+                    </form>
+                  </div>
+                <% } %>
+              </div>
+            <% }); %>
+          </div>
+        <% } %>
+      <% } else if (section === 'roles') { %>
+        <!-- Role Management -->
+        <div class="mb-6">
+          <h2 class="text-2xl font-bold text-white" data-i18n="admin.rolesTitle">Role Management</h2>
+          <p class="text-white/40 text-sm mt-1" data-i18n="admin.rolesSubtitle">Assign or change roles for users.</p>
+        </div>
+        <div class="rounded-2xl bg-white/[0.02] border border-white/10 overflow-hidden" style="background:rgba(255,255,255,0.02);border-color:rgba(255,255,255,0.1)">
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+              <thead>
+                <tr class="text-white/30 text-xs uppercase tracking-wider text-left border-b border-white/5">
+                  <th class="px-5 py-4 font-medium" data-i18n="admin.col.user">User</th>
+                  <th class="px-5 py-4 font-medium" data-i18n="admin.col.role">Current Role</th>
+                  <th class="px-5 py-4 font-medium" data-i18n="admin.newRole">New Role</th>
+                  <th class="px-5 py-4 font-medium text-right" data-i18n="admin.col.actions">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% users.forEach(function (u) { %>
+                  <tr class="border-b border-white/[0.04] hover:bg-white/[0.02]" style="border-color:rgba(255,255,255,0.04)">
+                    <td class="px-5 py-3">
+                      <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center overflow-hidden border border-white/10 shrink-0" style="background:rgba(255,255,255,0.1);border-color:rgba(255,255,255,0.1)">
+                          <% if (u.avatar_url) { %><img src="<%= u.avatar_url %>" class="w-full h-full object-cover" alt=""><% } else { %><span class="text-[11px] font-bold text-white/70"><%= u.username.charAt(0).toUpperCase() %></span><% } %>
+                        </div>
+                        <div class="min-w-0">
+                          <span class="text-white/80 font-medium block truncate"><%= u.username %></span>
+                          <span class="text-white/30 text-xs block truncate"><%= u.email %></span>
+                        </div>
+                      </div>
+                    </td>
+                    <td class="px-5 py-3">
+                      <span class="text-[11px] uppercase tracking-wider px-2.5 py-1 rounded-full border text-white/60
+                        <% if (u.role === 'admin') { %>border-red-500/30 bg-red-500/10 text-red-300<% } else if (u.role === 'moderator') { %>border-yellow-500/30 bg-yellow-500/10 text-yellow-300<% } else { %>border-white/10<% } %>" style="border-color:<%= u.role === 'admin' ? 'rgba(239,68,68,0.3)' : u.role === 'moderator' ? 'rgba(234,179,8,0.3)' : 'rgba(255,255,255,0.1)' %>;background:<%= u.role === 'admin' ? 'rgba(239,68,68,0.1)' : u.role === 'moderator' ? 'rgba(234,179,8,0.1)' : 'transparent' %>"><%= u.role %></span>
+                    </td>
+                    <td class="px-5 py-3">
+                      <% if (user && user.role === 'admin' && u.id !== user.id) { %>
+                        <form method="POST" action="/admin/users/<%= u.id %>/role" class="flex items-center gap-2">
+                          <select name="role" class="h-9 px-3 rounded-lg border border-white/10 bg-white/5 text-white text-xs focus:outline-none focus:border-white/20" style="background:rgba(255,255,255,0.05);border-color:rgba(255,255,255,0.1)">
+                            <option value="user" <%= u.role === 'user' ? 'selected' : '' %> data-i18n="admin.roleOpt.user">user</option>
+                            <option value="moderator" <%= u.role === 'moderator' ? 'selected' : '' %> data-i18n="admin.roleOpt.moderator">moderator</option>
+                            <option value="admin" <%= u.role === 'admin' ? 'selected' : '' %> data-i18n="admin.roleOpt.admin">admin</option>
+                          </select>
+                          <button type="submit" class="admin-primary-btn" data-i18n="admin.setBtn">Set</button>
+                        </form>
+                      <% } else { %>
+                        <span class="text-white/20 text-xs">—</span>
+                      <% } %>
+                    </td>
+                    <td class="px-5 py-3 text-right">
+                      <% if (user && user.role === 'admin' && u.id !== user.id) { %>
+                        <div class="flex items-center justify-end gap-2">
+                          <% if (u.role !== 'user') { %>
+                            <form method="POST" action="/admin/users/<%= u.id %>/role" class="inline">
+                              <input type="hidden" name="role" value="user">
+                              <button type="submit" class="text-red-300/50 hover:text-red-300 text-xs" data-i18n="admin.demoteToUser">Demote to User</button>
+                            </form>
+                          <% } %>
+                          <% if (u.role === 'user') { %>
+                            <form method="POST" action="/admin/users/<%= u.id %>/role" class="inline">
+                              <input type="hidden" name="role" value="moderator">
+                              <button type="submit" class="text-yellow-300/70 hover:text-yellow-300 text-xs" data-i18n="admin.promoteToMod">Promote to Mod</button>
+                            </form>
+                          <% } %>
+                          <% if (u.role === 'moderator') { %>
+                            <form method="POST" action="/admin/users/<%= u.id %>/role" class="inline">
+                              <input type="hidden" name="role" value="admin">
+                              <button type="submit" class="text-green-300/70 hover:text-green-300 text-xs" data-i18n="admin.promoteToAdmin">Promote to Admin</button>
+                            </form>
+                          <% } %>
+                        </div>
+                      <% } %>
+                    </td>
+                  </tr>
+                <% }); %>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      <% } else if (section === 'users') { %>
+        <!-- Users Management -->
+        <div class="mb-6">
+          <h2 class="text-2xl font-bold text-white" data-i18n="admin.usersTitle">User Management</h2>
+          <p class="text-white/40 text-sm mt-1" data-i18n="admin.usersSubtitle">View, ban, unban or delete registered users.</p>
+        </div>
+
+        <!-- Search -->
+        <div class="mb-6">
+          <input type="text" id="users-search" placeholder="Search by username or email..." data-i18n-placeholder="admin.searchUsers"
+            class="w-full max-w-md h-11 px-4 rounded-xl bg-white/5 border border-white/10 text-white text-sm placeholder:text-white/20 focus:outline-none focus:border-white/20 transition-all"
+            oninput="filterUsers(this.value)">
+        </div>
+
+        <div class="rounded-2xl bg-white/[0.02] border border-white/10 overflow-hidden" style="background:rgba(255,255,255,0.02);border-color:rgba(255,255,255,0.1)">
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm" id="users-table">
+              <thead>
+                <tr class="text-white/30 text-xs uppercase tracking-wider text-left border-b border-white/5">
+                  <th class="px-5 py-4 font-medium">#</th>
+                  <th class="px-5 py-4 font-medium" data-i18n="admin.col.user">User</th>
+                  <th class="px-5 py-4 font-medium" data-i18n="admin.col.email">Email</th>
+                  <th class="px-5 py-4 font-medium" data-i18n="admin.col.country">Country</th>
+                  <th class="px-5 py-4 font-medium" data-i18n="admin.col.role">Role</th>
+                  <th class="px-5 py-4 font-medium">Status</th>
+                  <th class="px-5 py-4 font-medium">Joined</th>
+                  <th class="px-5 py-4 font-medium text-right" data-i18n="admin.col.actions">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% users.forEach(function (u) { %>
+                  <tr class="border-b border-white/[0.04] hover:bg-white/[0.02] user-row" data-username="<%= u.username.toLowerCase() %>" data-email="<%= (u.email || '').toLowerCase() %>" style="border-color:rgba(255,255,255,0.04)">
+                    <td class="px-5 py-3 text-white/30 text-xs"><%= u.id %></td>
+                    <td class="px-5 py-3">
+                      <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center overflow-hidden border border-white/10 shrink-0" style="background:rgba(255,255,255,0.1);border-color:rgba(255,255,255,0.1)">
+                          <% if (u.avatar_url) { %><img src="<%= u.avatar_url %>" class="w-full h-full object-cover" alt=""><% } else { %><span class="text-[11px] font-bold text-white/70"><%= u.username.charAt(0).toUpperCase() %></span><% } %>
+                        </div>
+                        <span class="text-white/80 font-medium <%= u.banned ? 'line-through opacity-50' : '' %>"><%= u.username %></span>
+                      </div>
+                    </td>
+                    <td class="px-5 py-3 text-white/40 text-xs"><%= u.email %></td>
+                    <td class="px-5 py-3 text-white/40 text-xs"><%= u.country || '—' %></td>
+                    <td class="px-5 py-3">
+                      <% if (user && user.role === 'admin' && u.id !== user.id) { %>
+                        <form method="POST" action="/admin/users/<%= u.id %>/role" class="flex items-center gap-1.5">
+                          <select name="role" class="h-8 px-2 rounded-lg border border-white/10 bg-white/5 text-white text-[11px] focus:outline-none focus:border-white/20" style="background:rgba(255,255,255,0.05);border-color:rgba(255,255,255,0.1)">
+                            <option value="user" <%= u.role==='user' ? 'selected' : '' %>>user</option>
+                            <option value="moderator" <%= u.role==='moderator' ? 'selected' : '' %>>moderator</option>
+                            <option value="admin" <%= u.role==='admin' ? 'selected' : '' %>>admin</option>
+                          </select>
+                          <button type="submit" class="h-8 px-2 rounded-lg bg-white/10 text-white/80 text-[11px] font-medium hover:bg-white/20 transition-all" data-i18n="admin.setBtn">Set</button>
+                        </form>
+                      <% } else { %>
+                        <span class="text-[11px] uppercase tracking-wider px-2.5 py-1 rounded-full border text-white/60
+                          <% if (u.role === 'admin') { %>border-red-500/30 bg-red-500/10 text-red-300<% } else if (u.role === 'moderator') { %>border-yellow-500/30 bg-yellow-500/10 text-yellow-300<% } else { %>border-white/10<% } %>" style="border-color:<%= u.role === 'admin' ? 'rgba(239,68,68,0.3)' : u.role === 'moderator' ? 'rgba(234,179,8,0.3)' : 'rgba(255,255,255,0.1)' %>;background:<%= u.role === 'admin' ? 'rgba(239,68,68,0.1)' : u.role === 'moderator' ? 'rgba(234,179,8,0.1)' : 'transparent' %>"><%= u.role %></span>
+                      <% } %>
+                    </td>
+                    <td class="px-5 py-3">
+                      <% if (u.banned) { %>
+                        <span class="text-[11px] uppercase tracking-wider px-2.5 py-1 rounded-full border border-red-500/30 bg-red-500/10 text-red-300" style="border-color:rgba(239,68,68,0.3);background:rgba(239,68,68,0.1)">Banned</span>
+                      <% } else { %>
+                        <span class="text-[11px] uppercase tracking-wider px-2.5 py-1 rounded-full border border-green-500/30 bg-green-500/10 text-green-300" style="border-color:rgba(34,197,94,0.3);background:rgba(34,197,94,0.1)">Active</span>
+                      <% } %>
+                    </td>
+                    <td class="px-5 py-3 text-white/30 text-xs"><%= u.created_at ? u.created_at.substring(0, 10) : '—' %></td>
+                    <td class="px-5 py-3 text-right">
+                      <% if (user && user.role === 'admin' && u.id !== user.id) { %>
+                        <div class="flex items-center justify-end gap-2">
+                          <% if (u.banned) { %>
+                            <form method="POST" action="/admin/users/<%= u.id %>/unban" class="inline">
+                              <button type="submit" class="text-green-300/70 hover:text-green-300 text-xs" data-i18n="admin.unban">Unban</button>
+                            </form>
+                          <% } else { %>
+                            <form method="POST" action="/admin/users/<%= u.id %>/ban" class="inline" onsubmit="return confirm('Ban this user?')">
+                              <button type="submit" class="text-red-300/50 hover:text-red-300 text-xs" data-i18n="admin.ban">Ban</button>
+                            </form>
+                          <% } %>
+                          <form method="POST" action="/admin/users/<%= u.id %>/delete" class="inline" onsubmit="return confirm('Permanently delete this user? This cannot be undone.')">
+                            <button type="submit" class="text-red-400/50 hover:text-red-400 text-xs font-semibold" data-i18n="admin.deleteUser">Delete</button>
+                          </form>
+                        </div>
+                      <% } %>
+                    </td>
+                  </tr>
+                <% }); %>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <script>
+        function filterUsers(q) {
+          var low = q.toLowerCase();
+          document.querySelectorAll('.user-row').forEach(function(row) {
+            var u = row.dataset.username || '';
+            var e = row.dataset.email || '';
+            row.style.display = (u.indexOf(low) !== -1 || e.indexOf(low) !== -1) ? '' : 'none';
+          });
+        }
+        </script>
+      <% } else { %>
+        <div class="rounded-2xl bg-white/[0.02] border border-white/10 overflow-hidden p-12 text-center text-white/30" style="background:rgba(255,255,255,0.02);border-color:rgba(255,255,255,0.1)">
+          <p>Select a section from the sidebar or quick actions above.</p>
+        </div>
+      <% } %>
+    </div>
+  </main>
+
+<%- include('../partials/footer') %>
+<%- include('../partials/scripts') %>
+</body>
+</html>

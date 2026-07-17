@@ -1,0 +1,173 @@
+<%
+  var demonsJson = JSON.stringify((demons || []).map(function (d) {
+    return { id: d.id, name: d.name, position: d.position, requirement: d.requirement || 100 };
+  }));
+%>
+<script type="application/json" id="usl-demons-data"><%= demonsJson %></script>
+<script>window.USL_DEMONS = JSON.parse(document.getElementById('usl-demons-data').textContent);</script>
+
+<!-- ===================== Submit Record Modal ===================== -->
+<div class="usl-modal hidden" data-modal="submit-record" style="z-index:10000;background:rgba(0,0,0,0.72);backdrop-filter:blur(6px)">
+  <div class="glass-strong rounded-3xl w-full max-w-2xl max-h-[88vh] overflow-y-auto p-6 sm:p-8" style="margin:auto">
+    <div class="flex items-start justify-between mb-6">
+      <div>
+        <div class="text-xs text-white/30 uppercase tracking-[0.2em] font-medium mb-2" data-i18n="submit.recordKicker">Submit</div>
+        <h2 class="text-2xl font-black text-white" data-i18n="submit.recordTitle">Submit a Record</h2>
+      </div>
+      <button type="button" class="usl-modal-close w-9 h-9 rounded-lg text-white/40 hover:text-white hover:bg-white/10 transition-all duration-300" data-i18n="gd.close">Close</button>
+    </div>
+
+    <% if (typeof recordMsg !== 'undefined' && recordMsg === 'success') { %>
+      <div class="mb-5 p-4 rounded-2xl bg-white/[0.03] border border-white/10 text-sm text-white/70" data-i18n="submit.recordSuccess">Record submitted! It will be reviewed by moderators.</div>
+    <% } %>
+
+    <form action="/submit/record" method="POST" id="record-form" style="display:flex;flex-direction:column;gap:1.25rem">
+      <div id="record-rows" style="display:flex;flex-direction:column;gap:1rem">
+        <!-- rows injected by JS, one default row below -->
+        <div class="record-row rounded-2xl border border-white/10 p-4" style="background:rgba(255,255,255,0.02)">
+          <div class="flex items-center justify-between mb-3">
+            <span class="text-xs text-white/40 uppercase tracking-wider" data-i18n="submit.recordLevel">Level</span>
+            <button type="button" class="text-white/30 hover:text-white text-sm hidden" data-remove-row>✕</button>
+          </div>
+          <div class="level-picker" data-picker>
+            <button type="button" data-picker-toggle class="w-full h-11 px-4 rounded-xl bg-white/5 border border-white/10 text-left text-sm text-white/40 hover:border-white/20 transition-all duration-300" data-i18n="submit.recordPickLevel">Select a level…</button>
+            <input type="hidden" name="level[]" data-picker-value>
+            <div data-picker-dropdown class="hidden" style="position:absolute;z-index:20;margin-top:6px;width:100%;max-height:240px;overflow-y:auto" >
+              <input type="text" data-picker-search placeholder="Search…" data-i18n-placeholder="submit.searchPlaceholder" class="w-full h-10 px-3 rounded-xl bg-white/5 border border-white/10 text-sm text-white placeholder:text-white/20 mb-2 focus:outline-none focus:border-white/20">
+              <div data-picker-list class="flex flex-col gap-1"></div>
+            </div>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-3">
+            <input type="url" name="youtube[]" required placeholder="YouTube completion link" data-i18n-placeholder="submit.recordYoutube" class="h-11 px-4 rounded-xl bg-white/5 border border-white/10 text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-white/20">
+            <input type="url" name="raw[]" required placeholder="Raw footage link (Drive/Disk)" data-i18n-placeholder="submit.recordRaw" class="h-11 px-4 rounded-xl bg-white/5 border border-white/10 text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-white/20">
+          </div>
+          <input type="number" name="percent[]" min="0" max="100" placeholder="Percent (auto)" data-i18n-placeholder="submit.recordPercent" data-requirement class="mt-3 h-11 w-40 px-4 rounded-xl bg-white/5 border border-white/10 text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-white/20">
+        </div>
+      </div>
+
+      <button type="button" id="add-record-row" class="self-start text-sm text-white/50 hover:text-white transition-colors" data-i18n="submit.recordAddLevel">+ Add another level</button>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 border-t border-white/10 pt-5">
+        <div>
+          <label class="block text-xs text-white/30 uppercase tracking-wider mb-2" data-i18n="submit.recordPlatform">Platform</label>
+          <select name="platform" class="w-full h-11 px-4 rounded-xl bg-white/5 border border-white/10 text-sm text-white focus:outline-none focus:border-white/20">
+            <option value="PC" data-i18n="submit.recordPlatformPC">PC</option>
+            <option value="Mobile" data-i18n="submit.recordPlatformMobile">Smartphone</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-xs text-white/30 uppercase tracking-wider mb-2" data-i18n="submit.recordCommentLabel">Comment <span class="text-white/20">(optional)</span></label>
+          <input type="text" name="comment" placeholder="Optional note" class="w-full h-11 px-4 rounded-xl bg-white/5 border border-white/10 text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-white/20">
+        </div>
+      </div>
+
+      <button type="submit" class="w-full h-12 rounded-xl bg-white text-dark font-semibold text-sm hover:bg-white/90 transition-all duration-300" data-i18n="submit.recordSubmit">Submit Record</button>
+    </form>
+  </div>
+</div>
+
+<!-- ===================== Submit Level Modal ===================== -->
+<div class="usl-modal hidden" data-modal="submit-level" style="z-index:10000;background:rgba(0,0,0,0.72);backdrop-filter:blur(6px)">
+  <div class="glass-strong rounded-3xl w-full max-w-lg max-h-[88vh] overflow-y-auto p-6 sm:p-8" style="margin:auto">
+    <div class="flex items-start justify-between mb-6">
+      <div>
+        <div class="text-xs text-white/30 uppercase tracking-[0.2em] font-medium mb-2" data-i18n="nav.submitLevel">Submit Level</div>
+        <h2 class="text-2xl font-black text-white" data-i18n="submit.levelTitle">Submit a Level</h2>
+      </div>
+      <button type="button" class="usl-modal-close w-9 h-9 rounded-lg text-white/40 hover:text-white hover:bg-white/10 transition-all duration-300" data-i18n="gd.close">Close</button>
+    </div>
+    <form action="/submit/level" method="POST" style="display:flex;flex-direction:column;gap:1.25rem">
+      <div>
+        <label class="block text-xs text-white/30 uppercase tracking-wider mb-2" data-i18n="submit.levelName">Level name</label>
+        <input type="text" name="name" required class="w-full h-12 px-4 rounded-xl bg-white/5 border border-white/10 text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-white/20" placeholder="Level name">
+      </div>
+      <div>
+        <label class="block text-xs text-white/30 uppercase tracking-wider mb-2" data-i18n="submit.creatorsLabel">Creator nickname(s)</label>
+        <input type="text" name="creators" required class="w-full h-12 px-4 rounded-xl bg-white/5 border border-white/10 text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-white/20" placeholder="Creator1, Creator2" data-i18n-placeholder="submit.creatorsPlaceholder">
+      </div>
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="block text-xs text-white/30 uppercase tracking-wider mb-2" data-i18n="submit.verifierLabel">Verifier</label>
+          <input type="text" name="verifier" class="w-full h-12 px-4 rounded-xl bg-white/5 border border-white/10 text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-white/20" placeholder="Verifier" data-i18n-placeholder="submit.verifierPlaceholder">
+        </div>
+        <div>
+          <label class="block text-xs text-white/30 uppercase tracking-wider mb-2" data-i18n="submit.levelIdLabel">Level ID</label>
+          <input type="text" name="level_id" class="w-full h-12 px-4 rounded-xl bg-white/5 border border-white/10 text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-white/20" placeholder="GD level ID">
+        </div>
+      </div>
+      <div>
+        <label class="block text-xs text-white/30 uppercase tracking-wider mb-2" data-i18n="submit.videoLabel">Completion video link</label>
+        <input type="url" name="video_url" required class="w-full h-12 px-4 rounded-xl bg-white/5 border border-white/10 text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-white/20" placeholder="https://youtube.com/watch?v=..." data-i18n-placeholder="submit.videoPlaceholder">
+      </div>
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="block text-xs text-white/30 uppercase tracking-wider mb-2" data-i18n="submit.difficultyLabel">Difficulty</label>
+          <select name="difficulty" required class="w-full h-12 px-4 rounded-xl bg-white/5 border border-white/10 text-sm text-white focus:outline-none focus:border-white/20 appearance-none">
+            <option value="Easy">Easy</option>
+            <option value="Medium">Medium</option>
+            <option value="Hard">Hard</option>
+            <option value="Insane">Insane</option>
+            <option value="Extreme">Extreme</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-xs text-white/30 uppercase tracking-wider mb-2" data-i18n="submit.requirementLabel">List percent</label>
+          <input type="number" name="requirement" min="1" max="100" value="100" class="w-full h-12 px-4 rounded-xl bg-white/5 border border-white/10 text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-white/20">
+        </div>
+      </div>
+      <div>
+        <label class="block text-xs text-white/30 uppercase tracking-wider mb-2" data-i18n="submit.commentLabel">Comment <span class="text-white/20">(optional)</span></label>
+        <textarea name="comment" rows="3" class="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-white/20" style="resize:none" placeholder="Any additional info..." data-i18n-placeholder="submit.commentPlaceholder"></textarea>
+      </div>
+      <button type="submit" class="w-full h-12 rounded-xl bg-white text-dark font-semibold text-sm hover:bg-white/90 transition-all duration-300" data-i18n="submit.send">Send</button>
+    </form>
+  </div>
+</div>
+
+<!-- ===================== Apply Moderator Modal ===================== -->
+<div class="usl-modal hidden" data-modal="submit-mod" style="z-index:10000;background:rgba(0,0,0,0.72);backdrop-filter:blur(6px)">
+  <div class="glass-strong rounded-3xl w-full max-w-lg max-h-[88vh] overflow-y-auto p-6 sm:p-8" style="margin:auto">
+    <div class="flex items-start justify-between mb-6">
+      <div>
+        <div class="text-xs text-white/30 uppercase tracking-[0.2em] font-medium mb-2" data-i18n="nav.applyMod">Apply as Moderator</div>
+        <h2 class="text-2xl font-black text-white" data-i18n="submit.modTitle">Apply for Moderator</h2>
+      </div>
+      <button type="button" class="usl-modal-close w-9 h-9 rounded-lg text-white/40 hover:text-white hover:bg-white/10 transition-all duration-300" data-i18n="gd.close">Close</button>
+    </div>
+    <form action="/submit/moderator" method="POST" style="display:flex;flex-direction:column;gap:1.25rem">
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="block text-xs text-white/30 uppercase tracking-wider mb-2" data-i18n="submit.ageLabel">Age</label>
+          <input type="number" name="age" required min="13" max="99" class="w-full h-12 px-4 rounded-xl bg-white/5 border border-white/10 text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-white/20" placeholder="16">
+        </div>
+        <div>
+          <label class="block text-xs text-white/30 uppercase tracking-wider mb-2" data-i18n="submit.timezoneLabel">Timezone</label>
+          <input type="text" name="timezone" required class="w-full h-12 px-4 rounded-xl bg-white/5 border border-white/10 text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-white/20" placeholder="UTC+3" data-i18n-placeholder="submit.timezonePlaceholder">
+        </div>
+      </div>
+      <div>
+        <label class="block text-xs text-white/30 uppercase tracking-wider mb-2" data-i18n="submit.hardestLabel">Your hardest completed level</label>
+        <input type="text" name="hardest_level" required class="w-full h-12 px-4 rounded-xl bg-white/5 border border-white/10 text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-white/20" placeholder="Level name" data-i18n-placeholder="submit.hardestPlaceholder">
+      </div>
+      <div>
+        <label class="block text-xs text-white/30 uppercase tracking-wider mb-2" data-i18n="submit.q1">Have you worked as a moderator elsewhere?</label>
+        <textarea name="mod_before" rows="2" required class="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-white/20" style="resize:none" placeholder="Yes/No, details..." data-i18n-placeholder="submit.q1Placeholder"></textarea>
+      </div>
+      <div>
+        <label class="block text-xs text-white/30 uppercase tracking-wider mb-2" data-i18n="submit.q2">How many hours can you dedicate?</label>
+        <input type="text" name="hours" required class="w-full h-12 px-4 rounded-xl bg-white/5 border border-white/10 text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-white/20" placeholder="e.g. 2-3 hours daily">
+      </div>
+      <div>
+        <label class="block text-xs text-white/30 uppercase tracking-wider mb-2" data-i18n="submit.q3">Ready for moderator responsibilities?</label>
+        <textarea name="responsibility" rows="2" required class="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-white/20" style="resize:none" placeholder="Your answer" data-i18n-placeholder="submit.q3Placeholder"></textarea>
+      </div>
+      <label class="flex items-start gap-3 text-sm text-white/40">
+        <input type="checkbox" name="agree" required class="mt-1 w-4 h-4 rounded bg-white/5 border border-white/10">
+        <span><span data-i18n="submit.agreePrefix">I agree with</span> <a href="<%= discordInvite %>" target="_blank" rel="noopener" class="text-white/70 hover:text-white underline" data-i18n="submit.rulesLink">the list rules</a></span>
+      </label>
+      <button type="submit" class="w-full h-12 rounded-xl bg-white text-dark font-semibold text-sm hover:bg-white/90 transition-all duration-300" data-i18n="submit.send">Send</button>
+    </form>
+  </div>
+</div>
+
+

@@ -1,0 +1,200 @@
+<div id="auth-modal" class="fixed inset-0 z-[100] hidden items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+  <div class="relative w-full max-w-md rounded-3xl bg-white/[0.015] border border-white/[0.06] backdrop-blur-2xl p-8 shadow-2xl">
+    <button id="auth-close" type="button" class="absolute top-5 right-5 w-9 h-9 rounded-lg flex items-center justify-center text-white/40 hover:text-white hover:bg-white/5 transition-all duration-300" aria-label="Close">
+      <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+      </svg>
+    </button>
+
+    <!-- Tabs -->
+    <div class="flex gap-2 p-1 rounded-2xl bg-white/5 border border-white/10 mb-7">
+      <button type="button" data-auth-tab="login" class="auth-tab flex-1 h-10 rounded-xl text-sm font-semibold transition-all duration-300" data-i18n="auth.signin">Sign In</button>
+      <button type="button" data-auth-tab="register" class="auth-tab flex-1 h-10 rounded-xl text-sm font-semibold transition-all duration-300" data-i18n="auth.signup">Sign Up</button>
+    </div>
+
+    <!-- Login form -->
+    <form id="auth-login-form" data-auth-form="login" action="/auth/login" method="POST" class="space-y-5">
+      <div class="auth-error hidden mb-1 p-3 rounded-xl bg-red-500/5 border border-red-500/10 text-red-300 text-sm"></div>
+      <div>
+        <label class="block text-xs text-white/30 uppercase tracking-wider mb-2" data-i18n="auth.identifierLabel">Username or email</label>
+        <input type="text" name="identifier" required autocomplete="username"
+          class="w-full h-12 px-4 rounded-xl bg-white/5 border border-white/10 text-white text-sm placeholder:text-white/20 focus:outline-none focus:border-white/20 focus:bg-white/[0.03] transition-all duration-300"
+          placeholder="username / email">
+      </div>
+      <div>
+        <label class="block text-xs text-white/30 uppercase tracking-wider mb-2" data-i18n="auth.passwordLabel">Password</label>
+        <input type="password" name="password" required autocomplete="current-password"
+          class="w-full h-12 px-4 rounded-xl bg-white/5 border border-white/10 text-white text-sm placeholder:text-white/20 focus:outline-none focus:border-white/20 focus:bg-white/[0.03] transition-all duration-300"
+          placeholder="••••••••">
+      </div>
+      <button type="submit"
+        class="w-full h-12 rounded-xl bg-white text-dark font-semibold text-sm hover:bg-white/90 transition-all duration-300" data-i18n="auth.signin">
+        Sign In
+      </button>
+      <div class="text-center">
+        <span class="text-sm text-white/20" data-i18n="auth.needAccount">Need an account?</span>
+        <button type="button" data-auth-switch="register" class="text-sm text-white/60 hover:text-white ml-1 transition-colors duration-300" data-i18n="auth.signup">Sign Up</button>
+      </div>
+    </form>
+
+    <!-- Register form -->
+    <form id="auth-register-form" data-auth-form="register" action="/auth/register" method="POST" class="space-y-5 hidden">
+      <div class="auth-error hidden mb-1 p-3 rounded-xl bg-red-500/5 border border-red-500/10 text-red-300 text-sm"></div>
+      <div>
+        <label class="block text-xs text-white/30 uppercase tracking-wider mb-2" data-i18n="auth.usernameLabel">Username</label>
+        <input type="text" name="username" required minlength="3" maxlength="24"
+          class="w-full h-12 px-4 rounded-xl bg-white/5 border border-white/10 text-white text-sm placeholder:text-white/20 focus:outline-none focus:border-white/20 focus:bg-white/[0.03] transition-all duration-300"
+          placeholder="3-24 characters">
+      </div>
+      <div>
+        <label class="block text-xs text-white/30 uppercase tracking-wider mb-2" data-i18n="auth.emailLabel">Email</label>
+        <input type="email" name="email" required
+          class="w-full h-12 px-4 rounded-xl bg-white/5 border border-white/10 text-white text-sm placeholder:text-white/20 focus:outline-none focus:border-white/20 focus:bg-white/[0.03] transition-all duration-300"
+          placeholder="you@example.com">
+      </div>
+      <div>
+        <label class="block text-xs text-white/30 uppercase tracking-wider mb-2" data-i18n="auth.passwordLabel">Password</label>
+        <input type="password" name="password" required minlength="6" autocomplete="new-password"
+          class="w-full h-12 px-4 rounded-xl bg-white/5 border border-white/10 text-white text-sm placeholder:text-white/20 focus:outline-none focus:border-white/20 focus:bg-white/[0.03] transition-all duration-300"
+          placeholder="Min 6 characters">
+      </div>
+      <div>
+        <label class="block text-xs text-white/30 uppercase tracking-wider mb-2" data-i18n="auth.confirmLabel">Confirm Password</label>
+        <input type="password" name="confirm" required minlength="6" autocomplete="new-password"
+          class="w-full h-12 px-4 rounded-xl bg-white/5 border border-white/10 text-white text-sm placeholder:text-white/20 focus:outline-none focus:border-white/20 focus:bg-white/[0.03] transition-all duration-300"
+          placeholder="Repeat password">
+      </div>
+      <div>
+        <label class="block text-xs text-white/30 uppercase tracking-wider mb-2" data-i18n="auth.countryLabel">Country</label>
+        <select name="country"
+          class="w-full h-12 px-4 rounded-xl bg-white/5 border border-white/10 text-white text-sm focus:outline-none focus:border-white/20 focus:bg-white/[0.03] transition-all duration-300 appearance-none">
+          <option value="" class="bg-dark">—</option>
+          <option value="Russia" class="bg-dark">Russia</option>
+          <option value="Ukraine" class="bg-dark">Ukraine</option>
+          <option value="Belarus" class="bg-dark">Belarus</option>
+          <option value="Kazakhstan" class="bg-dark">Kazakhstan</option>
+          <option value="Uzbekistan" class="bg-dark">Uzbekistan</option>
+          <option value="Armenia" class="bg-dark">Armenia</option>
+          <option value="Georgia" class="bg-dark">Georgia</option>
+          <option value="Moldova" class="bg-dark">Moldova</option>
+          <option value="Latvia" class="bg-dark">Latvia</option>
+          <option value="Lithuania" class="bg-dark">Lithuania</option>
+          <option value="Estonia" class="bg-dark">Estonia</option>
+          <option value="Poland" class="bg-dark">Poland</option>
+          <option value="Germany" class="bg-dark">Germany</option>
+          <option value="France" class="bg-dark">France</option>
+          <option value="United Kingdom" class="bg-dark">United Kingdom</option>
+          <option value="Spain" class="bg-dark">Spain</option>
+          <option value="Italy" class="bg-dark">Italy</option>
+          <option value="Netherlands" class="bg-dark">Netherlands</option>
+          <option value="Turkey" class="bg-dark">Turkey</option>
+          <option value="United States" class="bg-dark">United States</option>
+          <option value="Canada" class="bg-dark">Canada</option>
+          <option value="Brazil" class="bg-dark">Brazil</option>
+          <option value="Australia" class="bg-dark">Australia</option>
+          <option value="Other" class="bg-dark">Other</option>
+        </select>
+      </div>
+
+      <!-- Captcha -->
+      <div class="rounded-xl border border-white/10 p-4" style="background:rgba(255,255,255,0.02)">
+        <div class="flex items-center justify-between mb-3">
+          <span class="text-[10px] text-white/25 uppercase tracking-[0.12em] font-semibold" data-i18n="auth.captchaLabel">Captcha</span>
+          <span class="text-[10px] text-white/15 uppercase tracking-wider">
+            <% if (captcha.type === 'math') { %>Math<% } %>
+            <% if (captcha.type === 'text') { %>Type text<% } %>
+            <% if (captcha.type === 'emoji') { %>Pick emoji<% } %>
+            <% if (captcha.type === 'word') { %>Unscramble<% } %>
+            <% if (captcha.type === 'logic') { %>Odd one out<% } %>
+          </span>
+        </div>
+
+        <% if (captcha.type === 'math') { %>
+          <div class="text-center mb-3">
+            <div class="text-xl font-bold text-white tracking-wider"><%= captcha.question %></div>
+          </div>
+          <input type="text" name="captcha_answer" required autocomplete="off"
+            class="w-full h-11 px-4 rounded-xl bg-white/5 border border-white/10 text-white text-sm text-center placeholder:text-white/20 focus:outline-none focus:border-white/20 transition-all"
+            placeholder="Answer" inputmode="numeric">
+
+        <% } else if (captcha.type === 'text') { %>
+          <div class="text-center mb-3">
+            <div style="font-family:monospace;font-size:1.25rem;font-weight:bold;letter-spacing:0.3em;padding:0.6rem 1rem;border-radius:0.75rem;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);display:inline-block;text-transform:uppercase"><%= captcha.question %></div>
+          </div>
+          <input type="text" name="captcha_answer" required autocomplete="off"
+            class="w-full h-11 px-4 rounded-xl bg-white/5 border border-white/10 text-white text-sm text-center placeholder:text-white/20 focus:outline-none focus:border-white/20 transition-all tracking-widest uppercase"
+            placeholder="Type the text" maxlength="6">
+
+        <% } else if (captcha.type === 'emoji') { %>
+          <div class="text-center mb-2">
+            <div class="text-[11px] text-white/30 mb-1">Find this emoji:</div>
+            <div class="text-2xl mb-2"><%= captcha.question %></div>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px">
+            <% captcha.options.forEach(function (e) { %>
+              <button type="button" class="modal-emoji-btn" data-emoji="<%= e %>" onclick="modalSelectEmoji(this)"
+                style="width:100%;aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-size:1.5rem;border-radius:0.75rem;border:2px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.03);cursor:pointer;transition:all 0.2s ease"><%= e %></button>
+            <% }); %>
+          </div>
+          <input type="hidden" name="captcha_answer" id="modal-emoji-answer" value="">
+
+        <% } else if (captcha.type === 'word') { %>
+          <div class="text-center mb-3">
+            <div class="text-lg font-bold text-white/80 tracking-wider mb-1" style="font-family:monospace"><%= captcha.question %></div>
+            <div class="text-[11px] text-white/25">Type the original word</div>
+          </div>
+          <input type="text" name="captcha_answer" required autocomplete="off"
+            class="w-full h-11 px-4 rounded-xl bg-white/5 border border-white/10 text-white text-sm text-center placeholder:text-white/20 focus:outline-none focus:border-white/20 transition-all"
+            placeholder="Original word">
+
+        <% } else if (captcha.type === 'logic') { %>
+          <div class="text-center mb-2">
+            <div class="text-[11px] text-white/30 mb-2">Which number doesn't belong?</div>
+            <div style="display:flex;flex-wrap:wrap;justify-content:center;gap:6px">
+              <% captcha.question.split(', ').forEach(function (n) { %>
+                <button type="button" class="modal-logic-btn" data-logic="<%= n %>" onclick="modalSelectLogic(this)"
+                  style="width:auto;padding:0.4rem 0.9rem;font-size:0.875rem;font-weight:600;border-radius:0.75rem;border:2px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.03);cursor:pointer;color:white;transition:all 0.2s ease"><%= n %></button>
+              <% }); %>
+            </div>
+          </div>
+          <input type="hidden" name="captcha_answer" id="modal-logic-answer" value="">
+
+        <% } %>
+      </div>
+
+      <label class="flex items-start gap-3 text-sm text-white/40 cursor-pointer select-none">
+        <input type="checkbox" name="agree" class="mt-0.5 w-4 h-4 rounded border-white/20 bg-white/5 accent-white">
+        <span><span data-i18n="auth.agree1">I have read the</span> <a href="<%= discordInvite %>" target="_blank" rel="noopener" class="text-white/70 hover:text-white underline" data-i18n="auth.rules">List Rules</a></span>
+      </label>
+      <button type="submit"
+        class="w-full h-12 rounded-xl bg-white text-dark font-semibold text-sm hover:bg-white/90 transition-all duration-300" data-i18n="auth.createAccount">
+        Create Account
+      </button>
+      <div class="text-center">
+        <span class="text-sm text-white/20" data-i18n="auth.alreadyHave">Already have an account?</span>
+        <button type="button" data-auth-switch="login" class="text-sm text-white/60 hover:text-white ml-1 transition-colors duration-300" data-i18n="auth.signin">Sign In</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+(function() {
+  // Set captcha token cookie when modal opens
+  var token = '<%= captchaToken %>';
+  document.cookie = 'usl_captcha=' + encodeURIComponent(token) + ';path=/;max-age=300;samesite=lax';
+})();
+
+function modalSelectEmoji(btn) {
+  document.querySelectorAll('.modal-emoji-btn').forEach(function(b) { b.style.borderColor='rgba(255,255,255,0.1)'; b.style.background='rgba(255,255,255,0.03)'; });
+  btn.style.borderColor='rgba(255,255,255,0.8)';
+  btn.style.background='rgba(255,255,255,0.1)';
+  document.getElementById('modal-emoji-answer').value = btn.dataset.emoji;
+}
+function modalSelectLogic(btn) {
+  document.querySelectorAll('.modal-logic-btn').forEach(function(b) { b.style.borderColor='rgba(255,255,255,0.1)'; b.style.background='rgba(255,255,255,0.03)'; });
+  btn.style.borderColor='rgba(255,255,255,0.8)';
+  btn.style.background='rgba(255,255,255,0.1)';
+  document.getElementById('modal-logic-answer').value = btn.dataset.logic;
+}
+</script>

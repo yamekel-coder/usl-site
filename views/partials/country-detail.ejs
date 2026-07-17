@@ -1,0 +1,52 @@
+<div class="rounded-3xl bg-white/[0.015] border border-white/[0.06] backdrop-blur-2xl p-8">
+  <div class="flex items-center gap-5">
+    <div style="width:80px;height:80px;border-radius:9999px;overflow:hidden;flex-shrink:0" class="bg-white/5 border border-white/10 flex items-center justify-center text-4xl">
+      <% if (country.flag) { %><%= country.flag %><% } else { %>
+      <svg class="w-10 h-10 text-white/60" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9 9 0 100-18 9 9 0 000 18z" />
+        <path stroke-linecap="round" stroke-linejoin="round" d="M3.6 9h16.8M3.6 15h16.8M12 3a15 15 0 010 18M12 3a15 15 0 000 18" />
+      </svg>
+      <% } %>
+    </div>
+    <div class="min-w-0">
+      <h2 class="text-3xl font-bold text-white truncate" data-country="<%= country.country %>"><%= country.country %></h2>
+      <div class="mt-1 text-sm text-white/40"><span class="text-white/25" data-i18n="leaderboard.players">Players</span> <%= country.players %></div>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-2 gap-4 mt-8">
+    <div class="p-4 rounded-2xl bg-white/[0.02] border border-white/[0.06] text-center">
+      <div class="text-3xl font-black text-white"><%= country.points %></div>
+      <div class="text-xs text-white/30 uppercase tracking-wider mt-1" data-i18n="leaderboard.points">Points</div>
+    </div>
+    <div class="p-4 rounded-2xl bg-white/[0.02] border border-white/[0.06] text-center">
+      <div class="text-3xl font-black text-white"><%= country.players %></div>
+      <div class="text-xs text-white/30 uppercase tracking-wider mt-1" data-i18n="leaderboard.players">Players</div>
+    </div>
+  </div>
+
+  <div class="mt-8">
+    <h3 class="text-lg font-semibold text-white/80 mb-4" data-i18n="leaderboard.members">Members</h3>
+    <% if (country.members.length === 0) { %>
+      <div class="py-10 text-center text-sm text-white/20" data-i18n="leaderboard.noMembers">No players yet.</div>
+    <% } else { %>
+      <div class="space-y-2">
+        <% country.members.forEach(function (m) { %>
+          <div class="flex items-center justify-between gap-4 px-4 py-3 rounded-xl bg-white/[0.02] border border-white/[0.04]">
+            <div class="flex items-center gap-3 min-w-0">
+              <div class="w-9 h-9 rounded-full bg-white/10 flex items-center justify-center overflow-hidden border border-white/10 shrink-0">
+                <% if (m.avatar_url) { %>
+                  <img src="<%= m.avatar_url %>" class="w-full h-full object-cover" alt="<%= m.username %>">
+                <% } else { %>
+                  <span class="text-[11px] font-bold text-white/70"><%= m.username.charAt(0).toUpperCase() %></span>
+                <% } %>
+              </div>
+              <span class="text-white truncate"><%= m.username %></span>
+            </div>
+            <div class="text-white/70 text-sm shrink-0"><%= m.rating %> <span class="text-white/30 text-xs" data-i18n="leaderboard.pts">pts</span></div>
+          </div>
+        <% }); %>
+      </div>
+    <% } %>
+  </div>
+</div>

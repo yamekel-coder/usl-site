@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<%- include('partials/head') %>
+<body class="bg-dark text-white font-inter antialiased selection:bg-white selection:text-dark overflow-x-hidden">
+  <div id="noise"></div>
+  <div id="bg-container"></div>
+  
+  <%- include('partials/navbar') %>
+
+  <main class="pt-20">
+    <%- include('partials/hero') %>
+    <%- include('partials/recent') %>
+    <%- include('partials/news') %>
+    <%- include('partials/whyus') %>
+  </main>
+
+  <%- include('partials/footer') %>
+  
+  <div id="scroll-progress"></div>
+
+  <div id="prank-overlay" class="fixed inset-0 hidden flex-col items-center justify-center bg-black/95 backdrop-blur-sm p-4" style="z-index:100">
+    <img src="/uploads/images.jpg" alt="prank" class="max-w-[96vw] max-h-[92vh] rounded-2xl border border-white/10 shadow-2xl object-contain">
+    <button id="prank-close" class="gd-btn mt-6" type="button" data-i18n="gd.close">Close</button>
+  </div>
+
+  <%- include('partials/submit-modals') %>
+  <%- include('partials/scripts') %>
+  <script src="/js/admin.js"></script>
+</body>
+</html>

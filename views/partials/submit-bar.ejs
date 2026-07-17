@@ -1,0 +1,25 @@
+<%
+  var loggedIn = !!user;
+%>
+<div class="flex flex-wrap items-center gap-2.5 mb-8">
+  <% if (loggedIn) { %>
+    <button type="button" data-modal-open="submit-record" class="gd-submit-btn">
+      <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+      <span data-i18n="submit.recordBtn">Submit Record</span>
+    </button>
+    <button type="button" data-modal-open="submit-level" class="gd-submit-btn">
+      <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+      <span data-i18n="submit.levelBtn">Submit Level</span>
+    </button>
+  <% } else { %>
+    <button type="button" data-auth-open="register" class="gd-submit-btn">
+      <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+      <span data-i18n="submit.recordBtn">Submit Record</span>
+    </button>
+    <button type="button" data-auth-open="register" class="gd-submit-btn">
+      <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+      <span data-i18n="submit.levelBtn">Submit Level</span>
+    </button>
+    <span class="text-xs text-white/30" data-i18n="submit.loginToSubmit">Sign in to submit</span>
+  <% } %>
+</div>
