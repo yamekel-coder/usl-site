@@ -600,7 +600,7 @@
                     <td class="px-5 py-3">
                       <% if (user && user.role === 'admin' && u.id !== user.id) { %>
                         <form method="POST" action="/admin/users/<%= u.id %>/role" class="flex items-center gap-1.5">
-                          <div class="usl-select !min-w-[130px]" data-name="role" data-current="<%= u.role %>" data-options='[{"code":"","name":"user"},{"code":"","name":"moderator"},{"code":"","name":"admin"}]'></div>
+                          <div class="usl-select usl-select--sm" data-name="role" data-current="<%= u.role %>" data-options='[{"code":"","name":"user"},{"code":"","name":"moderator"},{"code":"","name":"admin"}]'></div>
                           <button type="submit" class="h-8 px-2 rounded-lg bg-white/10 text-white/80 text-[11px] font-medium hover:bg-white/20 transition-all" data-i18n="admin.setBtn">Set</button>
                         </form>
                       <% } else { %>

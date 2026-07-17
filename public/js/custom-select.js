@@ -95,10 +95,28 @@
       el.classList.add('open');
       render('');
       search.value = '';
+      // Position panel as fixed under the trigger so it is not clipped by
+      // overflow:hidden / overflow-x:auto containers (e.g. admin tables).
+      var rect = trigger.getBoundingClientRect();
+      panel.style.position = 'fixed';
+      panel.style.top = (rect.bottom + 6) + 'px';
+      panel.style.left = rect.left + 'px';
+      panel.style.width = rect.width + 'px';
+      panel.style.right = 'auto';
       search.focus();
+      setTimeout(function () { document.addEventListener('scroll', onScroll, true); }, 0);
     }
     function close() {
       el.classList.remove('open');
+      panel.style.position = '';
+      panel.style.top = '';
+      panel.style.left = '';
+      panel.style.width = '';
+      panel.style.right = '';
+      document.removeEventListener('scroll', onScroll, true);
+    }
+    function onScroll() {
+      if (el.classList.contains('open')) close();
     }
 
     trigger.addEventListener('click', function (e) {
