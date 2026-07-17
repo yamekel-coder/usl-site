@@ -472,6 +472,7 @@
       'list.colCreator': 'Создатель',
       'list.colPoints': 'Очки',
       'list.colReq': 'Требование',
+      'list.requirement': 'Лист %',
       'list.emptyTitle': 'Пока нет демонов',
       'list.emptySub': 'Список пуст. Демоны появятся здесь, когда их добавят в панели админа.',
       'list.extTitle': 'Расширенный',

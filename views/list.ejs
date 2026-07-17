@@ -46,7 +46,10 @@
                     </div>
                     <div class="text-[11px] text-white/30 truncate"><%= d.creator || '—' %></div>
                   </div>
-                  <div class="text-sm font-bold text-white/80 shrink-0"><%= d.points %></div>
+                  <div class="text-right shrink-0">
+                    <div class="text-sm font-bold text-white/80"><%= d.points %></div>
+                    <div class="text-[10px] text-white/30"><%= d.requirement || 100 %>%</div>
+                  </div>
                 </button>
               <% }); %>
             <% } %>
