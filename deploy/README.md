@@ -64,25 +64,24 @@ crontab -u usl -e
 ```
 Backups land in `/opt/usl/backups/usl_YYYYMMDD_HHMMSS/` (db + uploads), old ones auto-deleted.
 
-## 8. (Optional) Nginx + domain
+## 8. (Optional) Nginx + domain / bare IP
+Nginx listens on port 80 and forwards to the app on :3000, so the site opens
+without a port (e.g. http://217.60.240.21).
+
 ```bash
 apt install -y nginx
-```
-Config `/etc/nginx/sites-available/usl`:
-```
-server {
-    listen 80;
-    server_name yourdomain.com;
-    location / {
-        proxy_pass http://localhost:3000;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-    }
-}
-```
-```bash
+cp /opt/usl/deploy/nginx-usl.conf /etc/nginx/sites-available/usl
 ln -s /etc/nginx/sites-available/usl /etc/nginx/sites-enabled/
-nginx -t && systemctl reload nginx
+# remove default site to avoid conflicts:
+rm -f /etc/nginx/sites-enabled/default
+nginx -t && systemctl enable --now nginx
+```
+
+To also serve on a domain, replace `server_name _;` with your domain and add a
+DNS A record pointing to the server IP. For HTTPS (free cert):
+```bash
+apt install -y certbot python3-certbot-nginx
+certbot --nginx -d yourdomain.com
 ```
 
 ## Updating the site later
