@@ -116,10 +116,13 @@ function verifyCaptchaToken(token) {
 }
 
 function setSession(res, token) {
-  const isProd = process.env.NODE_ENV === 'production';
+  // secure cookies only when HTTPS is actually available.
+  // On VDS over plain HTTP (no SSL) this MUST be false, otherwise the
+  // browser refuses to store the session cookie and login never persists.
+  const secureCookies = process.env.COOKIE_SECURE === 'true' || process.env.COOKIE_SECURE === '1';
   res.cookie(auth.SESSION_COOKIE, token, {
     httpOnly: true,
-    secure: isProd,
+    secure: secureCookies,
     sameSite: 'lax',
     maxAge: auth.COOKIE_MAX_AGE,
   });
