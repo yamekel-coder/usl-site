@@ -568,9 +568,9 @@
             oninput="filterUsers(this.value)">
         </div>
 
-        <div class="rounded-2xl bg-white/[0.02] border border-white/10 overflow-visible" style="background:rgba(255,255,255,0.02);border-color:rgba(255,255,255,0.1)">
-          <div class="overflow-visible">
-            <table class="w-full text-sm" id="users-table">
+        <div class="rounded-2xl bg-white/[0.02] border border-white/10 overflow-hidden" style="background:rgba(255,255,255,0.02);border-color:rgba(255,255,255,0.1)">
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm min-w-[820px]" id="users-table">
               <thead>
                 <tr class="text-white/30 text-xs uppercase tracking-wider text-left border-b border-white/5">
                   <th class="px-5 py-4 font-medium">#</th>
@@ -616,20 +616,20 @@
                       <% } %>
                     </td>
                     <td class="px-5 py-3 text-white/30 text-xs"><%= u.created_at ? u.created_at.substring(0, 10) : '—' %></td>
-                    <td class="px-5 py-3 text-right">
+                    <td class="px-5 py-3 text-right whitespace-nowrap">
                       <% if (user && user.role === 'admin' && u.id !== user.id) { %>
-                        <div class="flex items-center justify-end gap-2">
+                        <div class="flex items-center justify-end gap-1.5">
                           <% if (u.banned) { %>
                             <form method="POST" action="/admin/users/<%= u.id %>/unban" class="inline">
-                              <button type="submit" class="text-green-300/70 hover:text-green-300 text-xs" data-i18n="admin.unban">Unban</button>
+                              <button type="submit" title="Unban" class="w-8 h-8 grid place-items-center rounded-lg bg-green-500/10 text-green-300/80 hover:bg-green-500/20 hover:text-green-300 transition-all text-base" data-i18n-title="admin.unban">✓</button>
                             </form>
                           <% } else { %>
                             <form method="POST" action="/admin/users/<%= u.id %>/ban" class="inline" onsubmit="return confirm('Ban this user?')">
-                              <button type="submit" class="text-red-300/50 hover:text-red-300 text-xs" data-i18n="admin.ban">Ban</button>
+                              <button type="submit" title="Ban" class="w-8 h-8 grid place-items-center rounded-lg bg-red-500/10 text-red-300/80 hover:bg-red-500/20 hover:text-red-300 transition-all text-base" data-i18n-title="admin.ban">⦸</button>
                             </form>
                           <% } %>
                           <form method="POST" action="/admin/users/<%= u.id %>/delete" class="inline" onsubmit="return confirm('Permanently delete this user? This cannot be undone.')">
-                            <button type="submit" class="text-red-400/50 hover:text-red-400 text-xs font-semibold" data-i18n="admin.deleteUser">Delete</button>
+                            <button type="submit" title="Delete" class="w-8 h-8 grid place-items-center rounded-lg bg-red-500/10 text-red-400/80 hover:bg-red-500/20 hover:text-red-400 transition-all text-base" data-i18n-title="admin.deleteUser">🗑</button>
                           </form>
                         </div>
                       <% } %>
