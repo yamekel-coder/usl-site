@@ -29,7 +29,7 @@
         <a href="/admin?section=publish" class="text-sm text-white/40 hover:text-white transition-colors" data-i18n="admin.backToPublish">← Back</a>
       </div>
 
-      <form method="POST" action="<%= mode === 'new' ? '/admin/publish-new' : '/admin/publish/' + request.id %>" class="rounded-3xl bg-white/[0.015] border border-white/[0.06] backdrop-blur-2xl p-8" style="display:flex;flex-direction:column;gap:1.5rem">
+      <form method="POST" action="<%= mode === 'new' ? '/admin/publish-new' : '/admin/publish/' + request.id %>" enctype="multipart/form-data" class="rounded-3xl bg-white/[0.015] border border-white/[0.06] backdrop-blur-2xl p-8" style="display:flex;flex-direction:column;gap:1.5rem">
 
         <!-- Banner Preview -->
         <div id="banner-preview" class="w-full rounded-2xl overflow-hidden bg-white/5 border border-white/10" style="aspect-ratio:16/9;display:none">
@@ -53,9 +53,10 @@
         </div>
 
         <div>
-          <label class="block text-xs text-white/30 uppercase tracking-wider mb-2" data-i18n="admin.field.bannerUrl">Banner Image URL</label>
-          <input type="url" name="banner_url" id="banner-input" value="<%= data.banner_url || '' %>" class="w-full h-12 px-4 rounded-xl bg-white/5 border border-white/10 text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-white/20" placeholder="https://i.imgur.com/...">
-          <p class="text-[11px] text-white/20 mt-1" data-i18n="admin.field.bannerHint">Paste a link to the level's banner or thumbnail image</p>
+          <label class="block text-xs text-white/30 uppercase tracking-wider mb-2" data-i18n="admin.field.bannerUpload">Banner Image</label>
+          <% if (data.banner_url) { %><img src="<%= data.banner_url %>" class="w-full h-32 object-cover rounded-xl mb-2 border border-white/10"><% } %>
+          <input type="file" name="banner_file" id="banner-input" accept="image/*" class="w-full h-12 px-4 rounded-xl bg-white/5 border border-white/10 text-sm text-white file:mr-4 file:py-1 file:px-3 file:rounded-lg file:border-0 file:bg-white/10 file:text-white file:text-sm hover:file:bg-white/20">
+          <p class="text-[11px] text-white/20 mt-1" data-i18n="admin.field.bannerHint">Upload an image (png, jpg, gif, webp). Optional.</p>
         </div>
 
         <div>
@@ -139,16 +140,19 @@
   updatePoints();
 
   function updateBanner() {
-    var url = bannerInput.value.trim();
-    if (url) {
-      bannerImg.src = url;
-      bannerPreview.style.display = 'block';
-      bannerImg.onerror = function() { bannerPreview.style.display = 'none'; };
+    var file = bannerInput.files && bannerInput.files[0];
+    if (file) {
+      var reader = new FileReader();
+      reader.onload = function(e) {
+        bannerImg.src = e.target.result;
+        bannerPreview.style.display = 'block';
+      };
+      reader.readAsDataURL(file);
     } else {
       bannerPreview.style.display = 'none';
     }
   }
-  bannerInput.addEventListener('input', updateBanner);
+  bannerInput.addEventListener('change', updateBanner);
   updateBanner();
 })();
 </script>

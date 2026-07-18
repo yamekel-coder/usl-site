@@ -1,7 +1,52 @@
 const express = require('express');
 const router = express.Router();
+const multer = require('multer');
+const path = require('path');
+const fs = require('fs');
 const db = require('../database/db');
 const { adminRequired, modRequired } = require('../middleware/admin');
+
+const BANNER_DIR = path.join(__dirname, '..', 'public', 'uploads', 'banners');
+if (!fs.existsSync(BANNER_DIR)) {
+  fs.mkdirSync(BANNER_DIR, { recursive: true });
+}
+
+const bannerStorage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, BANNER_DIR);
+  },
+  filename: function (req, file, cb) {
+    var ext = path.extname(file.originalname).toLowerCase() || '.png';
+    cb(null, 'demon_' + Date.now() + '_' + Math.floor(Math.random() * 1e6) + ext);
+  },
+});
+
+const bannerFilter = function (req, file, cb) {
+  var allowed = ['.png', '.jpg', '.jpeg', '.gif', '.webp'];
+  var ext = path.extname(file.originalname).toLowerCase();
+  if (allowed.indexOf(ext) !== -1) {
+    cb(null, true);
+  } else {
+    cb(new Error('Only image files (png, jpg, gif, webp) are allowed'));
+  }
+};
+
+const uploadBanner = multer({
+  storage: bannerStorage,
+  fileFilter: bannerFilter,
+  limits: { fileSize: 5 * 1024 * 1024 },
+});
+
+// Resolve banner_url: uploaded file takes priority, else keep provided URL
+function resolveBanner(req, previous) {
+  if (req.file) {
+    return '/uploads/banners/' + req.file.filename;
+  }
+  if (typeof req.body.banner_url === 'string' && req.body.banner_url.trim()) {
+    return req.body.banner_url.trim();
+  }
+  return previous || '';
+}
 
 function back(res, msg, path) {
   const q = msg ? '?toast=' + encodeURIComponent(msg) : '';
@@ -140,12 +185,15 @@ router.post('/levels', modRequired, function (req, res) {
   back(res, 'Level added', '/admin');
 });
 
-router.post('/levels/:id', modRequired, function (req, res) {
+router.post('/levels/:id', modRequired, uploadBanner.single('banner_file'), function (req, res) {
   const id = parseInt(req.params.id, 10);
   const fields = {};
-  ['name', 'creator', 'verifier', 'level_id', 'video_url', 'banner_url'].forEach(function (k) {
+  ['name', 'creator', 'verifier', 'level_id', 'video_url'].forEach(function (k) {
     if (req.body[k] !== undefined) fields[k] = sanitizeStr(req.body[k], k === 'name' ? 100 : 500);
   });
+  if (req.file || (typeof req.body.banner_url === 'string' && req.body.banner_url.trim())) {
+    fields.banner_url = resolveBanner(req);
+  }
   if (req.body.difficulty !== undefined) {
     fields.difficulty = ['Easy','Medium','Hard','Insane','Extreme'].includes(req.body.difficulty) ? req.body.difficulty : 'Insane';
   }
@@ -249,7 +297,7 @@ router.get('/publish-new', modRequired, function (req, res) {
   });
 });
 
-router.post('/publish-new', modRequired, function (req, res) {
+router.post('/publish-new', modRequired, uploadBanner.single('banner_file'), function (req, res) {
   const name = sanitizeStr(req.body.name, 100);
   if (!name) {
     return back(res, 'Level name is required', '/admin/publish-new');
@@ -261,7 +309,7 @@ router.post('/publish-new', modRequired, function (req, res) {
     verifier: sanitizeStr(req.body.verifier, 100),
     level_id: sanitizeStr(req.body.level_id, 50),
     video_url: sanitizeStr(req.body.video_url, 500),
-    banner_url: sanitizeStr(req.body.banner_url, 500),
+    banner_url: resolveBanner(req),
     difficulty: ['Easy','Medium','Hard','Insane','Extreme'].includes(req.body.difficulty) ? req.body.difficulty : 'Insane',
     requirement: Math.min(100, Math.max(1, parseInt(req.body.requirement, 10) || 100)),
     position: req.body.position ? parseInt(req.body.position, 10) : null
@@ -269,7 +317,7 @@ router.post('/publish-new', modRequired, function (req, res) {
   back(res, 'Level created and published', '/admin?section=publish');
 });
 
-router.post('/publish/:requestId', modRequired, function (req, res) {
+router.post('/publish/:requestId', modRequired, uploadBanner.single('banner_file'), function (req, res) {
   const requestId = parseInt(req.params.requestId, 10);
   const sub = db.getSubmissions('level-request', null).find(function (s) { return s.id === requestId; });
   if (!sub) {
@@ -287,7 +335,7 @@ router.post('/publish/:requestId', modRequired, function (req, res) {
     verifier: sanitizeStr(req.body.verifier, 100),
     level_id: sanitizeStr(req.body.level_id, 50),
     video_url: sanitizeStr(req.body.video_url, 500),
-    banner_url: sanitizeStr(req.body.banner_url, 500),
+    banner_url: resolveBanner(req),
     difficulty: ['Easy','Medium','Hard','Insane','Extreme'].includes(req.body.difficulty) ? req.body.difficulty : 'Insane',
     requirement: Math.min(100, Math.max(1, parseInt(req.body.requirement, 10) || 100)),
     position: req.body.position ? parseInt(req.body.position, 10) : null
