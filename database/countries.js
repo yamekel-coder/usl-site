@@ -1,6 +1,15 @@
 // Shared country list used across registration, profile and admin panels.
 // Each entry: { code, name } — code is ISO-3166 alpha-2 (used for flag emoji).
 
+// Convert ISO-3166 alpha-2 code to flag emoji (regional indicator symbols).
+function flagEmoji(code) {
+  if (!code || code === 'Other' || code.length !== 2) return '';
+  const upper = code.toUpperCase();
+  return String.fromCodePoint(
+    ...[...upper].map(function (ch) { return 0x1F1E6 + (ch.charCodeAt(0) - 65); })
+  );
+}
+
 const COUNTRIES = [
   { code: 'RU', name: 'Russia' },
   { code: 'UA', name: 'Ukraine' },
@@ -96,3 +105,4 @@ const COUNTRIES = [
 ];
 
 module.exports = COUNTRIES;
+module.exports.flagEmoji = flagEmoji;

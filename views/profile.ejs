@@ -66,7 +66,7 @@
         <div class="mt-4 flex flex-col gap-2 text-sm text-white/40 items-center">
           <span><span class="text-white/25" data-i18n="profile.joined">Joined</span> <%= new Date(profile.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) %></span>
           <% if (profile.country) { %>
-            <span><span class="text-white/25" data-i18n="profile.country">Country</span> <%= profile.country %></span>
+            <span><span class="text-white/25" data-i18n="profile.country">Country</span> <%= flag(profile.country) %> <span class="text-white/40"><%= profile.country %></span></span>
           <% } %>
           <% if (user && user.id === profile.id) { %>
             <span class="truncate"><span class="text-white/25" data-i18n="profile.email">Email</span> <%= profile.email %></span>
@@ -80,7 +80,7 @@
             <div class="text-xs text-white/30 uppercase tracking-wider mt-1" data-i18n="profile.rating">Rating</div>
           </div>
           <div class="p-4 rounded-2xl bg-white/[0.02] border border-white/[0.06] text-center">
-            <div class="text-2xl font-black text-white truncate"><%= profile.country ? profile.country : '—' %></div>
+            <div class="text-2xl font-black text-white truncate"><%= profile.country ? flag(profile.country) : '—' %></div>
             <div class="text-xs text-white/30 uppercase tracking-wider mt-1" data-i18n="profile.country">Country</div>
           </div>
           <div class="p-4 rounded-2xl bg-white/[0.02] border border-white/[0.06] text-center">
