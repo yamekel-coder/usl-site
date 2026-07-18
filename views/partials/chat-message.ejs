@@ -9,7 +9,7 @@
   <div class="min-w-0">
     <div class="text-xs text-white/40">
       <span class="font-medium text-white/70"><%= m.username %></span>
-      <span class="ml-1 text-white/20"><%= (m.created_at || '').substring(11, 16) %></span>
+      <span class="ml-1 text-white/20 chat-time" data-time="<%= m.created_at %>"><%= (m.created_at || '').substring(11, 16) %></span>
     </div>
     <div class="text-sm text-white/90 break-words"><%= m.message %></div>
   </div>

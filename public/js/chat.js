@@ -19,6 +19,24 @@
     });
   }
 
+  // Convert UTC "YYYY-MM-DD HH:MM:SS" → local HH:MM
+  function formatTime(utc) {
+    if (!utc) return '';
+    var d = new Date(utc.replace(' ', 'T') + 'Z');
+    if (isNaN(d.getTime())) return utc.substring(11, 16);
+    var h = String(d.getHours()).padStart(2, '0');
+    var m = String(d.getMinutes()).padStart(2, '0');
+    return h + ':' + m;
+  }
+
+  function refreshTimes() {
+    var spans = log.querySelectorAll('.chat-time');
+    for (var i = 0; i < spans.length; i++) {
+      var t = spans[i].getAttribute('data-time');
+      if (t) spans[i].textContent = formatTime(t);
+    }
+  }
+
   function scrollToBottom() {
     log.scrollTop = log.scrollHeight;
   }
@@ -29,14 +47,13 @@
     div.setAttribute('data-id', m.id);
     div.className = 'chat-msg flex items-start gap-3';
     var initial = (m.username || '?').charAt(0).toUpperCase();
-    var time = (m.created_at || '').substring(11, 16);
     var avatar = m.avatar_url
       ? '<img src="' + escapeHtml(m.avatar_url) + '" alt="' + escapeHtml(m.username) + '" class="w-8 h-8 rounded-full bg-white/10 border border-white/10 object-cover shrink-0">'
       : '<div class="w-8 h-8 rounded-full bg-white/10 border border-white/10 flex items-center justify-center shrink-0 text-xs font-bold text-white/60">' + escapeHtml(initial) + '</div>';
     div.innerHTML =
       avatar +
       '<div class="min-w-0">' +
-        '<div class="text-xs text-white/40"><span class="font-medium text-white/70">' + escapeHtml(m.username) + '</span><span class="ml-1 text-white/20">' + escapeHtml(time) + '</span></div>' +
+        '<div class="text-xs text-white/40"><span class="font-medium text-white/70">' + escapeHtml(m.username) + '</span><span class="ml-1 text-white/20 chat-time" data-time="' + escapeHtml(m.created_at) + '">' + escapeHtml(formatTime(m.created_at)) + '</span></div>' +
         '<div class="text-sm text-white/90 break-words">' + escapeHtml(m.message) + '</div>' +
       '</div>';
     log.appendChild(div);
@@ -84,5 +101,7 @@
   }
 
   scrollToBottom();
-  setInterval(poll, 4000);
+  refreshTimes();
+  setInterval(poll, 1500);
+  setInterval(refreshTimes, 30000);
 })();
