@@ -2,7 +2,7 @@
   var log = document.getElementById('chat-log');
   if (!log) return;
 
-  var form = document.querySelector('#chat-log').closest('div').querySelector('form');
+  var form = document.getElementById('chat-form');
   var input = form ? form.querySelector('input[name="message"]') : null;
 
   var lastId = 0;

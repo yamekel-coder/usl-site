@@ -33,7 +33,7 @@
         </div>
 
         <% if (user) { %>
-          <form method="POST" action="/chat" class="border-t border-white/[0.06] p-4 flex gap-3">
+          <form id="chat-form" method="POST" action="/chat" class="border-t border-white/[0.06] p-4 flex gap-3" onsubmit="return false;">
             <input type="text" name="message" maxlength="500" autocomplete="off" required
               class="flex-1 h-11 px-4 rounded-xl bg-white/5 border border-white/10 text-white text-sm placeholder:text-white/20 focus:outline-none focus:border-white/20"
               placeholder="Type a message…" data-i18n-placeholder="chat.placeholder">
