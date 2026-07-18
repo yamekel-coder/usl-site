@@ -80,9 +80,6 @@
         if (data.captcha.type === 'math') {
           box.querySelector('#modal-captcha-type').textContent = 'Math';
           box.querySelector('.text-xl, .text-lg').textContent = data.captcha.question;
-        } else if (data.captcha.type === 'word') {
-          box.querySelector('#modal-captcha-type').textContent = 'Unscramble';
-          box.querySelector('.text-xl, .text-lg').textContent = data.captcha.question;
         }
       })
       .catch(function () {});
