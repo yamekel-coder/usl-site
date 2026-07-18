@@ -206,7 +206,11 @@
                           <input name="verifier" value="<%= d.verifier || '' %>" placeholder="Verifier" data-i18n-placeholder="admin.field.verifier" class="admin-input">
                           <div>
                             <% if (d.banner_url) { %><img src="<%= d.banner_url %>" class="w-full h-20 object-cover rounded-lg mb-1 border border-white/10"><% } %>
-                            <input type="file" name="banner_file" accept="image/*" class="admin-input" data-i18n-placeholder="admin.field.bannerUpload">
+                            <label for="banner-file-<%= d.id %>" class="flex items-center justify-between w-full px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-xs cursor-pointer hover:bg-white/[0.07] transition-all">
+                              <span class="text-white/40 truncate"><span data-i18n="admin.field.bannerChoose">Choose image…</span></span>
+                              <span class="ml-2 shrink-0 px-2 py-0.5 rounded bg-white/10 text-white" data-i18n="admin.field.bannerBrowse">Browse</span>
+                            </label>
+                            <input type="file" name="banner_file" id="banner-file-<%= d.id %>" accept="image/*" class="hidden">
                             <input type="hidden" name="banner_url" value="">
                           </div>
                           <input name="video_url" value="<%= d.video_url || '' %>" placeholder="YouTube link" class="admin-input">

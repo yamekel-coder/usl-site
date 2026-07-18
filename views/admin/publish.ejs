@@ -55,7 +55,11 @@
         <div>
           <label class="block text-xs text-white/30 uppercase tracking-wider mb-2" data-i18n="admin.field.bannerUpload">Banner Image</label>
           <% if (data.banner_url) { %><img src="<%= data.banner_url %>" class="w-full h-32 object-cover rounded-xl mb-2 border border-white/10"><% } %>
-          <input type="file" name="banner_file" id="banner-input" accept="image/*" class="w-full h-12 px-4 rounded-xl bg-white/5 border border-white/10 text-sm text-white file:mr-4 file:py-1 file:px-3 file:rounded-lg file:border-0 file:bg-white/10 file:text-white file:text-sm hover:file:bg-white/20">
+          <label for="banner-input" class="flex items-center justify-between w-full h-12 px-4 rounded-xl bg-white/5 border border-white/10 text-sm cursor-pointer hover:bg-white/[0.07] transition-all">
+            <span id="banner-filename" class="text-white/40 truncate"><span data-i18n="admin.field.bannerChoose">Choose image…</span></span>
+            <span class="ml-3 shrink-0 px-3 py-1 rounded-lg bg-white/10 text-white text-xs font-medium" data-i18n="admin.field.bannerBrowse">Browse</span>
+          </label>
+          <input type="file" name="banner_file" id="banner-input" accept="image/*" class="hidden">
           <p class="text-[11px] text-white/20 mt-1" data-i18n="admin.field.bannerHint">Upload an image (png, jpg, gif, webp). Optional.</p>
         </div>
 
@@ -139,9 +143,12 @@
   posInput.addEventListener('input', updatePoints);
   updatePoints();
 
+  var bannerFilename = document.getElementById('banner-filename');
+
   function updateBanner() {
     var file = bannerInput.files && bannerInput.files[0];
     if (file) {
+      if (bannerFilename) bannerFilename.textContent = file.name;
       var reader = new FileReader();
       reader.onload = function(e) {
         bannerImg.src = e.target.result;
@@ -149,6 +156,7 @@
       };
       reader.readAsDataURL(file);
     } else {
+      if (bannerFilename) bannerFilename.innerHTML = '<span data-i18n="admin.field.bannerChoose">Choose image…</span>';
       bannerPreview.style.display = 'none';
     }
   }
