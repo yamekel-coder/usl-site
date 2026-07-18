@@ -5,6 +5,7 @@ const crypto = require('crypto');
 const db = require('./database/db');
 const COUNTRIES = require('./database/countries');
 const auth = require('./middleware/auth');
+try { require('dotenv').config(); } catch (e) {}
 const app = express();
 const PORT = process.env.PORT || 3000;
 

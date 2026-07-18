@@ -1,0 +1,20 @@
+[Unit]
+Description=USL Site (Ultimate Shitty List)
+After=network.target
+
+[Service]
+Type=simple
+User=usl
+WorkingDirectory=/opt/usl
+Environment=NODE_ENV=production
+Environment=PORT=3000
+Environment=CAPTCHA_SECRET=change-me-in-production
+Environment=SESSION_SECRET=change-me-in-production
+ExecStart=/usr/bin/npm start
+Restart=always
+RestartSec=5
+StandardOutput=journald
+StandardError=journald
+
+[Install]
+WantedBy=multi-user.target
