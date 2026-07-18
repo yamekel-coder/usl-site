@@ -64,6 +64,30 @@
     if (e.key === 'Escape' && !modal.classList.contains('hidden')) closeModal();
   });
 
+  function setCookie(name, value, maxAge) {
+    document.cookie = name + '=' + encodeURIComponent(value) + ';path=/;max-age=' + (maxAge || 300) + ';samesite=lax';
+  }
+
+  function refreshCaptcha(form) {
+    var box = form.querySelector('#modal-captcha-box');
+    if (!box) return;
+    fetch('/auth/captcha-refresh', { headers: { 'Accept': 'application/json' } })
+      .then(function (r) { return r.json(); })
+      .then(function (data) {
+        if (!data || !data.ok) return;
+        setCookie('usl_captcha', data.token, 300);
+        box.querySelector('[name="captcha_answer"]').value = '';
+        if (data.captcha.type === 'math') {
+          box.querySelector('#modal-captcha-type').textContent = 'Math';
+          box.querySelector('.text-xl, .text-lg').textContent = data.captcha.question;
+        } else if (data.captcha.type === 'word') {
+          box.querySelector('#modal-captcha-type').textContent = 'Unscramble';
+          box.querySelector('.text-xl, .text-lg').textContent = data.captcha.question;
+        }
+      })
+      .catch(function () {});
+  }
+
   function handleSubmit(form) {
     form.addEventListener('submit', function (e) {
       e.preventDefault();
@@ -83,6 +107,7 @@
           }
           errBox.textContent = json.error || 'Something went wrong';
           errBox.classList.remove('hidden');
+          if (/captcha/i.test(json.error || '')) refreshCaptcha(form);
         });
       }).catch(function () {
         errBox.textContent = 'Network error, please try again';

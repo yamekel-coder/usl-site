@@ -70,15 +70,12 @@
       </div>
 
       <!-- Captcha -->
-      <div class="rounded-xl border border-white/10 p-4" style="background:rgba(255,255,255,0.02)">
+      <div id="modal-captcha-box" class="rounded-xl border border-white/10 p-4" style="background:rgba(255,255,255,0.02)">
         <div class="flex items-center justify-between mb-3">
           <span class="text-[10px] text-white/25 uppercase tracking-[0.12em] font-semibold" data-i18n="auth.captchaLabel">Captcha</span>
-          <span class="text-[10px] text-white/15 uppercase tracking-wider">
+          <span class="text-[10px] text-white/15 uppercase tracking-wider" id="modal-captcha-type">
             <% if (captcha.type === 'math') { %>Math<% } %>
-            <% if (captcha.type === 'text') { %>Type text<% } %>
-            <% if (captcha.type === 'emoji') { %>Pick emoji<% } %>
             <% if (captcha.type === 'word') { %>Unscramble<% } %>
-            <% if (captcha.type === 'logic') { %>Odd one out<% } %>
           </span>
         </div>
 
@@ -90,27 +87,6 @@
             class="w-full h-11 px-4 rounded-xl bg-white/5 border border-white/10 text-white text-sm text-center placeholder:text-white/20 focus:outline-none focus:border-white/20 transition-all"
             placeholder="Answer" inputmode="numeric">
 
-        <% } else if (captcha.type === 'text') { %>
-          <div class="text-center mb-3">
-            <div style="font-family:monospace;font-size:1.25rem;font-weight:bold;letter-spacing:0.3em;padding:0.6rem 1rem;border-radius:0.75rem;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);display:inline-block;text-transform:uppercase"><%= captcha.question %></div>
-          </div>
-          <input type="text" name="captcha_answer" required autocomplete="off"
-            class="w-full h-11 px-4 rounded-xl bg-white/5 border border-white/10 text-white text-sm text-center placeholder:text-white/20 focus:outline-none focus:border-white/20 transition-all tracking-widest uppercase"
-            placeholder="Type the text" maxlength="6">
-
-        <% } else if (captcha.type === 'emoji') { %>
-          <div class="text-center mb-2">
-            <div class="text-[11px] text-white/30 mb-1">Find this emoji:</div>
-            <div class="text-2xl mb-2"><%= captcha.question %></div>
-          </div>
-          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px">
-            <% captcha.options.forEach(function (e) { %>
-              <button type="button" class="modal-emoji-btn" data-emoji="<%= e %>" onclick="modalSelectEmoji(this)"
-                style="width:100%;aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-size:1.5rem;border-radius:0.75rem;border:2px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.03);cursor:pointer;transition:all 0.2s ease"><%= e %></button>
-            <% }); %>
-          </div>
-          <input type="hidden" name="captcha_answer" id="modal-emoji-answer" value="">
-
         <% } else if (captcha.type === 'word') { %>
           <div class="text-center mb-3">
             <div class="text-lg font-bold text-white/80 tracking-wider mb-1" style="font-family:monospace"><%= captcha.question %></div>
@@ -119,19 +95,6 @@
           <input type="text" name="captcha_answer" required autocomplete="off"
             class="w-full h-11 px-4 rounded-xl bg-white/5 border border-white/10 text-white text-sm text-center placeholder:text-white/20 focus:outline-none focus:border-white/20 transition-all"
             placeholder="Original word">
-
-        <% } else if (captcha.type === 'logic') { %>
-          <div class="text-center mb-2">
-            <div class="text-[11px] text-white/30 mb-2">Which number doesn't belong?</div>
-            <div style="display:flex;flex-wrap:wrap;justify-content:center;gap:6px">
-              <% captcha.question.split(', ').forEach(function (n) { %>
-                <button type="button" class="modal-logic-btn" data-logic="<%= n %>" onclick="modalSelectLogic(this)"
-                  style="width:auto;padding:0.4rem 0.9rem;font-size:0.875rem;font-weight:600;border-radius:0.75rem;border:2px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.03);cursor:pointer;color:white;transition:all 0.2s ease"><%= n %></button>
-              <% }); %>
-            </div>
-          </div>
-          <input type="hidden" name="captcha_answer" id="modal-logic-answer" value="">
-
         <% } %>
       </div>
 
@@ -150,24 +113,3 @@
     </form>
   </div>
 </div>
-
-<script>
-(function() {
-  // Set captcha token cookie when modal opens
-  var token = '<%= captchaToken %>';
-  document.cookie = 'usl_captcha=' + encodeURIComponent(token) + ';path=/;max-age=300;samesite=lax';
-})();
-
-function modalSelectEmoji(btn) {
-  document.querySelectorAll('.modal-emoji-btn').forEach(function(b) { b.style.borderColor='rgba(255,255,255,0.1)'; b.style.background='rgba(255,255,255,0.03)'; });
-  btn.style.borderColor='rgba(255,255,255,0.8)';
-  btn.style.background='rgba(255,255,255,0.1)';
-  document.getElementById('modal-emoji-answer').value = btn.dataset.emoji;
-}
-function modalSelectLogic(btn) {
-  document.querySelectorAll('.modal-logic-btn').forEach(function(b) { b.style.borderColor='rgba(255,255,255,0.1)'; b.style.background='rgba(255,255,255,0.03)'; });
-  btn.style.borderColor='rgba(255,255,255,0.8)';
-  btn.style.background='rgba(255,255,255,0.1)';
-  document.getElementById('modal-logic-answer').value = btn.dataset.logic;
-}
-</script>

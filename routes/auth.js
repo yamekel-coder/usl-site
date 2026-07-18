@@ -33,7 +33,7 @@ function getClientIp(req) {
 }
 
 function generateCaptcha() {
-  const types = ['math', 'text', 'emoji', 'word', 'logic'];
+  const types = ['math', 'word'];
   const type = types[Math.floor(Math.random() * types.length)];
 
   switch (type) {
@@ -149,6 +149,18 @@ function isAjax(req) {
   return req.get('X-Requested-With') === 'fetch' ||
     (req.get('Accept') || '').indexOf('application/json') !== -1;
 }
+
+// GET /auth/captcha-refresh — returns a fresh captcha + token (for AJAX retry)
+router.get('/captcha-refresh', function (req, res) {
+  var captcha = generateCaptcha();
+  var token = signCaptcha(captcha);
+  res.cookie(CAPTCHA_COOKIE, token, {
+    httpOnly: true,
+    maxAge: 5 * 60 * 1000,
+    sameSite: 'lax',
+  });
+  res.json({ ok: true, token: token, captcha: captcha });
+});
 
 // GET /auth/register
 router.get('/register', function (req, res) {
