@@ -118,6 +118,7 @@ app.use('/submit', require('./routes/submit'));
 app.use('/api', require('./routes/api'));
 app.use('/auth', require('./routes/auth'));
 app.use('/admin', require('./routes/admin'));
+app.use('/chat', require('./routes/chat'));
 
 app.get('/privacy', function (req, res) { res.render('privacy'); });
 app.get('/terms', function (req, res) { res.render('terms'); });

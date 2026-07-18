@@ -951,6 +951,10 @@ html {
   height: 2.25rem;
 }
 
+.h-\[55vh\] {
+  height: 55vh;
+}
+
 .h-full {
   height: 100%;
 }
@@ -1949,6 +1953,10 @@ html {
 
 .text-white\/85 {
   color: rgb(255 255 255 / 0.85);
+}
+
+.text-white\/90 {
+  color: rgb(255 255 255 / 0.9);
 }
 
 .text-yellow-300 {

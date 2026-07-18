@@ -91,6 +91,15 @@ function migrate(database) {
     "created_at TEXT NOT NULL DEFAULT (datetime('now')))"
   );
 
+  database.exec(
+    "CREATE TABLE IF NOT EXISTS chat_messages (" +
+    "id INTEGER PRIMARY KEY AUTOINCREMENT, " +
+    "user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE, " +
+    "username TEXT NOT NULL, " +
+    "message TEXT NOT NULL, " +
+    "created_at TEXT NOT NULL DEFAULT (datetime('now')))"
+  );
+
   // Normalize all existing countries
   const countryMap = {
     'Россия': 'RU', 'россия': 'RU', 'RUSSIA': 'RU', 'Russia': 'RU', 'RU': 'RU', 'rus': 'RU', 'RUS': 'RU', 'ru': 'RU',
@@ -437,6 +446,22 @@ function getUserSubmissions(userId) {
   ).all(userId);
 }
 
+function addChatMessage(userId, username, message) {
+  return get().prepare(
+    "INSERT INTO chat_messages (user_id, username, message) VALUES (?, ?, ?)"
+  ).run(userId, username, message);
+}
+
+function getChatMessages(limit) {
+  return get().prepare(
+    "SELECT id, user_id, username, message, created_at FROM chat_messages ORDER BY id DESC LIMIT ?"
+  ).all(limit || 100).reverse();
+}
+
+function getChatMessageCount() {
+  return get().prepare("SELECT COUNT(*) c FROM chat_messages").get().c;
+}
+
 function getUserById(id) {
   return get().prepare(
     "SELECT id, username, email, role, avatar_url, country, created_at FROM users WHERE id = ?"
@@ -709,6 +734,7 @@ module.exports = {
   setUsername, usernameExists,
   deleteUserSessions,
   getUserSubmissions,
+  addChatMessage, getChatMessages, getChatMessageCount,
   createRecord, getPendingRecords, getRecordById, approveRecord, rejectRecord,
   getLevelRequests, approveLevelRequest, createNews, getNews,
   getRegistrationCount, recordRegistration, normalizeCountry, getCountryFlag,

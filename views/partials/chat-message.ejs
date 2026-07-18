@@ -1,0 +1,12 @@
+<div class="chat-msg flex items-start gap-3" data-id="<%= m.id %>">
+  <div class="w-8 h-8 rounded-full bg-white/10 border border-white/10 flex items-center justify-center shrink-0 text-xs font-bold text-white/60">
+    <%= (m.username || '?').charAt(0).toUpperCase() %>
+  </div>
+  <div class="min-w-0">
+    <div class="text-xs text-white/40">
+      <span class="font-medium text-white/70"><%= m.username %></span>
+      <span class="ml-1 text-white/20"><%= (m.created_at || '').substring(11, 16) %></span>
+    </div>
+    <div class="text-sm text-white/90 break-words"><%= m.message %></div>
+  </div>
+</div>

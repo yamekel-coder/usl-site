@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<%- include('partials/head') %>
+<body class="bg-dark text-white font-inter antialiased selection:bg-white selection:text-dark overflow-x-hidden">
+  <%- include('partials/navbar') %>
+  <div id="noise"></div>
+  <div id="bg-container"></div>
+
+  <main class="pt-32 pb-20 min-h-screen">
+    <div class="mx-auto px-6 lg:px-8" style="max-width:48rem">
+      <div class="flex items-center gap-4 mb-6">
+        <div class="w-12 h-px bg-white/10"></div>
+        <span class="text-xs text-white/30 uppercase tracking-[0.2em] font-medium" data-i18n="nav.chat">Chat</span>
+      </div>
+      <h1 class="text-4xl font-black text-white tracking-tight mb-2" data-i18n="chat.title">Global Chat</h1>
+      <p class="text-white/30 text-sm mb-6" data-i18n="chat.sub">Talk with everyone. Links are not allowed.</p>
+
+      <% if (error === 'no-links') { %>
+        <div class="mb-4 p-3 rounded-xl bg-red-500/5 border border-red-500/15 text-red-300 text-sm" data-i18n="chat.errorLinks">Links are not allowed in chat.</div>
+      <% } %>
+      <% if (error === 'too-long') { %>
+        <div class="mb-4 p-3 rounded-xl bg-red-500/5 border border-red-500/15 text-red-300 text-sm" data-i18n="chat.errorLong">Message is too long (max 500 characters).</div>
+      <% } %>
+
+      <div class="rounded-3xl bg-white/[0.015] border border-white/[0.06] backdrop-blur-2xl overflow-hidden">
+        <div id="chat-log" class="px-5 py-4 space-y-3 h-[55vh] overflow-y-auto" style="scrollbar-width:thin">
+          <% if (messages.length === 0) { %>
+            <div id="chat-empty" class="text-center text-sm text-white/20 py-10" data-i18n="chat.empty">No messages yet. Be the first!</div>
+          <% } %>
+          <% messages.forEach(function (m) { %>
+            <%- include('partials/chat-message', { m: m }) %>
+          <% }); %>
+        </div>
+
+        <% if (user) { %>
+          <form method="POST" action="/chat" class="border-t border-white/[0.06] p-4 flex gap-3">
+            <input type="text" name="message" maxlength="500" autocomplete="off" required
+              class="flex-1 h-11 px-4 rounded-xl bg-white/5 border border-white/10 text-white text-sm placeholder:text-white/20 focus:outline-none focus:border-white/20"
+              placeholder="Type a message…" data-i18n-placeholder="chat.placeholder">
+            <button type="submit"
+              class="px-5 h-11 rounded-xl bg-white text-dark font-semibold text-sm hover:bg-white/90 transition-all duration-300" data-i18n="chat.send">Send</button>
+          </form>
+        <% } else { %>
+          <div class="border-t border-white/[0.06] p-4 text-center text-sm text-white/30">
+            <button type="button" data-auth-open="login" class="text-white/70 hover:text-white underline" data-i18n="chat.signinToWrite">Sign in to write messages</button>
+          </div>
+        <% } %>
+      </div>
+    </div>
+  </main>
+
+<%- include('partials/footer') %>
+<%- include('partials/scripts') %>
+<script src="/js/chat.js"></script>
+</body>
+</html>
