@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../database/db');
+const rateLimit = require('../middleware/ratelimit');
 
 function requireAuth(req, res, next) {
   if (!res.locals.user) {
@@ -96,7 +97,21 @@ router.post('/moderator', requireAuth, function (req, res) {
   res.redirect('/list?toast=' + encodeURIComponent('Application sent! It will be reviewed.'));
 });
 
-router.post('/record', requireAuth, function (req, res) {
+// Anti-farm: limit how many records a user can submit per time window.
+const RECORD_LIMIT_COUNT = 5;
+const RECORD_LIMIT_HOURS = 3;
+
+router.post('/record', requireAuth, rateLimit({ keySuffix: 'submit-rec', max: RECORD_LIMIT_COUNT + 2, windowMs: RECORD_LIMIT_HOURS * 3600 * 1000 }), function (req, res) {
+  const userId = res.locals.user.id;
+  const username = res.locals.user.username;
+
+  // Enforce per-user record quota with auto-ban on abuse.
+  const recent = db.countRecentRecords(userId, RECORD_LIMIT_HOURS);
+  if (recent >= RECORD_LIMIT_COUNT) {
+    db.autoBanForSpam(userId, 'record spam: ' + recent + ' records in ' + RECORD_LIMIT_HOURS + 'h (limit ' + RECORD_LIMIT_COUNT + ')');
+    return res.redirect('/auth/login?toast=' + encodeURIComponent('Your account was automatically banned for submitting too many records.'));
+  }
+
   const levels = toArray(req.body.level);
   const youtubes = toArray(req.body.youtube);
   const raws = toArray(req.body.raw);
@@ -111,7 +126,7 @@ router.post('/record', requireAuth, function (req, res) {
     if (!demon) return;
     const percent = parseInt(percents[i], 10);
     const progress = isNaN(percent) ? (demon.requirement || 100) : percent;
-    db.createRecord(res.locals.user.id, {
+    db.createRecord(userId, {
       demon_id: demon.id,
       progress: progress,
       youtube_url: sanitizeStr(youtubes[i], 500),

@@ -639,6 +639,30 @@ function updateRecord(id, progress, status, youtubeUrl, platform) {
   ).run(progress, status, youtubeUrl || null, platform || null, id);
 }
 
+// Count records a user created in the last N hours (anti spam/farm).
+function countRecentRecords(userId, hours) {
+  return get().prepare(
+    "SELECT COUNT(*) AS c FROM records WHERE user_id = ? AND created_at >= datetime('now', ?)"
+  ).get(userId, '-' + hours + ' hours').c;
+}
+
+// Auto-ban a user for record spam (called when they exceed the limit).
+function autoBanForSpam(userId, reason) {
+  const d = get();
+  d.prepare("UPDATE users SET banned = 1, updated_at = datetime('now') WHERE id = ?").run(userId);
+  d.prepare("DELETE FROM records WHERE user_id = ?").run(userId);
+  d.prepare("DELETE FROM sessions WHERE user_id = ?").run(userId);
+  logAction({
+    user_id: null,
+    username: 'SYSTEM',
+    email: null,
+    ip: null,
+    action: 'auto_ban',
+    target: 'user#' + userId,
+    detail: reason || 'record spam'
+  });
+}
+
 function getLevelRequests(status) {
   return getSubmissions('level-request', status);
 }
@@ -784,6 +808,7 @@ module.exports = {
   createRecord, getPendingRecords, getRecordById, approveRecord, rejectRecord,
   getLevelRequests, approveLevelRequest, createNews, getNews,
   getRecordById, updateRecord,
+  countRecentRecords, autoBanForSpam,
   getRegistrationCount, recordRegistration, normalizeCountry, getCountryFlag,
   banUser, unbanUser, deleteUser, purgeUserContent, isUserBanned, youtubeId,
   logAction, getActivityLog
