@@ -100,6 +100,20 @@ function migrate(database) {
     "created_at TEXT NOT NULL DEFAULT (datetime('now')))"
   );
 
+  // Admin activity log (who did what, with IP + email)
+  database.exec(
+    "CREATE TABLE IF NOT EXISTS activity_log (" +
+    "id INTEGER PRIMARY KEY AUTOINCREMENT, " +
+    "user_id INTEGER, " +
+    "username TEXT, " +
+    "email TEXT, " +
+    "ip TEXT, " +
+    "action TEXT NOT NULL, " +
+    "target TEXT, " +
+    "detail TEXT, " +
+    "created_at TEXT NOT NULL DEFAULT (datetime('now')))"
+  );
+
   // Normalize all existing countries
   const countryMap = {
     'Россия': 'RU', 'россия': 'RU', 'RUSSIA': 'RU', 'Russia': 'RU', 'RU': 'RU', 'rus': 'RU', 'RUS': 'RU', 'ru': 'RU',
@@ -619,6 +633,12 @@ function rejectRecord(id) {
   ).run(id);
 }
 
+function updateRecord(id, progress, status, youtubeUrl, platform) {
+  return get().prepare(
+    "UPDATE records SET progress = ?, status = ?, youtube_url = ?, platform = ? WHERE id = ?"
+  ).run(progress, status, youtubeUrl || null, platform || null, id);
+}
+
 function getLevelRequests(status) {
   return getSubmissions('level-request', status);
 }
@@ -722,6 +742,29 @@ function isUserBanned(id) {
   return row ? !!row.banned : false;
 }
 
+// Log an admin-relevant action (performed by a user) with IP + email.
+function logAction(info) {
+  const d = get();
+  d.prepare(
+    "INSERT INTO activity_log (user_id, username, email, ip, action, target, detail, created_at) " +
+    "VALUES (?, ?, ?, ?, ?, ?, ?, datetime('now'))"
+  ).run(
+    info.user_id || null,
+    info.username || null,
+    info.email || null,
+    info.ip || null,
+    info.action,
+    info.target || null,
+    info.detail || null
+  );
+}
+
+function getActivityLog(limit) {
+  return get().prepare(
+    "SELECT * FROM activity_log ORDER BY id DESC LIMIT ?"
+  ).all(limit || 200);
+}
+
 function get() {
   if (!db) {
     throw new Error('Database not initialized. Call init() first.');
@@ -740,6 +783,8 @@ module.exports = {
   addChatMessage, getChatMessages, getChatMessageCount,
   createRecord, getPendingRecords, getRecordById, approveRecord, rejectRecord,
   getLevelRequests, approveLevelRequest, createNews, getNews,
+  getRecordById, updateRecord,
   getRegistrationCount, recordRegistration, normalizeCountry, getCountryFlag,
-  banUser, unbanUser, deleteUser, purgeUserContent, isUserBanned, youtubeId
+  banUser, unbanUser, deleteUser, purgeUserContent, isUserBanned, youtubeId,
+  logAction, getActivityLog
 };

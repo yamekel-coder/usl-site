@@ -5,6 +5,8 @@ const path = require('path');
 const fs = require('fs');
 const db = require('../database/db');
 const { adminRequired, modRequired } = require('../middleware/admin');
+const audit = require('../lib/audit');
+const rateLimit = require('../middleware/ratelimit');
 
 const BANNER_DIR = path.join(__dirname, '..', 'public', 'uploads', 'banners');
 if (!fs.existsSync(BANNER_DIR)) {
@@ -66,6 +68,9 @@ router.get('/', modRequired, function (req, res) {
   const status = Object.prototype.hasOwnProperty.call(req.query, 'status') ? req.query.status : 'pending';
 
   if (section === 'applications' && req.user.role !== 'admin') {
+    return res.status(403).render('admin/forbidden', { user: req.user });
+  }
+  if (section === 'activity' && req.user.role !== 'admin') {
     return res.status(403).render('admin/forbidden', { user: req.user });
   }
 
@@ -137,6 +142,7 @@ router.get('/', modRequired, function (req, res) {
     news: news,
     pendingRecords: pendingRecords,
     levelRequests: levelRequests,
+    activityLog: section === 'activity' ? db.getActivityLog(300) : [],
     section: section,
     flash: req.query.toast || null
   });
@@ -214,14 +220,40 @@ router.post('/levels/:id/delete', modRequired, function (req, res) {
 
 // ---- Record review (mod + admin) ----
 
-router.post('/records/:id/approve', modRequired, function (req, res) {
-  const info = db.approveRecord(parseInt(req.params.id, 10));
+router.post('/records/:id/approve', modRequired, rateLimit({ keySuffix: 'rec-appr', max: 20, windowMs: 15000 }), function (req, res) {
+  const id = parseInt(req.params.id, 10);
+  const rec = db.getRecordById(id);
+  const info = db.approveRecord(id);
+  audit.log(req, 'record_approve', rec ? (rec.username + ' / ' + (rec.demon_name || rec.demon_id)) : ('#' + id), 'progress=' + (rec && rec.progress));
   back(res, info.changes ? 'Record approved' : 'Record already processed', '/admin');
 });
 
-router.post('/records/:id/reject', modRequired, function (req, res) {
-  const info = db.rejectRecord(parseInt(req.params.id, 10));
+router.post('/records/:id/reject', modRequired, rateLimit({ keySuffix: 'rec-rej', max: 20, windowMs: 15000 }), function (req, res) {
+  const id = parseInt(req.params.id, 10);
+  const rec = db.getRecordById(id);
+  const info = db.rejectRecord(id);
+  audit.log(req, 'record_reject', rec ? (rec.username + ' / ' + (rec.demon_name || rec.demon_id)) : ('#' + id), 'progress=' + (rec && rec.progress));
   back(res, info.changes ? 'Record rejected' : 'Record already processed', '/admin');
+});
+
+// ---- Record edit (mod + admin) ----
+
+router.post('/records/:id/edit', modRequired, rateLimit({ keySuffix: 'rec-edit', max: 20, windowMs: 15000 }), function (req, res) {
+  const id = parseInt(req.params.id, 10);
+  const progress = parseInt(req.body.progress, 10);
+  const status = ['pending', 'verified', 'rejected'].includes(req.body.status) ? req.body.status : 'pending';
+  const youtube_url = (req.body.youtube_url || '').trim().slice(0, 500);
+  const platform = (req.body.platform || '').trim().slice(0, 50);
+  const rec = db.getRecordById(id);
+  if (!rec) {
+    return back(res, 'Record not found', '/admin');
+  }
+  if (isNaN(progress) || progress < 0 || progress > 100) {
+    return back(res, 'Progress must be 0-100', '/admin');
+  }
+  db.updateRecord(id, progress, status, youtube_url, platform);
+  audit.log(req, 'record_edit', rec.username + ' / ' + (rec.demon_name || rec.demon_id), 'progress=' + progress + ' status=' + status);
+  back(res, 'Record updated', '/admin');
 });
 
 // ---- Submissions approve/reject ----
@@ -415,13 +447,15 @@ router.post('/users/:id/country', adminRequired, function (req, res) {
   back(res, 'User country updated', '/admin');
 });
 
-router.post('/users/:id/ban', adminRequired, function (req, res) {
+router.post('/users/:id/ban', adminRequired, rateLimit({ keySuffix: 'ban', max: 15, windowMs: 15000 }), function (req, res) {
   const id = parseInt(req.params.id, 10);
   if (id === req.user.id) {
     return back(res, 'You cannot ban yourself', '/admin');
   }
+  const target = db.getUserById ? db.getUserById(id) : null;
   db.banUser(id);
   db.purgeUserContent(id);
+  audit.log(req, 'ban', target ? (target.username + ' (id#' + id + ')') : ('id#' + id), 'email=' + (target && target.email));
   back(res, 'User banned and all their submissions, records and sessions removed', '/admin?section=users');
 });
 

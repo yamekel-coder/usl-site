@@ -3,6 +3,7 @@ const bcrypt = require('bcrypt');
 const crypto = require('crypto');
 const db = require('../database/db');
 const auth = require('../middleware/auth');
+const audit = require('../lib/audit');
 
 const router = express.Router();
 
@@ -224,6 +225,7 @@ router.post('/register', function (req, res) {
 
   res.clearCookie(CAPTCHA_COOKIE);
   var token = auth.createSession(info.lastInsertRowid);
+  audit.log(req, 'register', username, 'email=' + email + ' ip=' + ip);
   return ok(res, req, token);
 });
 
@@ -261,6 +263,7 @@ router.post('/login', function (req, res) {
   }
 
   var token = auth.createSession(user.id);
+  audit.log(req, 'login', user.username, 'email=' + user.email);
   return ok(res, req, token);
 });
 
