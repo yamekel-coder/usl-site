@@ -483,13 +483,13 @@
         </div>
         <div class="rounded-2xl bg-white/[0.02] border border-white/10 overflow-hidden" style="background:rgba(255,255,255,0.02);border-color:rgba(255,255,255,0.1)">
           <div class="overflow-x-auto">
-            <table class="w-full text-sm">
+            <table class="w-full text-sm min-w-[640px]">
               <thead>
                 <tr class="text-white/30 text-xs uppercase tracking-wider text-left border-b border-white/5">
                   <th class="px-5 py-4 font-medium" data-i18n="admin.col.user">User</th>
                   <th class="px-5 py-4 font-medium" data-i18n="admin.col.role">Current Role</th>
                   <th class="px-5 py-4 font-medium" data-i18n="admin.newRole">New Role</th>
-                  <th class="px-5 py-4 font-medium text-right" data-i18n="admin.col.actions">Actions</th>
+                  <th class="px-5 py-4 font-medium text-right whitespace-nowrap" data-i18n="admin.col.actions">Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -510,39 +510,39 @@
                       <span class="text-[11px] uppercase tracking-wider px-2.5 py-1 rounded-full border text-white/60
                         <% if (u.role === 'admin') { %>border-red-500/30 bg-red-500/10 text-red-300<% } else if (u.role === 'moderator') { %>border-yellow-500/30 bg-yellow-500/10 text-yellow-300<% } else { %>border-white/10<% } %>" style="border-color:<%= u.role === 'admin' ? 'rgba(239,68,68,0.3)' : u.role === 'moderator' ? 'rgba(234,179,8,0.3)' : 'rgba(255,255,255,0.1)' %>;background:<%= u.role === 'admin' ? 'rgba(239,68,68,0.1)' : u.role === 'moderator' ? 'rgba(234,179,8,0.1)' : 'transparent' %>"><%= u.role %></span>
                     </td>
-                    <td class="px-5 py-3">
+                    <td class="px-5 py-3 whitespace-nowrap">
                       <% if (user && user.role === 'admin' && u.id !== user.id) { %>
-                        <form method="POST" action="/admin/users/<%= u.id %>/role" class="flex items-center gap-2">
-                          <select name="role" class="h-9 px-3 rounded-lg border border-white/10 bg-white/5 text-white text-xs focus:outline-none focus:border-white/20" style="background:rgba(255,255,255,0.05);border-color:rgba(255,255,255,0.1)">
+                        <form method="POST" action="/admin/users/<%= u.id %>/role" class="flex items-center gap-1.5">
+                          <select name="role" class="h-8 w-28 px-2 rounded-lg border border-white/10 bg-white/5 text-white text-xs focus:outline-none focus:border-white/20" style="background:rgba(255,255,255,0.05);border-color:rgba(255,255,255,0.1)">
                             <option value="user" <%= u.role === 'user' ? 'selected' : '' %> data-i18n="admin.roleOpt.user">user</option>
                             <option value="moderator" <%= u.role === 'moderator' ? 'selected' : '' %> data-i18n="admin.roleOpt.moderator">moderator</option>
                             <option value="admin" <%= u.role === 'admin' ? 'selected' : '' %> data-i18n="admin.roleOpt.admin">admin</option>
                           </select>
-                          <button type="submit" class="admin-primary-btn" data-i18n="admin.setBtn">Set</button>
+                          <button type="submit" class="h-7 px-2 rounded-lg bg-white/10 text-white/80 text-[11px] font-medium hover:bg-white/20 transition-all" data-i18n="admin.setBtn">Set</button>
                         </form>
                       <% } else { %>
                         <span class="text-white/20 text-xs">—</span>
                       <% } %>
                     </td>
-                    <td class="px-5 py-3 text-right">
+                    <td class="px-5 py-3 text-right whitespace-nowrap">
                       <% if (user && user.role === 'admin' && u.id !== user.id) { %>
-                        <div class="flex items-center justify-end gap-2">
+                        <div class="flex items-center justify-end gap-1.5">
                           <% if (u.role !== 'user') { %>
                             <form method="POST" action="/admin/users/<%= u.id %>/role" class="inline">
                               <input type="hidden" name="role" value="user">
-                              <button type="submit" class="text-red-300/50 hover:text-red-300 text-xs" data-i18n="admin.demoteToUser">Demote to User</button>
+                              <button type="submit" title="Demote to User" class="h-7 px-2 rounded-lg bg-red-500/10 text-red-300/80 hover:bg-red-500/20 text-[11px] font-medium transition-all" data-i18n="admin.demoteToUser">Demote</button>
                             </form>
                           <% } %>
                           <% if (u.role === 'user') { %>
                             <form method="POST" action="/admin/users/<%= u.id %>/role" class="inline">
                               <input type="hidden" name="role" value="moderator">
-                              <button type="submit" class="text-yellow-300/70 hover:text-yellow-300 text-xs" data-i18n="admin.promoteToMod">Promote to Mod</button>
+                              <button type="submit" title="Promote to Mod" class="h-7 px-2 rounded-lg bg-yellow-500/10 text-yellow-300/80 hover:bg-yellow-500/20 text-[11px] font-medium transition-all" data-i18n="admin.promoteToMod">To Mod</button>
                             </form>
                           <% } %>
                           <% if (u.role === 'moderator') { %>
                             <form method="POST" action="/admin/users/<%= u.id %>/role" class="inline">
                               <input type="hidden" name="role" value="admin">
-                              <button type="submit" class="text-green-300/70 hover:text-green-300 text-xs" data-i18n="admin.promoteToAdmin">Promote to Admin</button>
+                              <button type="submit" title="Promote to Admin" class="h-7 px-2 rounded-lg bg-green-500/10 text-green-300/80 hover:bg-green-500/20 text-[11px] font-medium transition-all" data-i18n="admin.promoteToAdmin">To Admin</button>
                             </form>
                           <% } %>
                         </div>
