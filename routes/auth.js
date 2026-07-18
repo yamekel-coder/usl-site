@@ -11,19 +11,6 @@ const MAX_ACCOUNTS_PER_IP = 2;
 const CAPTCHA_COOKIE = 'usl_captcha';
 const CAPTCHA_SECRET = process.env.CAPTCHA_SECRET || 'usl-captcha-secret-key-change-in-prod';
 
-const EMOJIS = ['🐶','🐱','🐭','🐹','🐰','🦊','🐻','🐼','🐨','🐯','🦁','🐮','🐷','🐸','🐵','🐔','🐧','🐦','🐤','🦆','🦅','🦉','🦇','🐺','🐗','🐴','🦄','🐝','🪱','🐛','🦋','🐌','🐞'];
-const WORDS = ['geometry','demon','list','record','verify','submit','moderator','challenge','platform','extreme','insane','hardest','progress','percent','level'];
-const ODD_ONE_OUT_GROUPS = [
-  { items: ['2','4','6','9','8'], answer: '9' },
-  { items: ['3','7','11','14','17'], answer: '14' },
-  { items: ['1','4','9','16','25','36'], answer: '36', note: 'all are squares except 36' },
-  { items: ['5','10','15','20','22'], answer: '22' },
-  { items: ['2','6','12','20','30','38'], answer: '38' },
-  { items: ['100','81','64','49','30','16'], answer: '30' },
-  { items: ['1','8','27','64','100'], answer: '100' },
-  { items: ['11','13','17','19','23','25'], answer: '25' },
-];
-
 function getClientIp(req) {
   return req.headers['x-forwarded-for']?.split(',')[0]?.trim() ||
     req.headers['x-real-ip'] ||
@@ -33,8 +20,7 @@ function getClientIp(req) {
 }
 
 function generateCaptcha() {
-  const types = ['math', 'word'];
-  const type = types[Math.floor(Math.random() * types.length)];
+  const type = 'math';
 
   switch (type) {
     case 'math': {
@@ -55,39 +41,6 @@ function generateCaptcha() {
         answer = String(a * b);
       }
       return { type, question: `${a} ${op} ${b} = ?`, answer };
-    }
-    case 'text': {
-      const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-      let text = '';
-      for (let i = 0; i < 6; i++) {
-        text += chars[Math.floor(Math.random() * chars.length)];
-      }
-      return { type, question: text, answer: text };
-    }
-    case 'emoji': {
-      const targetIdx = Math.floor(Math.random() * EMOJIS.length);
-      const target = EMOJIS[targetIdx];
-      const pool = EMOJIS.filter((_, i) => i !== targetIdx);
-      const options = [target];
-      while (options.length < 9) {
-        const pick = pool[Math.floor(Math.random() * pool.length)];
-        if (!options.includes(pick)) options.push(pick);
-      }
-      for (let i = options.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [options[i], options[j]] = [options[j], options[i]];
-      }
-      const names = ['🐶','🐱','🐭','🐹','🐰','🦊','🐻','🐼','🐨'];
-      return { type, question: target, options, answer: target };
-    }
-    case 'word': {
-      const word = WORDS[Math.floor(Math.random() * WORDS.length)];
-      const reversed = word.split('').reverse().join('');
-      return { type, question: reversed, answer: word.toLowerCase() };
-    }
-    case 'logic': {
-      const group = ODD_ONE_OUT_GROUPS[Math.floor(Math.random() * ODD_ONE_OUT_GROUPS.length)];
-      return { type, question: group.items.join(', '), answer: group.answer };
     }
   }
 }

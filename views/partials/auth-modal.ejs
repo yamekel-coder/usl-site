@@ -73,29 +73,15 @@
       <div id="modal-captcha-box" class="rounded-xl border border-white/10 p-4" style="background:rgba(255,255,255,0.02)">
         <div class="flex items-center justify-between mb-3">
           <span class="text-[10px] text-white/25 uppercase tracking-[0.12em] font-semibold" data-i18n="auth.captchaLabel">Captcha</span>
-          <span class="text-[10px] text-white/15 uppercase tracking-wider" id="modal-captcha-type">
-            <% if (captcha.type === 'math') { %>Math<% } %>
-            <% if (captcha.type === 'word') { %>Unscramble<% } %>
-          </span>
+          <span class="text-[10px] text-white/15 uppercase tracking-wider" id="modal-captcha-type">Math</span>
         </div>
 
-        <% if (captcha.type === 'math') { %>
-          <div class="text-center mb-3">
-            <div class="text-xl font-bold text-white tracking-wider"><%= captcha.question %></div>
-          </div>
-          <input type="text" name="captcha_answer" required autocomplete="off"
-            class="w-full h-11 px-4 rounded-xl bg-white/5 border border-white/10 text-white text-sm text-center placeholder:text-white/20 focus:outline-none focus:border-white/20 transition-all"
-            placeholder="Answer" inputmode="numeric">
-
-        <% } else if (captcha.type === 'word') { %>
-          <div class="text-center mb-3">
-            <div class="text-lg font-bold text-white/80 tracking-wider mb-1" style="font-family:monospace"><%= captcha.question %></div>
-            <div class="text-[11px] text-white/25">Type the original word</div>
-          </div>
-          <input type="text" name="captcha_answer" required autocomplete="off"
-            class="w-full h-11 px-4 rounded-xl bg-white/5 border border-white/10 text-white text-sm text-center placeholder:text-white/20 focus:outline-none focus:border-white/20 transition-all"
-            placeholder="Original word">
-        <% } %>
+        <div class="text-center mb-3">
+          <div class="text-xl font-bold text-white tracking-wider"><%= captcha.question %></div>
+        </div>
+        <input type="text" name="captcha_answer" required autocomplete="off"
+          class="w-full h-11 px-4 rounded-xl bg-white/5 border border-white/10 text-white text-sm text-center placeholder:text-white/20 focus:outline-none focus:border-white/20 transition-all"
+          placeholder="Answer" inputmode="numeric">
       </div>
 
       <label class="flex items-start gap-3 text-sm text-white/40 cursor-pointer select-none">
