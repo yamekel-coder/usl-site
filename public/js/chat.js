@@ -95,8 +95,10 @@
         .then(function (data) {
           if (data && data.error === 'no-links') {
             alert('Links are not allowed in chat.');
+            return;
           }
-          // message will arrive via WebSocket broadcast (no local append to avoid dup)
+          // Show immediately (ws broadcast may also arrive — render() dedupes by id)
+          if (data && data.ok && data.message) render(data.message);
         })
         .catch(function () {});
     });
