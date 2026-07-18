@@ -200,7 +200,8 @@
                 <form action="/admin/level-requests/<%= s.id %>/approve" method="POST" class="flex-1">
                   <button type="submit" class="w-full h-10 rounded-xl bg-white text-dark text-sm font-semibold hover:bg-white/90 transition-all" data-i18n="admin.approve">Approve</button>
                 </form>
-                <form action="/admin/level-requests/<%= s.id %>/reject" method="POST" class="flex-1">
+                <form action="/admin/level-requests/<%= s.id %>/reject" method="POST" class="flex-1 space-y-2">
+                  <input type="text" name="reason" maxlength="500" placeholder="Reason for rejection (optional)" data-i18n-placeholder="admin.rejectReasonPlaceholder" class="w-full h-9 px-3 rounded-lg bg-white/5 border border-white/10 text-white text-xs placeholder:text-white/25 focus:outline-none focus:border-white/20">
                   <button type="submit" class="w-full h-10 rounded-xl border border-white/20 text-white/70 text-sm font-medium hover:bg-white/5 transition-all" data-i18n="admin.reject">Reject</button>
                 </form>
               </div>

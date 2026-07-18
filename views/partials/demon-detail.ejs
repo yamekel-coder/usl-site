@@ -19,6 +19,10 @@
             <span>·</span>
             <span><span class="text-white/25" data-i18n="list.verifier">Verifier</span> <%= demon.verifier %></span>
           <% } %>
+          <% if (demon.level_id) { %>
+            <span>·</span>
+            <span><span class="text-white/25" data-i18n="list.levelId">Level ID</span> <%= demon.level_id %></span>
+          <% } %>
         </div>
       </div>
     </div>

@@ -160,7 +160,8 @@
                   </div>
                   <div class="flex gap-2">
                     <a href="/admin/publish/<%= s.id %>" class="flex-1 h-10 rounded-xl bg-white text-dark text-sm font-semibold hover:bg-white/90 transition-all flex items-center justify-center" data-i18n="admin.publishLevel">Publish Level</a>
-                    <form method="POST" action="/admin/submissions/<%= s.id %>/reject" class="flex-1">
+                    <form method="POST" action="/admin/submissions/<%= s.id %>/reject" class="flex-1 space-y-2">
+                      <input type="text" name="reason" maxlength="500" placeholder="Reason for rejection (optional)" data-i18n-placeholder="admin.rejectReasonPlaceholder" class="w-full h-9 px-3 rounded-lg bg-white/5 border border-white/10 text-white text-xs placeholder:text-white/25 focus:outline-none focus:border-white/20">
                       <button type="submit" class="w-full h-10 rounded-xl border border-white/10 text-white/50 text-sm font-medium hover:bg-white/5 transition-all" data-i18n="admin.reject">Reject</button>
                     </form>
                   </div>
@@ -409,7 +410,8 @@
                     <form method="POST" action="/admin/submissions/<%= s.id %>/approve" class="flex-1">
                       <button type="submit" class="w-full h-10 rounded-xl bg-white text-dark text-sm font-semibold hover:bg-white/90 transition-all" data-i18n="admin.approve">Approve</button>
                     </form>
-                    <form method="POST" action="/admin/submissions/<%= s.id %>/reject" class="flex-1">
+                    <form method="POST" action="/admin/submissions/<%= s.id %>/reject" class="flex-1 space-y-2">
+                      <input type="text" name="reason" maxlength="500" placeholder="Reason for rejection (optional)" data-i18n-placeholder="admin.rejectReasonPlaceholder" class="w-full h-9 px-3 rounded-lg bg-white/5 border border-white/10 text-white text-xs placeholder:text-white/25 focus:outline-none focus:border-white/20">
                       <button type="submit" class="w-full h-10 rounded-xl border border-white/15 text-white/70 text-sm font-medium hover:bg-white/5 transition-all" style="border-color:rgba(255,255,255,0.15)" data-i18n="admin.reject">Reject</button>
                     </form>
                   </div>

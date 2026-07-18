@@ -206,7 +206,8 @@ router.post('/submissions/:id/approve', modRequired, function (req, res) {
 });
 
 router.post('/submissions/:id/reject', modRequired, function (req, res) {
-  db.updateSubmissionStatus(parseInt(req.params.id, 10), 'rejected');
+  const reason = typeof req.body.reason === 'string' ? req.body.reason.trim().substring(0, 500) : '';
+  db.updateSubmissionStatus(parseInt(req.params.id, 10), 'rejected', reason);
   back(res, 'Submission rejected', '/admin');
 });
 
@@ -301,7 +302,8 @@ router.post('/level-requests/:id/approve', modRequired, function (req, res) {
 });
 
 router.post('/level-requests/:id/reject', modRequired, function (req, res) {
-  db.updateSubmissionStatus(parseInt(req.params.id, 10), 'rejected');
+  const reason = typeof req.body.reason === 'string' ? req.body.reason.trim().substring(0, 500) : '';
+  db.updateSubmissionStatus(parseInt(req.params.id, 10), 'rejected', reason);
   back(res, 'Level request rejected', '/admin');
 });
 

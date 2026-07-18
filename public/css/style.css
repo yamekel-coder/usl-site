@@ -1359,6 +1359,10 @@ html {
   border-color: rgb(239 68 68 / 0.1);
 }
 
+.border-red-500\/15 {
+  border-color: rgb(239 68 68 / 0.15);
+}
+
 .border-red-500\/30 {
   border-color: rgb(239 68 68 / 0.3);
 }
@@ -1884,6 +1888,10 @@ html {
 
 .text-red-300\/80 {
   color: rgb(252 165 165 / 0.8);
+}
+
+.text-red-300\/90 {
+  color: rgb(252 165 165 / 0.9);
 }
 
 .text-red-400\/80 {
@@ -2629,6 +2637,14 @@ select:focus {
   color: rgb(255 255 255 / 0.2);
 }
 
+.placeholder\:text-white\/25::-moz-placeholder {
+  color: rgb(255 255 255 / 0.25);
+}
+
+.placeholder\:text-white\/25::placeholder {
+  color: rgb(255 255 255 / 0.25);
+}
+
 .before\:absolute::before {
   content: var(--tw-content);
   position: absolute;
@@ -2807,6 +2823,10 @@ select:focus {
 
   .sm\:inline-flex {
     display: inline-flex;
+  }
+
+  .sm\:w-44 {
+    width: 11rem;
   }
 
   .sm\:grid-cols-2 {

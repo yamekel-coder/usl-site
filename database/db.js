@@ -158,6 +158,11 @@ function migrate(database) {
       updateStmt.run(mapped, u.id);
     }
   }
+
+  const subCols = database.prepare("PRAGMA table_info(submissions)").all();
+  if (!subCols.some(function (c) { return c.name === 'reject_reason'; })) {
+    database.exec("ALTER TABLE submissions ADD COLUMN reject_reason TEXT DEFAULT NULL");
+  }
 }
 
 function getDemons(limit) {
@@ -415,10 +420,21 @@ function getSubmissions(type, status) {
   return get().prepare(sql).all(...params);
 }
 
-function updateSubmissionStatus(id, status) {
+function updateSubmissionStatus(id, status, reason) {
+  if (reason !== undefined) {
+    return get().prepare(
+      "UPDATE submissions SET status = ?, reject_reason = ?, updated_at = datetime('now') WHERE id = ?"
+    ).run(status, reason || null, id);
+  }
   return get().prepare(
     "UPDATE submissions SET status = ?, updated_at = datetime('now') WHERE id = ?"
   ).run(status, id);
+}
+
+function getUserSubmissions(userId) {
+  return get().prepare(
+    "SELECT * FROM submissions WHERE user_id = ? ORDER BY created_at DESC"
+  ).all(userId);
 }
 
 function getUserById(id) {
@@ -692,6 +708,7 @@ module.exports = {
   setUserRole, getUsers, getTeamMembers, getUsersByRole, addDemon, updateDemon, deleteDemon, setUserCountry, setUserPassword,
   setUsername, usernameExists,
   deleteUserSessions,
+  getUserSubmissions,
   createRecord, getPendingRecords, getRecordById, approveRecord, rejectRecord,
   getLevelRequests, approveLevelRequest, createNews, getNews,
   getRegistrationCount, recordRegistration, normalizeCountry, getCountryFlag,

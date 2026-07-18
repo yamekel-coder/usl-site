@@ -58,12 +58,15 @@ router.get('/', auth.authRequired, function (req, res) {
     'ORDER BY r.created_at DESC LIMIT 5'
   ).all(user.id);
 
+  var mySubmissions = db.getUserSubmissions(user.id);
+
   res.render('profile', {
     profile: user,
     user: req.user,
     record_count: recordCount,
     rating: db.getPlayerRating(user.id),
     records: records,
+    my_submissions: mySubmissions,
     countries: COUNTRIES,
     error: null,
     success: req.query.success || null

@@ -121,6 +121,44 @@
         <% } %>
       </div>
 
+      <!-- My submissions -->
+      <% if (user && user.id === profile.id) { %>
+      <div class="rounded-3xl bg-white/[0.015] border border-white/[0.06] backdrop-blur-2xl overflow-hidden mb-6">
+        <div class="px-6 py-4 border-b border-white/[0.04] text-sm font-medium text-white/70" data-i18n="profile.mySubmissions">My Submissions</div>
+        <% if (!my_submissions || my_submissions.length === 0) { %>
+          <div class="px-6 py-10 text-center text-sm text-white/20" data-i18n="profile.noSubmissions">No submissions yet.</div>
+        <% } else { %>
+          <% my_submissions.forEach(function (s) { %>
+            <%
+              var sd = {};
+              try { sd = JSON.parse(s.data || '{}'); } catch (e) {}
+              var sdClass = {
+                'pending': 'border-white/30 text-white/40',
+                'approved': 'border-white text-white',
+                'rejected': 'border-white/20 text-white/20'
+              };
+              var ssc = sdClass[s.status] || 'border-white/40 text-white/60';
+              var title = s.type === 'moderator' ? 'Moderator application' : (sd.name || 'Level request');
+            %>
+            <div class="px-6 py-4 border-b border-white/[0.03] last:border-0">
+              <div class="flex items-center justify-between gap-4">
+                <div class="min-w-0">
+                  <div class="text-white truncate"><%= title %></div>
+                  <div class="text-[11px] uppercase tracking-wider text-white/30"><%= s.type %></div>
+                </div>
+                <span class="inline-flex px-2.5 py-0.5 rounded-full border text-[11px] uppercase tracking-wider <%= ssc %>"><%= s.status %></span>
+              </div>
+              <% if (s.status === 'rejected' && s.reject_reason) { %>
+                <div class="mt-2 rounded-lg bg-red-500/5 border border-red-500/15 px-3 py-2 text-xs text-red-300/90">
+                  <span class="text-white/40" data-i18n="profile.rejectReason">Reason:</span> <%= s.reject_reason %>
+                </div>
+              <% } %>
+            </div>
+          <% }); %>
+        <% } %>
+      </div>
+      <% } %>
+
       <!-- Avatar upload hint (own profile only) -->
       <% if (user && user.id === profile.id) { %>
         <p class="text-center text-xs text-white/25 mb-6" data-i18n="profile.uploadHint">Hover the avatar to change it · PNG, JPG, GIF or WebP</p>
