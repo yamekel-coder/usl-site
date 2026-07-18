@@ -204,6 +204,7 @@
                           <input name="name" value="<%= d.name %>" required class="admin-input">
                           <input name="creator" value="<%= d.creator || '' %>" placeholder="Creator" data-i18n-placeholder="admin.field.creators" class="admin-input">
                           <input name="verifier" value="<%= d.verifier || '' %>" placeholder="Verifier" data-i18n-placeholder="admin.field.verifier" class="admin-input">
+                          <input name="level_id" value="<%= d.level_id || '' %>" placeholder="Level ID" data-i18n-placeholder="admin.field.levelId" class="admin-input">
                           <div>
                             <% if (d.banner_url) { %><img src="<%= d.banner_url %>" class="w-full h-20 object-cover rounded-lg mb-1 border border-white/10"><% } %>
                             <label for="banner-file-<%= d.id %>" class="flex items-center justify-between w-full px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-xs cursor-pointer hover:bg-white/[0.07] transition-all">
