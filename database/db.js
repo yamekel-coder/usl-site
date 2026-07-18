@@ -447,9 +447,10 @@ function getUserSubmissions(userId) {
 }
 
 function addChatMessage(userId, username, message) {
-  return get().prepare(
+  var info = get().prepare(
     "INSERT INTO chat_messages (user_id, username, message) VALUES (?, ?, ?)"
   ).run(userId, username, message);
+  return info.lastInsertRowid;
 }
 
 function getChatMessages(limit) {

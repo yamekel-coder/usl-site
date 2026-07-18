@@ -6,9 +6,11 @@
   var input = form ? form.querySelector('input[name="message"]') : null;
 
   var lastId = 0;
+  var ids = {};
   var msgs = log.querySelectorAll('.chat-msg');
   for (var i = 0; i < msgs.length; i++) {
     var id = parseInt(msgs[i].getAttribute('data-id'), 10);
+    ids[id] = true;
     if (id > lastId) lastId = id;
   }
   var emptyEl = document.getElementById('chat-empty');
@@ -19,7 +21,6 @@
     });
   }
 
-  // Convert UTC "YYYY-MM-DD HH:MM:SS" → local HH:MM
   function formatTime(utc) {
     if (!utc) return '';
     var d = new Date(utc.replace(' ', 'T') + 'Z');
@@ -29,19 +30,13 @@
     return h + ':' + m;
   }
 
-  function refreshTimes() {
-    var spans = log.querySelectorAll('.chat-time');
-    for (var i = 0; i < spans.length; i++) {
-      var t = spans[i].getAttribute('data-time');
-      if (t) spans[i].textContent = formatTime(t);
-    }
-  }
-
   function scrollToBottom() {
     log.scrollTop = log.scrollHeight;
   }
 
   function render(m) {
+    if (ids[m.id]) return; // avoid duplicates
+    ids[m.id] = true;
     if (emptyEl) { emptyEl.remove(); emptyEl = null; }
     var div = document.createElement('div');
     div.setAttribute('data-id', m.id);
@@ -57,25 +52,33 @@
         '<div class="text-sm text-white/90 break-words">' + escapeHtml(m.message) + '</div>' +
       '</div>';
     log.appendChild(div);
-    lastId = m.id;
-  }
-
-  function appendLocal(m) {
-    render(m);
+    if (m.id > lastId) lastId = m.id;
     scrollToBottom();
   }
 
-  function poll() {
-    fetch('/chat/messages?since=' + lastId, { headers: { 'Accept': 'application/json' } })
-      .then(function (r) { return r.json(); })
-      .then(function (data) {
-        var list = (data.messages || []);
-        if (list.length) {
-          list.forEach(appendLocal);
-        }
-      })
-      .catch(function () {});
+  // WebSocket live updates
+  var proto = location.protocol === 'https:' ? 'wss' : 'ws';
+  var wsUrl = proto + '://' + location.host + '/ws/chat';
+  var ws = null;
+  var wsReady = false;
+
+  function connect() {
+    try {
+      ws = new WebSocket(wsUrl);
+      ws.onopen = function () { wsReady = true; };
+      ws.onmessage = function (ev) {
+        try {
+          var data = JSON.parse(ev.data);
+          if (data.type === 'message' && data.message) render(data.message);
+        } catch (e) {}
+      };
+      ws.onclose = function () { wsReady = false; setTimeout(connect, 2000); };
+      ws.onerror = function () { try { ws.close(); } catch (e) {} };
+    } catch (e) {
+      setTimeout(connect, 2000);
+    }
   }
+  connect();
 
   if (form && input) {
     form.addEventListener('submit', function (e) {
@@ -90,18 +93,14 @@
       })
         .then(function (r) { return r.json(); })
         .then(function (data) {
-          if (data && data.ok && data.message) {
-            appendLocal(data.message);
-          } else if (data && data.error === 'no-links') {
+          if (data && data.error === 'no-links') {
             alert('Links are not allowed in chat.');
           }
+          // message will arrive via WebSocket broadcast (no local append to avoid dup)
         })
         .catch(function () {});
     });
   }
 
   scrollToBottom();
-  refreshTimes();
-  setInterval(poll, 1500);
-  setInterval(refreshTimes, 30000);
 })();

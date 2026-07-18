@@ -1,8 +1,10 @@
 const express = require('express');
 const path = require('path');
+const http = require('http');
 const cookieParser = require('cookie-parser');
 const crypto = require('crypto');
 const db = require('./database/db');
+const chatSocket = require('./lib/chat-socket');
 const COUNTRIES = require('./database/countries');
 const auth = require('./middleware/auth');
 try { require('dotenv').config(); } catch (e) {}
@@ -124,6 +126,9 @@ app.use('/chat', require('./routes/chat'));
 app.get('/privacy', function (req, res) { res.render('privacy'); });
 app.get('/terms', function (req, res) { res.render('terms'); });
 
-app.listen(PORT, () => {
+const server = http.createServer(app);
+chatSocket.init(server);
+
+server.listen(PORT, () => {
   console.log(`USL running at http://localhost:${PORT}`);
 });

@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const db = require('../database/db');
 const auth = require('../middleware/auth');
+const chatSocket = require('../lib/chat-socket');
 
 // Block any links: http(s)://, www., and bare domains like site.com or sub.site.tld
 function containsLink(text) {
@@ -55,11 +56,12 @@ router.post('/', auth.authRequired, function (req, res) {
     }
     return res.redirect('/chat?error=no-links');
   }
-  db.addChatMessage(req.user.id, req.user.username, message);
+  const newId = db.addChatMessage(req.user.id, req.user.username, message);
+  chatSocket.broadcastChatMessage(newId);
   const msg = db.get().prepare(
     "SELECT cm.id, cm.user_id, cm.username, cm.message, cm.created_at, u.avatar_url " +
-    "FROM chat_messages cm LEFT JOIN users u ON u.id = cm.user_id WHERE cm.id = last_insert_rowid()"
-  ).get();
+    "FROM chat_messages cm LEFT JOIN users u ON u.id = cm.user_id WHERE cm.id = ?"
+  ).get(newId);
   if (req.xhr || (req.headers.accept && req.headers.accept.indexOf('json') !== -1)) {
     return res.json({ ok: true, message: msg });
   }
