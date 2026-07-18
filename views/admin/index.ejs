@@ -665,23 +665,17 @@
         <% } %>
 
         <!-- Grant Record -->
-        <div class="mt-8 rounded-2xl bg-white/[0.02] border border-white/10 overflow-hidden p-6" style="background:rgba(255,255,255,0.02);border-color:rgba(255,255,255,0.1)">
+         <div class="mt-8 rounded-2xl bg-white/[0.02] border border-white/10 p-6 relative" style="background:rgba(255,255,255,0.02);border-color:rgba(255,255,255,0.1)">
           <h3 class="text-lg font-bold text-white mb-1" data-i18n="admin.grantTitle">Grant Record Manually</h3>
           <p class="text-white/40 text-sm mb-5" data-i18n="admin.grantSub">Select a user and an existing level to grant them a verified completion (counts toward their points & leaderboard).</p>
           <form method="POST" action="/admin/users/0/add-record" id="grant-form" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
             <div class="lg:col-span-1">
               <label class="block text-white/40 text-xs uppercase tracking-wider mb-1.5" data-i18n="admin.grantUser">User</label>
-              <select name="user_id" id="grant-user" class="w-full h-11 px-3 rounded-xl border border-white/10 bg-white/5 text-white text-sm focus:outline-none focus:border-white/20" style="background:rgba(255,255,255,0.05);border-color:rgba(255,255,255,0.1)" required>
-                <option value="" data-i18n="admin.grantSelectUser">Select user…</option>
-                <% users.forEach(function (u) { %><option value="<%= u.id %>"><%= u.username %> (<%= u.id %>)</option><% }); %>
-              </select>
+              <div class="usl-select" data-name="user_id" data-current="" data-options='<%= JSON.stringify(users.map(function (u) { return { name: String(u.id), label: u.username + ' (' + u.id + ')' }; })) %>'></div>
             </div>
             <div class="lg:col-span-1">
               <label class="block text-white/40 text-xs uppercase tracking-wider mb-1.5" data-i18n="admin.grantLevel">Level</label>
-              <select name="demon_id" id="grant-demon" class="w-full h-11 px-3 rounded-xl border border-white/10 bg-white/5 text-white text-sm focus:outline-none focus:border-white/20" style="background:rgba(255,255,255,0.05);border-color:rgba(255,255,255,0.1)" required>
-                <option value="" data-i18n="admin.grantSelectLevel">Select level…</option>
-                <% demons.forEach(function (d) { %><option value="<%= d.id %>" data-req="<%= d.requirement || 100 %>"><%= d.position ? (d.position + '. ') : '' %><%= d.name %> (<%= d.difficulty %>)</option><% }); %>
-              </select>
+              <div class="usl-select" data-name="demon_id" data-current="" data-options='<%= JSON.stringify(demons.map(function (d) { return { name: String(d.id), label: (d.position ? (d.position + '. ') : '') + d.name + ' (' + d.difficulty + ')', req: d.requirement || 100 }; })) %>'></div>
             </div>
             <div class="lg:col-span-1">
               <label class="block text-white/40 text-xs uppercase tracking-wider mb-1.5" data-i18n="admin.grantPercent">Percent</label>
@@ -698,14 +692,20 @@
           </form>
           <script>
           function prepareGrant() {
-            var uid = document.getElementById('grant-user').value;
+            var form = document.getElementById('grant-form');
+            var uid = form.querySelector('[name="user_id"]').value;
             if (!uid) { alert('Select a user first'); return false; }
-            document.getElementById('grant-form').action = '/admin/users/' + uid + '/add-record';
-            var sel = document.getElementById('grant-demon');
-            var opt = sel.options[sel.selectedIndex];
-            if (opt && opt.dataset.req) {
-              var p = document.getElementById('grant-percent');
-              if (!p.value) p.value = opt.dataset.req;
+            form.action = '/admin/users/' + uid + '/add-record';
+            var demonId = form.querySelector('[name="demon_id"]').value;
+            if (demonId) {
+              var sel = form.querySelector('[data-name="demon_id"]');
+              var opts = [];
+              try { opts = JSON.parse(sel.getAttribute('data-options')); } catch (e) {}
+              var found = opts.filter(function (o) { return o.name === demonId; })[0];
+              if (found && found.req) {
+                var p = document.getElementById('grant-percent');
+                if (!p.value) p.value = found.req;
+              }
             }
             return true;
           }
