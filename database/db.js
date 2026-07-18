@@ -196,8 +196,8 @@ function getRecords(limit) {
   const sql =
     "SELECT r.id, r.progress, r.status, r.created_at, u.username, d.name AS demon_name, d.difficulty " +
     "FROM records r " +
-    "JOIN users u ON u.id = r.user_id " +
-    "JOIN demons d ON d.id = r.demon_id " +
+    "LEFT JOIN users u ON u.id = r.user_id " +
+    "LEFT JOIN demons d ON d.id = r.demon_id " +
     "ORDER BY r.created_at DESC" +
     (limit ? " LIMIT " + Number(limit) : "");
   return database.prepare(sql).all();
@@ -648,6 +648,14 @@ function deleteUser(id) {
   return get().prepare("DELETE FROM users WHERE id = ?").run(id);
 }
 
+// Remove all content (submissions, records, sessions) belonging to a user.
+function purgeUserContent(id) {
+  const d = get();
+  d.prepare("DELETE FROM submissions WHERE user_id = ?").run(id);
+  d.prepare("DELETE FROM records WHERE user_id = ?").run(id);
+  d.prepare("DELETE FROM sessions WHERE user_id = ?").run(id);
+}
+
 function isUserBanned(id) {
   const row = get().prepare("SELECT banned FROM users WHERE id = ?").get(id);
   return row ? !!row.banned : false;
@@ -668,5 +676,5 @@ module.exports = {
   createRecord, getPendingRecords, getRecordById, approveRecord, rejectRecord,
   getLevelRequests, approveLevelRequest, createNews, getNews,
   getRegistrationCount, recordRegistration, normalizeCountry, getCountryFlag,
-  banUser, unbanUser, deleteUser, isUserBanned, youtubeId
+  banUser, unbanUser, deleteUser, purgeUserContent, isUserBanned, youtubeId
 };

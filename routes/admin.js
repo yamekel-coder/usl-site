@@ -370,7 +370,8 @@ router.post('/users/:id/ban', adminRequired, function (req, res) {
     return back(res, 'You cannot ban yourself', '/admin');
   }
   db.banUser(id);
-  back(res, 'User banned', '/admin?section=users');
+  db.purgeUserContent(id);
+  back(res, 'User banned and all their submissions, records and sessions removed', '/admin?section=users');
 });
 
 router.post('/users/:id/unban', adminRequired, function (req, res) {
