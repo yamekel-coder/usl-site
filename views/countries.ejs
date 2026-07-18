@@ -40,7 +40,7 @@
                     <% } %>
                   </div>
                   <div class="min-w-0 flex-1">
-                    <div class="text-sm font-semibold text-white truncate" data-country="<%= c.country %>"><%= c.flag %> <%= c.country %></div>
+                    <div class="text-sm font-semibold text-white truncate" data-country="<%= c.country %>"><%= c.flag %> <%= countryName(c.country) %></div>
                     <div class="text-[11px] text-white/30 truncate"><%= c.players %> <span data-i18n="leaderboard.playersShort">players</span></div>
                   </div>
                   <div class="text-sm font-bold text-white/80 shrink-0"><%= c.points %></div>

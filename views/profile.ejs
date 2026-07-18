@@ -66,7 +66,7 @@
         <div class="mt-4 flex flex-col gap-2 text-sm text-white/40 items-center">
           <span><span class="text-white/25" data-i18n="profile.joined">Joined</span> <%= new Date(profile.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) %></span>
           <% if (profile.country) { %>
-            <span><span class="text-white/25" data-i18n="profile.country">Country</span> <%= flag(profile.country) %> <span class="text-white/40"><%= profile.country %></span></span>
+            <span><span class="text-white/25" data-i18n="profile.country">Country</span> <%= flag(profile.country) %> <span class="text-white/40"><%= countryName(profile.country) %></span></span>
           <% } %>
           <% if (user && user.id === profile.id) { %>
             <span class="truncate"><span class="text-white/25" data-i18n="profile.email">Email</span> <%= profile.email %></span>

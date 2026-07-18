@@ -10,6 +10,13 @@ function flagEmoji(code) {
   );
 }
 
+// Map ISO-3166 alpha-2 code to full country name (or the code itself if unknown).
+function countryName(code) {
+  if (!code) return '';
+  const found = COUNTRIES.find(function (c) { return c.code === code; });
+  return found ? found.name : code;
+}
+
 const COUNTRIES = [
   { code: 'RU', name: 'Russia' },
   { code: 'UA', name: 'Ukraine' },
@@ -106,3 +113,4 @@ const COUNTRIES = [
 
 module.exports = COUNTRIES;
 module.exports.flagEmoji = flagEmoji;
+module.exports.countryName = countryName;

@@ -40,7 +40,7 @@
                   </div>
                   <div class="min-w-0 flex-1">
                     <div class="text-sm font-semibold text-white truncate"><%= p.username %></div>
-                    <div class="text-[11px] text-white/30 truncate" data-country="<%= p.country || '' %>"><%= flag(p.country) %> <%= p.country || '—' %></div>
+                    <div class="text-[11px] text-white/30 truncate" data-country="<%= p.country || '' %>"><%= flag(p.country) %> <%= countryName(p.country) || '—' %></div>
                   </div>
                   <div class="text-sm font-bold text-white/80 shrink-0"><%= p.rating %></div>
                 </button>

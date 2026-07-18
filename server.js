@@ -103,6 +103,7 @@ app.use(function (req, res, next) {
   res.locals.youtubeId = function (input) { return db.youtubeId(input); };
   res.locals.countries = COUNTRIES;
   res.locals.flag = function (code) { return COUNTRIES.flagEmoji(code); };
+  res.locals.countryName = function (code) { return COUNTRIES.countryName(code); };
 
   // Pass captcha to all pages (for auth modal)
   var captcha = generateCaptcha();

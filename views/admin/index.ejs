@@ -455,7 +455,7 @@
                 <div class="grid grid-cols-2 gap-3 text-sm">
                   <div>
                     <span class="text-white/30 text-xs uppercase tracking-wider" data-i18n="admin.col.country">Country</span>
-                    <div class="text-white/60 mt-0.5"><%= flag(m.country) %> <%= m.country || '—' %></div>
+                    <div class="text-white/60 mt-0.5"><%= flag(m.country) %> <%= countryName(m.country) || '—' %></div>
                   </div>
                   <div>
                     <span class="text-white/30 text-xs uppercase tracking-wider" data-i18n="admin.joined">Joined</span>
@@ -607,7 +607,7 @@
                       </div>
                     </td>
                     <td class="px-5 py-3 text-white/40 text-xs"><%= u.email %></td>
-                    <td class="px-5 py-3 text-white/40 text-xs"><%= flag(u.country) %> <%= u.country || '—' %></td>
+                    <td class="px-5 py-3 text-white/40 text-xs"><%= flag(u.country) %> <%= countryName(u.country) || '—' %></td>
                     <td class="px-5 py-3">
                       <% if (user && user.role === 'admin' && u.id !== user.id) { %>
                         <form method="POST" action="/admin/users/<%= u.id %>/role" class="flex items-center gap-1.5">
