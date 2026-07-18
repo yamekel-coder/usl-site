@@ -52,13 +52,14 @@
       var f = (filter || '').toLowerCase();
       var visible = 0;
       options.forEach(function (opt) {
-        if (f && opt.name.toLowerCase().indexOf(f) === -1) return;
+        if (f && (opt.name + ' ' + (opt.label || '')).toLowerCase().indexOf(f) === -1) return;
         visible++;
         var o = document.createElement('div');
         o.className = 'usl-select__opt' + (opt.name === current ? ' selected' : '');
         o.dataset.value = opt.name;
         var fe = flagEmoji(opt.code);
-        o.innerHTML = (fe ? '<span class="usl-select__flag">' + fe + '</span>' : '') + '<span>' + opt.name + '</span>';
+        var label = opt.label || opt.name;
+        o.innerHTML = (fe ? '<span class="usl-select__flag">' + fe + '</span>' : '') + '<span>' + label + '</span>';
         o.addEventListener('click', function () {
           current = opt.name;
           hidden.value = opt.name;
