@@ -92,6 +92,19 @@ sudo -u usl npm run build:css
 systemctl restart usl
 ```
 
+## WebSocket (real-time chat) — required nginx config
+The chat uses WebSocket on the same port (`:3000`). For it to work through
+nginx, the proxy **must** forward the `Upgrade`/`Connection` headers. They are
+already present in `deploy/nginx-usl.conf`. After deploying/updating that file:
+
+```bash
+cp /opt/usl/deploy/nginx-usl.conf /etc/nginx/sites-available/usl
+nginx -t && systemctl reload nginx
+```
+
+If you skip this, chat messages from other users will only appear after a page
+refresh.
+
 ## Restore a backup
 ```bash
 systemctl stop usl
