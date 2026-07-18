@@ -454,7 +454,9 @@ function addChatMessage(userId, username, message) {
 
 function getChatMessages(limit) {
   return get().prepare(
-    "SELECT id, user_id, username, message, created_at FROM chat_messages ORDER BY id DESC LIMIT ?"
+    "SELECT cm.id, cm.user_id, cm.username, cm.message, cm.created_at, u.avatar_url " +
+    "FROM chat_messages cm LEFT JOIN users u ON u.id = cm.user_id " +
+    "ORDER BY cm.id DESC LIMIT ?"
   ).all(limit || 100).reverse();
 }
 

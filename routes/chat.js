@@ -38,15 +38,31 @@ router.get('/messages', function (req, res) {
 router.post('/', auth.authRequired, function (req, res) {
   const message = typeof req.body.message === 'string' ? req.body.message.trim() : '';
   if (!message) {
+    if (req.xhr || (req.headers.accept && req.headers.accept.indexOf('json') !== -1)) {
+      return res.status(400).json({ ok: false, error: 'empty' });
+    }
     return res.redirect('/chat');
   }
   if (message.length > 500) {
+    if (req.xhr || (req.headers.accept && req.headers.accept.indexOf('json') !== -1)) {
+      return res.status(400).json({ ok: false, error: 'too-long' });
+    }
     return res.redirect('/chat?error=too-long');
   }
   if (containsLink(message)) {
+    if (req.xhr || (req.headers.accept && req.headers.accept.indexOf('json') !== -1)) {
+      return res.status(400).json({ ok: false, error: 'no-links' });
+    }
     return res.redirect('/chat?error=no-links');
   }
   db.addChatMessage(req.user.id, req.user.username, message);
+  const msg = db.get().prepare(
+    "SELECT cm.id, cm.user_id, cm.username, cm.message, cm.created_at, u.avatar_url " +
+    "FROM chat_messages cm LEFT JOIN users u ON u.id = cm.user_id WHERE cm.id = last_insert_rowid()"
+  ).get();
+  if (req.xhr || (req.headers.accept && req.headers.accept.indexOf('json') !== -1)) {
+    return res.json({ ok: true, message: msg });
+  }
   res.redirect('/chat');
 });
 
