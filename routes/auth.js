@@ -242,7 +242,7 @@ router.post('/register', function (req, res) {
   var dbInstance = db.get();
 
   var existing = dbInstance.prepare(
-    'SELECT id FROM users WHERE username = ? OR email = ?'
+    'SELECT id FROM users WHERE lower(username) = lower(?) OR lower(email) = lower(?)'
   ).get(username, email);
   if (existing) {
     return fail(res, req, 'Username or email already taken', 'auth/register', {

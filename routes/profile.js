@@ -203,7 +203,8 @@ router.post('/password', auth.authRequired, function (req, res) {
   }
 
   db.setUserPassword(req.user.id, bcrypt.hashSync(next, 10));
-  res.redirect('/profile?success=password-updated');
+  db.deleteUserSessions(req.user.id);
+  return res.redirect('/login?password-changed=1');
 });
 
 module.exports = router;

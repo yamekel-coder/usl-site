@@ -525,6 +525,10 @@ function setUsername(userId, username) {
   ).run(username, userId);
 }
 
+function deleteUserSessions(userId) {
+  return get().prepare("DELETE FROM sessions WHERE user_id = ?").run(userId);
+}
+
 function createRecord(userId, record) {
   const info = get().prepare(
     "INSERT INTO records (user_id, demon_id, progress, status, youtube_url, raw_footage_url, platform, comment) " +
@@ -687,6 +691,7 @@ module.exports = {
   createSubmission, getSubmissions, updateSubmissionStatus, getUserById, getUserByEmail,
   setUserRole, getUsers, getTeamMembers, getUsersByRole, addDemon, updateDemon, deleteDemon, setUserCountry, setUserPassword,
   setUsername, usernameExists,
+  deleteUserSessions,
   createRecord, getPendingRecords, getRecordById, approveRecord, rejectRecord,
   getLevelRequests, approveLevelRequest, createNews, getNews,
   getRegistrationCount, recordRegistration, normalizeCountry, getCountryFlag,
