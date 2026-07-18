@@ -138,6 +138,21 @@
             <% if (success === 'password-short') { %>New password must be at least 6 characters.<% } %>
             <% if (success === 'password-mismatch') { %>New passwords do not match.<% } %>
             <% if (success === 'invalid-country') { %>Invalid region selected.<% } %>
+            <% if (success === 'username-updated') { %>Nickname updated.<% } %>
+            <% if (success === 'username-short') { %>Nickname must be 3–24 characters.<% } %>
+            <% if (success === 'username-invalid') { %>Only letters, numbers, spaces, . _ - are allowed.<% } %>
+            <% if (success === 'username-taken') { %>This nickname is already taken.<% } %>
+          </div>
+        <% } %>
+
+        <% if (user && user.id === profile.id) { %>
+          <div class="rounded-3xl bg-white/[0.015] border border-white/[0.06] backdrop-blur-2xl p-6 mb-6">
+            <h3 class="text-lg font-bold text-white mb-1" data-i18n="profile.changeUsername">Change Nickname</h3>
+            <p class="text-white/40 text-sm mb-5" data-i18n="profile.changeUsernameSub">This is the name shown across the site and leaderboards.</p>
+            <form method="POST" action="/profile/username" class="flex flex-col sm:flex-row gap-3">
+              <input type="text" name="username" required minlength="3" maxlength="24" value="<%= profile.username %>" placeholder="New nickname" data-i18n-placeholder="profile.newUsername" class="flex-1 h-11 px-4 rounded-xl bg-white/5 border border-white/10 text-white text-sm placeholder:text-white/20 focus:outline-none focus:border-white/20">
+              <button type="submit" class="sm:w-44 h-11 rounded-xl bg-white text-dark font-semibold text-sm hover:bg-white/90 transition-all duration-300" data-i18n="profile.saveUsername">Save Nickname</button>
+            </form>
           </div>
         <% } %>
 

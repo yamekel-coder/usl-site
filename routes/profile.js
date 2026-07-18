@@ -165,6 +165,22 @@ router.post('/country', auth.authRequired, function (req, res) {
   res.redirect('/profile?success=country-updated');
 });
 
+// POST /profile/username — change nickname
+router.post('/username', auth.authRequired, function (req, res) {
+  var name = typeof req.body.username === 'string' ? req.body.username.trim() : '';
+  if (name.length < 3 || name.length > 24) {
+    return res.redirect('/profile?success=username-short');
+  }
+  if (!/^[A-Za-z0-9_.\- ]+$/.test(name)) {
+    return res.redirect('/profile?success=username-invalid');
+  }
+  if (db.usernameExists(name, req.user.id)) {
+    return res.redirect('/profile?success=username-taken');
+  }
+  db.setUsername(req.user.id, name);
+  res.redirect('/profile?success=username-updated');
+});
+
 // POST /profile/password — change password
 router.post('/password', auth.authRequired, function (req, res) {
   var current = req.body.current || '';
