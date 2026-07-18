@@ -21,7 +21,8 @@ router.get('/', function (req, res) {
   res.render('chat', {
     user: res.locals.user || null,
     messages: messages,
-    count: db.getChatMessageCount()
+    count: db.getChatMessageCount(),
+    error: req.query.error || null
   });
 });
 
