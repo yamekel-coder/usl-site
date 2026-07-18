@@ -337,7 +337,8 @@ router.post('/mod-applications/:id/approve', adminRequired, function (req, res) 
 });
 
 router.post('/mod-applications/:id/reject', adminRequired, function (req, res) {
-  db.updateSubmissionStatus(parseInt(req.params.id, 10), 'rejected');
+  const reason = typeof req.body.reason === 'string' ? req.body.reason.trim().substring(0, 500) : '';
+  db.updateSubmissionStatus(parseInt(req.params.id, 10), 'rejected', reason);
   back(res, 'Moderator application rejected', '/admin');
 });
 
