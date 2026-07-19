@@ -42,13 +42,39 @@ function migrate(database) {
   if (!demonCols.some(function (c) { return c.name === 'banner_url'; })) {
     database.exec("ALTER TABLE demons ADD COLUMN banner_url TEXT DEFAULT NULL");
   }
+  if (!demonCols.some(function (c) { return c.name === 'shittylist_equiv'; })) {
+    database.exec("ALTER TABLE demons ADD COLUMN shittylist_equiv TEXT DEFAULT NULL");
+  }
 
   const recordCols = database.prepare("PRAGMA table_info(records)").all();
-  ['youtube_url', 'raw_footage_url', 'platform', 'comment'].forEach(function (col) {
+  ['youtube_url', 'raw_footage_url', 'platform', 'comment', 'opinion', 'player_name'].forEach(function (col) {
     if (!recordCols.some(function (c) { return c.name === col; })) {
       database.exec("ALTER TABLE records ADD COLUMN " + col + " TEXT DEFAULT NULL");
     }
   });
+  // Allow records not linked to a registered account (admin-added records):
+  // make user_id nullable by rebuilding the table if it is still NOT NULL.
+  const recUserIdCol = database.prepare("PRAGMA table_info(records)").all().find(function (c) { return c.name === 'user_id'; });
+  if (recUserIdCol && recUserIdCol.notnull) {
+    database.exec(
+      "CREATE TABLE records_new (" +
+      "id INTEGER PRIMARY KEY AUTOINCREMENT, " +
+      "user_id INTEGER REFERENCES users(id) ON DELETE CASCADE, " +
+      "demon_id INTEGER NOT NULL REFERENCES demons(id) ON DELETE CASCADE, " +
+      "progress INTEGER NOT NULL DEFAULT 100, " +
+      "status TEXT NOT NULL DEFAULT 'verified' CHECK(status IN ('pending','verified','rejected')), " +
+      "youtube_url TEXT DEFAULT NULL, raw_footage_url TEXT DEFAULT NULL, " +
+      "platform TEXT DEFAULT NULL, comment TEXT DEFAULT NULL, opinion TEXT DEFAULT NULL, " +
+      "player_name TEXT DEFAULT NULL, " +
+      "created_at TEXT NOT NULL DEFAULT (datetime('now')))"
+    );
+    database.exec(
+      "INSERT INTO records_new (id, user_id, demon_id, progress, status, youtube_url, raw_footage_url, platform, comment, opinion, player_name, created_at) " +
+      "SELECT id, user_id, demon_id, progress, status, youtube_url, raw_footage_url, platform, comment, opinion, player_name, created_at FROM records"
+    );
+    database.exec("DROP TABLE records");
+    database.exec("ALTER TABLE records_new RENAME TO records");
+  }
 
   database.exec(
     "CREATE TABLE IF NOT EXISTS news (" +
@@ -213,8 +239,8 @@ function getDemonById(id) {
 
 function getDemonRecords(demonId) {
   return get().prepare(
-    "SELECT r.id, r.progress, r.status, r.created_at, u.username, u.avatar_url " +
-    "FROM records r JOIN users u ON u.id = r.user_id " +
+    "SELECT r.id, r.progress, r.status, r.created_at, r.player_name, u.username, u.avatar_url " +
+    "FROM records r LEFT JOIN users u ON u.id = r.user_id " +
     "WHERE r.demon_id = ? AND r.status = 'verified' " +
     "ORDER BY r.progress DESC, r.created_at ASC"
   ).all(demonId);
@@ -551,7 +577,7 @@ function addDemon(demon) {
 }
 
 function updateDemon(id, fields) {
-  const allowed = ['position', 'name', 'creator', 'verifier', 'difficulty', 'video_url', 'banner_url', 'level_id', 'requirement'];
+  const allowed = ['position', 'name', 'creator', 'verifier', 'difficulty', 'video_url', 'banner_url', 'level_id', 'requirement', 'shittylist_equiv'];
   const sets = [];
   const params = [];
   allowed.forEach(function (key) {
@@ -601,8 +627,8 @@ function deleteUserSessions(userId) {
 
 function createRecord(userId, record) {
   const info = get().prepare(
-    "INSERT INTO records (user_id, demon_id, progress, status, youtube_url, raw_footage_url, platform, comment) " +
-    "VALUES (?, ?, ?, 'pending', ?, ?, ?, ?)"
+    "INSERT INTO records (user_id, demon_id, progress, status, youtube_url, raw_footage_url, platform, comment, opinion) " +
+    "VALUES (?, ?, ?, 'pending', ?, ?, ?, ?, ?)"
   ).run(
     userId,
     record.demon_id,
@@ -610,7 +636,25 @@ function createRecord(userId, record) {
     record.youtube_url || null,
     record.raw_footage_url || null,
     record.platform || null,
-    record.comment || null
+    record.comment || null,
+    record.opinion || null
+  );
+  return info.lastInsertRowid;
+}
+
+// Admin-added record for a player that may not have an account.
+function createUnregisteredRecord(record) {
+  const info = get().prepare(
+    "INSERT INTO records (user_id, demon_id, progress, status, youtube_url, raw_footage_url, platform, comment, player_name) " +
+    "VALUES (NULL, ?, ?, 'verified', ?, ?, ?, ?, ?)"
+  ).run(
+    record.demon_id,
+    record.progress != null ? record.progress : 100,
+    record.youtube_url || null,
+    record.raw_footage_url || null,
+    record.platform || null,
+    record.comment || null,
+    record.player_name || null
   );
   return info.lastInsertRowid;
 }
@@ -858,7 +902,7 @@ module.exports = {
   deleteUserSessions,
   getUserSubmissions,
   addChatMessage, getChatMessages, getChatMessageCount,
-  createRecord, getPendingRecords, getRecordById, approveRecord, rejectRecord,
+  createRecord, createUnregisteredRecord, getPendingRecords, getRecordById, approveRecord, rejectRecord,
   getLevelRequests, approveLevelRequest, createNews, getNews,
   getRecordById, updateRecord,
   generateEmailCode, verifyEmailCode, setEmailVerified, isEmailVerified,

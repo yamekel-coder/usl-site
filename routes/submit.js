@@ -112,34 +112,38 @@ router.post('/record', requireAuth, rateLimit({ keySuffix: 'submit-rec', max: RE
     return res.redirect('/auth/login?toast=' + encodeURIComponent('Your account was automatically banned for submitting too many records.'));
   }
 
-  const levels = toArray(req.body.level);
-  const youtubes = toArray(req.body.youtube);
-  const raws = toArray(req.body.raw);
-  const percents = toArray(req.body.percent);
+  const demonId = req.body.demon_id;
+  const youtube = sanitizeStr(req.body.youtube, 500);
+  const raw = sanitizeStr(req.body.raw, 500);
+  const percentRaw = req.body.percent;
   const platform = sanitizeStr(req.body.platform, 50);
   const comment = sanitizeStr(req.body.comment, 500);
+  const opinion = sanitizeStr(req.body.opinion, 300);
 
-  let created = 0;
-  levels.forEach(function (levelId, i) {
-    if (!levelId) return;
-    const demon = db.getDemonById(parseInt(levelId, 10));
-    if (!demon) return;
-    const percent = parseInt(percents[i], 10);
-    const progress = isNaN(percent) ? (demon.requirement || 100) : percent;
-    db.createRecord(userId, {
-      demon_id: demon.id,
-      progress: progress,
-      youtube_url: sanitizeStr(youtubes[i], 500),
-      raw_footage_url: sanitizeStr(raws[i], 500),
-      platform: platform,
-      comment: comment
-    });
-    created += 1;
+  if (!demonId) {
+    return res.redirect('/list?toast=' + encodeURIComponent('Select a level.'));
+  }
+  const demon = db.getDemonById(parseInt(demonId, 10));
+  if (!demon) {
+    return res.redirect('/list?toast=' + encodeURIComponent('Level not found.'));
+  }
+  if (!youtube || !raw) {
+    return res.redirect('/list?toast=' + encodeURIComponent('YouTube and raw footage links are required.'));
+  }
+
+  const percent = parseInt(percentRaw, 10);
+  const progress = isNaN(percent) ? (demon.requirement || 100) : Math.max(0, Math.min(100, percent));
+
+  db.createRecord(userId, {
+    demon_id: demon.id,
+    progress: progress,
+    youtube_url: youtube,
+    raw_footage_url: raw,
+    platform: platform,
+    comment: comment,
+    opinion: opinion
   });
 
-  if (created === 0) {
-    return res.redirect('/list?toast=' + encodeURIComponent('Select at least one level and provide a link.'));
-  }
   res.redirect('/list?record=success');
 });
 

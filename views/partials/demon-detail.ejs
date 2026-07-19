@@ -52,6 +52,12 @@
         <span>·</span>
         <span><%= demon.difficulty %></span>
       </div>
+      <% if (demon.shittylist_equiv) { %>
+        <div class="mt-3 p-3 rounded-xl bg-white/[0.03] border border-white/[0.08] text-sm text-white/70">
+          <span class="text-white/40 uppercase tracking-wider text-[11px] mr-1">Приравнен в сложности к:</span>
+          <%= demon.shittylist_equiv %>
+        </div>
+      <% } %>
     </div>
 
     <div>

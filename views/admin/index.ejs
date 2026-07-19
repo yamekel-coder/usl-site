@@ -227,6 +227,7 @@
                             <option value="Insane" <%= d.difficulty === 'Insane' ? 'selected' : '' %>>Insane</option>
                             <option value="Extreme" <%= d.difficulty === 'Extreme' ? 'selected' : '' %>>Extreme</option>
                           </select>
+                          <input name="shittylist_equiv" value="<%= d.shittylist_equiv || '' %>" placeholder="Приравнен в сложности к… (напр. Extreme Demon #12)" class="admin-input">
                           <button type="submit" class="admin-primary-btn" data-i18n="admin.save">Save</button>
                         </form>
                       </details>
@@ -318,8 +319,31 @@
                   </td>
                 </tr>
               <% }); %>
-            </tbody>
-          </table>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Add a record manually (player may not have an account) -->
+          <div class="rounded-2xl bg-white/[0.02] border border-white/10 p-6 mt-6" style="background:rgba(255,255,255,0.02);border-color:rgba(255,255,255,0.1)">
+            <h3 class="text-lg font-semibold text-white mb-1">Add record manually</h3>
+            <p class="text-xs text-white/40 mb-4">Creates a verified record for a player even if they have no account.</p>
+            <form method="POST" action="/admin/records/add" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+              <select name="demon_id" required class="admin-input">
+                <option value="" disabled selected>Select a level…</option>
+                <% demons.forEach(function (d) { %>
+                  <option value="<%= d.id %>"><%= (d.position ? ('#' + d.position + ' ') : '') %><%= d.name %> (<%= d.difficulty %>)</option>
+                <% }); %>
+              </select>
+              <input name="player_name" required placeholder="Player nickname" class="admin-input">
+              <input type="url" name="youtube_url" required placeholder="Completion video URL" class="admin-input">
+              <input type="number" name="progress" min="1" max="100" value="100" placeholder="Percent" class="admin-input">
+              <select name="platform" class="admin-input">
+                <option value="PC">PC</option>
+                <option value="Mobile">Smartphone</option>
+              </select>
+              <input name="comment" placeholder="Comment (optional)" class="admin-input">
+              <button type="submit" class="admin-primary-btn sm:col-span-2 lg:col-span-3">Add record</button>
+            </form>
           </div>
         </div>
       <% } else if (section === 'applications') { %>

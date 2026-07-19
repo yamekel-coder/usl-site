@@ -209,6 +209,9 @@ router.post('/levels/:id', modRequired, uploadBanner.single('banner_file'), func
   if (req.body.position !== undefined) {
     fields.position = req.body.position === '' ? null : (parseInt(req.body.position, 10) || null);
   }
+  if (req.body.shittylist_equiv !== undefined) {
+    fields.shittylist_equiv = sanitizeStr(req.body.shittylist_equiv, 200);
+  }
   db.updateDemon(id, fields);
   back(res, 'Level updated', '/admin');
 });
@@ -254,6 +257,36 @@ router.post('/records/:id/edit', modRequired, rateLimit({ keySuffix: 'rec-edit',
   db.updateRecord(id, progress, status, youtube_url, platform);
   audit.log(req, 'record_edit', rec.username + ' / ' + (rec.demon_name || rec.demon_id), 'progress=' + progress + ' status=' + status);
   back(res, 'Record updated', '/admin');
+});
+
+// ---- Manually add a verified record (player may not have an account) ----
+router.post('/records/add', modRequired, rateLimit({ keySuffix: 'rec-add', max: 30, windowMs: 15000 }), function (req, res) {
+  const demonId = parseInt(req.body.demon_id, 10);
+  const demon = db.getDemonById(demonId);
+  if (!demon) {
+    return back(res, 'Level not found', '/admin');
+  }
+  const playerName = sanitizeStr(req.body.player_name, 100);
+  if (!playerName) {
+    return back(res, 'Player nickname is required', '/admin');
+  }
+  const progress = Math.max(1, Math.min(100, parseInt(req.body.progress, 10) || 100));
+  const platform = ['PC', 'Mobile'].includes(req.body.platform) ? req.body.platform : 'PC';
+  const youtube_url = sanitizeStr(req.body.youtube_url, 500);
+  const comment = sanitizeStr(req.body.comment, 500);
+  if (!youtube_url) {
+    return back(res, 'Completion video URL is required', '/admin');
+  }
+  db.createUnregisteredRecord({
+    demon_id: demon.id,
+    progress: progress,
+    platform: platform,
+    youtube_url: youtube_url,
+    comment: comment,
+    player_name: playerName
+  });
+  audit.log(req, 'record_add_manual', playerName + ' / ' + demon.name, 'progress=' + progress);
+  back(res, 'Record added for ' + playerName, '/admin');
 });
 
 // ---- Submissions approve/reject ----
