@@ -801,6 +801,14 @@ function getActivityLog(limit) {
   ).all(limit || 200);
 }
 
+function deleteActivityLog(id) {
+  return get().prepare("DELETE FROM activity_log WHERE id = ?").run(id);
+}
+
+function clearActivityLog() {
+  get().prepare("DELETE FROM activity_log").run();
+}
+
 function get() {
   if (!db) {
     throw new Error('Database not initialized. Call init() first.');
@@ -857,5 +865,5 @@ module.exports = {
   countRecentRecords, autoBanForSpam,
   getRegistrationCount, recordRegistration, normalizeCountry, getCountryFlag,
   banUser, unbanUser, deleteUser, purgeUserContent, isUserBanned, youtubeId,
-  logAction, getActivityLog
+  logAction, getActivityLog, deleteActivityLog, clearActivityLog
 };

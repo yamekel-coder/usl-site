@@ -740,7 +740,14 @@
         <div class="rounded-2xl bg-white/[0.02] border border-white/10 overflow-hidden" style="background:rgba(255,255,255,0.02);border-color:rgba(255,255,255,0.1)">
           <div class="px-6 py-4 border-b border-white/10 flex items-center justify-between">
             <h3 class="text-sm font-semibold text-white" data-i18n="admin.activityLog">Activity Log</h3>
-            <span class="text-[11px] text-white/30"><%= activityLog.length %> events</span>
+            <div class="flex items-center gap-3">
+              <span class="text-[11px] text-white/30"><%= activityLog.length %> events</span>
+              <% if (activityLog.length > 0) { %>
+                <form method="POST" action="/admin/activity/clear" onsubmit="return confirm('Clear the entire activity log?');">
+                  <button type="submit" class="text-[11px] text-red-300/60 hover:text-red-300 underline">Clear all</button>
+                </form>
+              <% } %>
+            </div>
           </div>
           <div class="max-h-[70vh] overflow-y-auto">
             <% if (activityLog.length === 0) { %>
@@ -755,6 +762,7 @@
                     <th class="px-4 py-3 text-left font-medium">IP</th>
                     <th class="px-4 py-3 text-left font-medium">Action</th>
                     <th class="px-4 py-3 text-left font-medium">Target / Detail</th>
+                    <th class="px-4 py-3 text-left font-medium"></th>
                   </tr>
                 </thead>
                 <tbody>
@@ -766,6 +774,11 @@
                       <td class="px-4 py-2.5 text-white/40 font-mono text-xs"><%= a.ip || '—' %></td>
                       <td class="px-4 py-2.5 text-white/80 font-medium"><%= a.action %></td>
                       <td class="px-4 py-2.5 text-white/40 text-xs"><%= (a.target || '') %><% if (a.detail) { %> <span class="text-white/25">·</span> <%= a.detail %><% } %></td>
+                      <td class="px-4 py-2.5 text-right">
+                        <form method="POST" action="/admin/activity/<%= a.id %>/delete" onsubmit="return confirm('Delete this log entry?');">
+                          <button type="submit" class="text-[11px] text-white/30 hover:text-red-300" title="Delete">✕</button>
+                        </form>
+                      </td>
                     </tr>
                   <% }); %>
                 </tbody>

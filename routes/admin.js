@@ -502,4 +502,17 @@ router.post('/users/:id/add-record', modRequired, function (req, res) {
   back(res, 'Record granted to ' + user.username, '/admin?section=users');
 });
 
+// ---- Activity log management (admin only) ----
+
+router.post('/activity/:id/delete', adminRequired, function (req, res) {
+  const id = parseInt(req.params.id, 10);
+  db.deleteActivityLog(id);
+  back(res, 'Log entry deleted', '/admin?section=activity');
+});
+
+router.post('/activity/clear', adminRequired, function (req, res) {
+  db.clearActivityLog();
+  back(res, 'Activity log cleared', '/admin?section=activity');
+});
+
 module.exports = router;
