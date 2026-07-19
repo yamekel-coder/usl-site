@@ -4,7 +4,6 @@ const crypto = require('crypto');
 const db = require('../database/db');
 const auth = require('../middleware/auth');
 const audit = require('../lib/audit');
-const mailer = require('../lib/mailer');
 
 const router = express.Router();
 
@@ -224,22 +223,10 @@ router.post('/register', function (req, res) {
 
   db.recordRegistration(ip);
 
-  // Generate + "send" email verification code.
-  var newUserId = info.lastInsertRowid;
-  var code = db.generateEmailCode(newUserId);
-  var mailResult = mailer.sendVerificationCode(email, code);
-
   res.clearCookie(CAPTCHA_COOKIE);
-  var token = auth.createSession(newUserId);
+  var token = auth.createSession(info.lastInsertRowid);
   audit.log(req, 'register', username, 'email=' + email + ' ip=' + ip);
-  // If email could not be sent (no SMTP / blocked by provider), surface the
-  // code on the verification page so the user can still confirm manually.
-  var devCode = (mailResult && mailResult.sent) ? '' : ('&devcode=' + code);
-  var target = '/auth/verify-email?email=' + encodeURIComponent(email) + devCode;
-  if (isAjax(req)) {
-    return res.json({ ok: true, redirect: target });
-  }
-  return res.redirect(target);
+  return ok(res, req, token);
 });
 
 // GET /auth/login
@@ -277,13 +264,6 @@ router.post('/login', function (req, res) {
 
   var token = auth.createSession(user.id);
   audit.log(req, 'login', user.username, 'email=' + user.email);
-  // Allow login but nudge unverified users to confirm their email.
-  if (!user.email_verified) {
-    if (isAjax(req)) {
-      return res.json({ ok: true, redirect: '/auth/verify-email?email=' + encodeURIComponent(user.email) });
-    }
-    return res.redirect('/auth/verify-email?email=' + encodeURIComponent(user.email));
-  }
   return ok(res, req, token);
 });
 
@@ -295,54 +275,6 @@ router.post('/logout', function (req, res) {
     res.clearCookie(auth.SESSION_COOKIE);
   }
   res.redirect('/');
-});
-
-// ---- Email verification ----
-
-router.get('/verify-email', function (req, res) {
-  var email = req.query.email || '';
-  res.render('auth/verify-email', {
-    email: email,
-    error: req.query.error || null,
-    devcode: req.query.devcode || null,
-    success: req.query.ok === '1' ? true : false
-  });
-});
-
-router.post('/verify-email', function (req, res) {
-  var email = (req.body.email || '').trim().toLowerCase();
-  var code = (req.body.code || '').trim();
-  if (!email || !code) {
-    return res.redirect('/auth/verify-email?email=' + encodeURIComponent(email) + '&error=' + encodeURIComponent('Email and code are required'));
-  }
-  var user = db.get().prepare('SELECT id, email_verified FROM users WHERE LOWER(email) = LOWER(?)').get(email);
-  if (!user) {
-    return res.redirect('/auth/verify-email?email=' + encodeURIComponent(email) + '&error=' + encodeURIComponent('Account not found'));
-  }
-  if (user.email_verified) {
-    return res.redirect('/auth/verify-email?email=' + encodeURIComponent(email) + '&ok=1');
-  }
-  var ok = db.verifyEmailCode(user.id, code);
-  if (!ok) {
-    return res.redirect('/auth/verify-email?email=' + encodeURIComponent(email) + '&error=' + encodeURIComponent('Invalid or expired code'));
-  }
-  audit.log(req, 'email_verified', user.id ? String(user.id) : email, 'email=' + email);
-  return res.redirect('/auth/verify-email?email=' + encodeURIComponent(email) + '&ok=1');
-});
-
-router.post('/verify-email/resend', function (req, res) {
-  var email = (req.body.email || '').trim().toLowerCase();
-  var user = db.get().prepare('SELECT id, email_verified FROM users WHERE LOWER(email) = LOWER(?)').get(email);
-  if (!user) {
-    return res.redirect('/auth/verify-email?email=' + encodeURIComponent(email) + '&error=' + encodeURIComponent('Account not found'));
-  }
-  if (user.email_verified) {
-    return res.redirect('/auth/verify-email?email=' + encodeURIComponent(email) + '&ok=1');
-  }
-  var code = db.generateEmailCode(user.id);
-  var mailResult = mailer.sendVerificationCode(email, code);
-  var devCode = (mailResult && mailResult.sent) ? '&resent=1' : ('&devcode=' + code + '&resent=1');
-  res.redirect('/auth/verify-email?email=' + encodeURIComponent(email) + '&ok=1' + devCode);
 });
 
 module.exports = router;
