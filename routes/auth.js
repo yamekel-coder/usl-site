@@ -278,3 +278,4 @@ router.post('/logout', function (req, res) {
 });
 
 module.exports = router;
+module.exports.generateCaptcha = generateCaptcha;
