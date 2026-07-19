@@ -684,11 +684,11 @@
           <form method="POST" action="/admin/users/0/add-record" id="grant-form" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
             <div class="lg:col-span-1">
               <label class="block text-white/40 text-xs uppercase tracking-wider mb-1.5" data-i18n="admin.grantUser">User</label>
-              <div class="usl-select" data-name="user_id" data-current="" data-options='<%= JSON.stringify(users.map(function (u) { return { name: String(u.id), label: u.username + ' (' + u.id + ')' }; })) %>'></div>
+              <div class="usl-select" data-name="user_id" data-current="" data-options="<%= optAttr(users.map(function (u) { return { name: String(u.id), label: u.username + ' (' + u.id + ')' }; })) %>"></div>
             </div>
             <div class="lg:col-span-1">
               <label class="block text-white/40 text-xs uppercase tracking-wider mb-1.5" data-i18n="admin.grantLevel">Level</label>
-              <div class="usl-select" data-name="demon_id" data-current="" data-options='<%= JSON.stringify(demons.map(function (d) { return { name: String(d.id), label: (d.position ? (d.position + '. ') : '') + d.name + ' (' + d.difficulty + ')', req: d.requirement || 100 }; })) %>'></div>
+              <div class="usl-select" data-name="demon_id" data-current="" data-options="<%= optAttr(demons.map(function (d) { return { name: String(d.id), label: (d.position ? (d.position + '. ') : '') + d.name + ' (' + d.difficulty + ')', req: d.requirement || 100 }; })) %>"></div>
             </div>
             <div class="lg:col-span-1">
               <label class="block text-white/40 text-xs uppercase tracking-wider mb-1.5" data-i18n="admin.grantPercent">Percent</label>
