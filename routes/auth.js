@@ -234,9 +234,9 @@ router.post('/register', function (req, res) {
   audit.log(req, 'register', username, 'email=' + email + ' ip=' + ip);
   // Redirect to verification page so the user can confirm their email.
   if (isAjax(req)) {
-    return res.json({ ok: true, redirect: '/verify-email?email=' + encodeURIComponent(email) });
+    return res.json({ ok: true, redirect: '/auth/verify-email?email=' + encodeURIComponent(email) });
   }
-  return res.redirect('/verify-email?email=' + encodeURIComponent(email));
+  return res.redirect('/auth/verify-email?email=' + encodeURIComponent(email));
 });
 
 // GET /auth/login
@@ -277,9 +277,9 @@ router.post('/login', function (req, res) {
   // Allow login but nudge unverified users to confirm their email.
   if (!user.email_verified) {
     if (isAjax(req)) {
-      return res.json({ ok: true, redirect: '/verify-email?email=' + encodeURIComponent(user.email) });
+      return res.json({ ok: true, redirect: '/auth/verify-email?email=' + encodeURIComponent(user.email) });
     }
-    return res.redirect('/verify-email?email=' + encodeURIComponent(user.email));
+    return res.redirect('/auth/verify-email?email=' + encodeURIComponent(user.email));
   }
   return ok(res, req, token);
 });
@@ -309,35 +309,35 @@ router.post('/verify-email', function (req, res) {
   var email = (req.body.email || '').trim().toLowerCase();
   var code = (req.body.code || '').trim();
   if (!email || !code) {
-    return res.redirect('/verify-email?email=' + encodeURIComponent(email) + '&error=' + encodeURIComponent('Email and code are required'));
+    return res.redirect('/auth/verify-email?email=' + encodeURIComponent(email) + '&error=' + encodeURIComponent('Email and code are required'));
   }
   var user = db.get().prepare('SELECT id, email_verified FROM users WHERE LOWER(email) = LOWER(?)').get(email);
   if (!user) {
-    return res.redirect('/verify-email?email=' + encodeURIComponent(email) + '&error=' + encodeURIComponent('Account not found'));
+    return res.redirect('/auth/verify-email?email=' + encodeURIComponent(email) + '&error=' + encodeURIComponent('Account not found'));
   }
   if (user.email_verified) {
-    return res.redirect('/verify-email?email=' + encodeURIComponent(email) + '&ok=1');
+    return res.redirect('/auth/verify-email?email=' + encodeURIComponent(email) + '&ok=1');
   }
   var ok = db.verifyEmailCode(user.id, code);
   if (!ok) {
-    return res.redirect('/verify-email?email=' + encodeURIComponent(email) + '&error=' + encodeURIComponent('Invalid or expired code'));
+    return res.redirect('/auth/verify-email?email=' + encodeURIComponent(email) + '&error=' + encodeURIComponent('Invalid or expired code'));
   }
   audit.log(req, 'email_verified', user.id ? String(user.id) : email, 'email=' + email);
-  return res.redirect('/verify-email?email=' + encodeURIComponent(email) + '&ok=1');
+  return res.redirect('/auth/verify-email?email=' + encodeURIComponent(email) + '&ok=1');
 });
 
 router.post('/verify-email/resend', function (req, res) {
   var email = (req.body.email || '').trim().toLowerCase();
   var user = db.get().prepare('SELECT id, email_verified FROM users WHERE LOWER(email) = LOWER(?)').get(email);
   if (!user) {
-    return res.redirect('/verify-email?email=' + encodeURIComponent(email) + '&error=' + encodeURIComponent('Account not found'));
+    return res.redirect('/auth/verify-email?email=' + encodeURIComponent(email) + '&error=' + encodeURIComponent('Account not found'));
   }
   if (user.email_verified) {
-    return res.redirect('/verify-email?email=' + encodeURIComponent(email) + '&ok=1');
+    return res.redirect('/auth/verify-email?email=' + encodeURIComponent(email) + '&ok=1');
   }
   var code = db.generateEmailCode(user.id);
   mailer.sendVerificationCode(email, code);
-  res.redirect('/verify-email?email=' + encodeURIComponent(email) + '&ok=1&resent=1');
+  res.redirect('/auth/verify-email?email=' + encodeURIComponent(email) + '&ok=1&resent=1');
 });
 
 module.exports = router;
