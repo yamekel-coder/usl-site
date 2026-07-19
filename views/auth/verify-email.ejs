@@ -27,6 +27,13 @@
     <% if (error) { %>
       <div class="rounded-xl border border-red-500/30 bg-red-500/10 text-red-300 text-sm px-4 py-3 mb-4" style="border-color:rgba(239,68,68,0.3);background:rgba(239,68,68,0.1)"><%= error %></div>
     <% } %>
+    <% if (devcode) { %>
+      <div class="rounded-xl border border-yellow-500/40 bg-yellow-500/10 text-yellow-200 text-sm px-4 py-3 mb-4" style="border-color:rgba(250,204,21,0.4);background:rgba(250,204,21,0.1)">
+        <div class="font-semibold mb-1">Email delivery unavailable</div>
+        <div class="text-white/70">Use this code to verify (copy from server log if shown):</div>
+        <div class="text-2xl font-bold tracking-[0.3em] mt-1"><%= devcode %></div>
+      </div>
+    <% } %>
 
     <form method="POST" action="/auth/verify-email" class="space-y-3">
       <input type="hidden" name="email" value="<%= email %>">
