@@ -84,6 +84,18 @@ function migrate(database) {
     database.exec("ALTER TABLE users ADD COLUMN banned INTEGER NOT NULL DEFAULT 0");
   }
 
+  // Email verification columns
+  const userCols3 = database.prepare("PRAGMA table_info(users)").all();
+  if (!userCols3.some(function (c) { return c.name === 'email_verified'; })) {
+    database.exec("ALTER TABLE users ADD COLUMN email_verified INTEGER NOT NULL DEFAULT 0");
+  }
+  if (!userCols3.some(function (c) { return c.name === 'email_code'; })) {
+    database.exec("ALTER TABLE users ADD COLUMN email_code TEXT");
+  }
+  if (!userCols3.some(function (c) { return c.name === 'email_code_expires'; })) {
+    database.exec("ALTER TABLE users ADD COLUMN email_code_expires TEXT");
+  }
+
   database.exec(
     "CREATE TABLE IF NOT EXISTS registrations (" +
     "id INTEGER PRIMARY KEY AUTOINCREMENT, " +
@@ -796,6 +808,39 @@ function get() {
   return db;
 }
 
+// ---- Email verification ----
+
+function generateEmailCode(userId) {
+  const code = String(Math.floor(100000 + Math.random() * 900000));
+  const expires = new Date(Date.now() + 15 * 60 * 1000).toISOString();
+  get().prepare(
+    "UPDATE users SET email_code = ?, email_code_expires = ? WHERE id = ?"
+  ).run(code, expires, userId);
+  return code;
+}
+
+function verifyEmailCode(userId, code) {
+  const u = get().prepare(
+    "SELECT email_code, email_code_expires FROM users WHERE id = ?"
+  ).get(userId);
+  if (!u || !u.email_code) return false;
+  if (new Date(u.email_code_expires).getTime() < Date.now()) return false;
+  if (u.email_code !== String(code).trim()) return false;
+  get().prepare(
+    "UPDATE users SET email_verified = 1, email_code = NULL, email_code_expires = NULL WHERE id = ?"
+  ).run(userId);
+  return true;
+}
+
+function setEmailVerified(userId) {
+  get().prepare("UPDATE users SET email_verified = 1 WHERE id = ?").run(userId);
+}
+
+function isEmailVerified(userId) {
+  const u = get().prepare("SELECT email_verified FROM users WHERE id = ?").get(userId);
+  return u ? !!u.email_verified : false;
+}
+
 module.exports = {
   init, get, getStats, getDemons, getDemonById, getDemonRecords, calculateDemonPoints,
   getRecords, getPlayers, getPlayerRating, getPlayerRecords, getCountries,
@@ -808,6 +853,7 @@ module.exports = {
   createRecord, getPendingRecords, getRecordById, approveRecord, rejectRecord,
   getLevelRequests, approveLevelRequest, createNews, getNews,
   getRecordById, updateRecord,
+  generateEmailCode, verifyEmailCode, setEmailVerified, isEmailVerified,
   countRecentRecords, autoBanForSpam,
   getRegistrationCount, recordRegistration, normalizeCountry, getCountryFlag,
   banUser, unbanUser, deleteUser, purgeUserContent, isUserBanned, youtubeId,

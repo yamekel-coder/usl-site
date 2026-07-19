@@ -70,6 +70,9 @@
           <% } %>
           <% if (user && user.id === profile.id) { %>
             <span class="truncate"><span class="text-white/25" data-i18n="profile.email">Email</span> <%= profile.email %></span>
+            <% if (!profile.email_verified) { %>
+              <a href="/auth/verify-email?email=<%= encodeURIComponent(profile.email) %>" class="ml-1 inline-flex items-center gap-1 px-2 py-0.5 rounded-full border border-yellow-500/40 text-yellow-300 text-[10px] uppercase tracking-wider hover:bg-yellow-500/10">Not verified</a>
+            <% } %>
           <% } %>
         </div>
 
