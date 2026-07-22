@@ -221,6 +221,22 @@ router.post('/levels/:id/delete', modRequired, function (req, res) {
   back(res, 'Level deleted', '/admin');
 });
 
+router.post('/levels/:id/move-up', modRequired, function (req, res) {
+  var demon = db.getDemonById(parseInt(req.params.id, 10));
+  if (!demon || demon.position == null) return back(res, 'Level not found', '/admin');
+  var newPos = Math.max(1, demon.position - 1);
+  db.updateDemon(demon.id, { position: newPos });
+  back(res, demon.name + ' moved to #' + newPos, '/admin');
+});
+
+router.post('/levels/:id/move-down', modRequired, function (req, res) {
+  var demon = db.getDemonById(parseInt(req.params.id, 10));
+  if (!demon || demon.position == null) return back(res, 'Level not found', '/admin');
+  var newPos = demon.position + 1;
+  db.updateDemon(demon.id, { position: newPos });
+  back(res, demon.name + ' moved to #' + newPos, '/admin');
+});
+
 // ---- Record review (mod + admin) ----
 
 router.post('/records/:id/approve', modRequired, rateLimit({ keySuffix: 'rec-appr', max: 20, windowMs: 15000 }), function (req, res) {

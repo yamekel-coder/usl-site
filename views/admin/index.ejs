@@ -191,7 +191,15 @@
                 <% demons.forEach(function (d) { %>
                   <tr class="border-b border-white/[0.04] hover:bg-white/[0.02]" style="border-color:rgba(255,255,255,0.04)">
                     <td class="px-5 py-3 text-white/30 text-xs"><%= d.id %></td>
-                    <td class="px-5 py-3 text-white/50"><%= d.position || '—' %></td>
+                    <td class="px-5 py-3 text-white/50">
+                      <form method="POST" action="/admin/levels/<%= d.id %>/move-up" class="inline">
+                        <button type="submit" class="text-white/40 hover:text-white text-xs px-1" title="Move up">▲</button>
+                      </form>
+                      <span class="mx-1"><%= d.position || '—' %></span>
+                      <form method="POST" action="/admin/levels/<%= d.id %>/move-down" class="inline">
+                        <button type="submit" class="text-white/40 hover:text-white text-xs px-1" title="Move down">▼</button>
+                      </form>
+                    </td>
                     <td class="px-5 py-3 text-white font-medium"><%= d.name %></td>
                     <td class="px-5 py-3 text-white/50"><%= d.creator || '—' %></td>
                     <td class="px-5 py-3 text-white/50"><%= d.verifier || '—' %></td>
