@@ -553,27 +553,37 @@ function getUsersByRole(role) {
   ).all(role);
 }
 
-// Re-number all demon positions sequentially (1, 2, 3, …) to eliminate
-// gaps and duplicates. Called after every position-affecting mutation.
-function compactPositions() {
+// Reorder a demon to targetPos (1-indexed) and renumber all demons
+// sequentially. Call after every add/delete/position-update.
+function reorderDemon(movedId, targetPos) {
   const d = get();
-  const demons = d.prepare("SELECT id FROM demons ORDER BY position IS NULL DESC, position ASC, id ASC").all();
-  demons.forEach(function (row, idx) {
-    d.prepare("UPDATE demons SET position = ? WHERE id = ?").run(idx + 1, row.id);
+  let rows = d.prepare("SELECT id FROM demons ORDER BY position IS NULL DESC, position ASC, id ASC").all();
+  if (movedId && targetPos != null) {
+    var idx = -1;
+    for (var i = 0; i < rows.length; i++) {
+      if (rows[i].id === movedId) { idx = i; break; }
+    }
+    if (idx >= 0) rows.splice(idx, 1);
+    var insertAt = targetPos - 1;
+    if (insertAt < 0) insertAt = 0;
+    if (insertAt > rows.length) insertAt = rows.length;
+    rows.splice(insertAt, 0, {id: movedId});
+  }
+  rows.forEach(function (row, i) {
+    d.prepare("UPDATE demons SET position = ? WHERE id = ?").run(i + 1, row.id);
   });
 }
 
 function addDemon(demon) {
-  let position = demon.position != null ? demon.position : null;
+  var position = demon.position != null ? demon.position : null;
   if (position == null) {
-    const row = get().prepare("SELECT MAX(position) AS m FROM demons").get();
+    var row = get().prepare("SELECT MAX(position) AS m FROM demons").get();
     position = (row && row.m ? row.m : 0) + 1;
   }
-  const info = get().prepare(
-    "INSERT INTO demons (position, name, creator, verifier, difficulty, video_url, banner_url, level_id, requirement, verified) " +
-    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 0)"
+  var info = get().prepare(
+    "INSERT INTO demons (name, creator, verifier, difficulty, video_url, banner_url, level_id, requirement, verified, position) " +
+    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
   ).run(
-    position,
     demon.name,
     demon.creator || null,
     demon.verifier || null,
@@ -581,35 +591,39 @@ function addDemon(demon) {
     demon.video_url || null,
     demon.banner_url || null,
     demon.level_id || null,
-    demon.requirement != null ? demon.requirement : 100
+    demon.requirement != null ? demon.requirement : 100,
+    0,  // temporary position — will be fixed by reorderDemon
+    position  // store target position for reorder
   );
-  compactPositions();
+  reorderDemon(info.lastInsertRowid, position);
   return info.lastInsertRowid;
 }
 
 function updateDemon(id, fields) {
-  const allowed = ['position', 'name', 'creator', 'verifier', 'difficulty', 'video_url', 'banner_url', 'level_id', 'requirement', 'shittylist_equiv'];
-  const sets = [];
-  const params = [];
+  var allowed = ['position', 'name', 'creator', 'verifier', 'difficulty', 'video_url', 'banner_url', 'level_id', 'requirement', 'shittylist_equiv'];
+  var targetPos = Object.prototype.hasOwnProperty.call(fields, 'position') ? fields.position : undefined;
+  var sets = [];
+  var params = [];
   allowed.forEach(function (key) {
-    if (Object.prototype.hasOwnProperty.call(fields, key)) {
+    if (Object.prototype.hasOwnProperty.call(fields, key) && key !== 'position') {
       sets.push(key + " = ?");
       params.push(fields[key]);
     }
   });
-  if (!sets.length) return;
-  sets.push("updated_at = datetime('now')");
-  params.push(id);
-  get().prepare("UPDATE demons SET " + sets.join(", ") + " WHERE id = ?").run(...params);
-  if (Object.prototype.hasOwnProperty.call(fields, 'position')) {
-    compactPositions();
+  if (!sets.length && targetPos === undefined) return;
+  if (sets.length) {
+    sets.push("updated_at = datetime('now')");
+    params.push(id);
+    get().prepare("UPDATE demons SET " + sets.join(", ") + " WHERE id = ?").run(...params);
+  }
+  if (targetPos !== undefined) {
+    reorderDemon(id, targetPos);
   }
 }
 
 function deleteDemon(id) {
-  const result = get().prepare("DELETE FROM demons WHERE id = ?").run(id);
-  compactPositions();
-  return result;
+  get().prepare("DELETE FROM demons WHERE id = ?").run(id);
+  reorderDemon(null, null);
 }
 
 function setUserCountry(userId, country) {
