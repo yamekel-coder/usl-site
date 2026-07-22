@@ -39,3 +39,6 @@ router.get('/demons/:id', function (req, res) {
 });
 
 module.exports = router;
+
+const levelsRouter = require('./api-levels');
+router.use('/api', levelsRouter);
