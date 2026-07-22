@@ -553,11 +553,35 @@ function getUsersByRole(role) {
   ).all(role);
 }
 
+// When placing a demon at newPos, shift existing demons to make room.
+// Handles add, move-up, and move-down without creating duplicates.
+function makePositionSlot(newPos, excludeId) {
+  if (newPos == null) return;
+  const d = get();
+  const current = excludeId ? d.prepare("SELECT position FROM demons WHERE id = ?").get(excludeId) : null;
+  const oldPos = current ? current.position : null;
+  if (oldPos == null) {
+    // New demon or one without a position yet
+    d.prepare("UPDATE demons SET position = position + 1 WHERE position >= ? AND id != ?")
+      .run(newPos, excludeId || 0);
+  } else if (newPos < oldPos) {
+    // Moving up: shift the block between newPos and oldPos-1 down
+    d.prepare("UPDATE demons SET position = position + 1 WHERE position >= ? AND position < ? AND id != ?")
+      .run(newPos, oldPos, excludeId);
+  } else if (newPos > oldPos) {
+    // Moving down: shift the block between oldPos+1 and newPos up
+    d.prepare("UPDATE demons SET position = position - 1 WHERE position > ? AND position <= ? AND id != ?")
+      .run(oldPos, newPos, excludeId);
+  }
+}
+
 function addDemon(demon) {
   let position = demon.position != null ? demon.position : null;
   if (position == null) {
     const row = get().prepare("SELECT MAX(position) AS m FROM demons").get();
     position = (row && row.m ? row.m : 0) + 1;
+  } else {
+    makePositionSlot(position, 0);
   }
   const info = get().prepare(
     "INSERT INTO demons (position, name, creator, verifier, difficulty, video_url, banner_url, level_id, requirement, verified) " +
@@ -578,6 +602,9 @@ function addDemon(demon) {
 
 function updateDemon(id, fields) {
   const allowed = ['position', 'name', 'creator', 'verifier', 'difficulty', 'video_url', 'banner_url', 'level_id', 'requirement', 'shittylist_equiv'];
+  if (Object.prototype.hasOwnProperty.call(fields, 'position') && fields.position != null) {
+    makePositionSlot(fields.position, id);
+  }
   const sets = [];
   const params = [];
   allowed.forEach(function (key) {
@@ -593,7 +620,12 @@ function updateDemon(id, fields) {
 }
 
 function deleteDemon(id) {
-  return get().prepare("DELETE FROM demons WHERE id = ?").run(id);
+  const demon = get().prepare("SELECT position FROM demons WHERE id = ?").get(id);
+  const result = get().prepare("DELETE FROM demons WHERE id = ?").run(id);
+  if (demon && demon.position != null) {
+    get().prepare("UPDATE demons SET position = position - 1 WHERE position > ?").run(demon.position);
+  }
+  return result;
 }
 
 function setUserCountry(userId, country) {
