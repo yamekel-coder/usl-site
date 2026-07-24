@@ -77,9 +77,8 @@ app.use(function (req, res, next) {
 
 // Safely embed a JS object as a double-quoted HTML attribute value.
 // JSON uses double quotes; we escape them so they don't break the
-// attribute (EJS <%= %> already escapes < > & ' for us).
 function optAttr(obj) {
-  return JSON.stringify(obj || []).replace(/"/g, '&quot;');
+  return JSON.stringify(obj || []);
 }
 app.locals.optAttr = optAttr;
 
