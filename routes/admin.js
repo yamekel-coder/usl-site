@@ -133,6 +133,7 @@ router.get('/', modRequired, function (req, res) {
     moderatorApplications: moderatorApplications.map(formatSubmission),
     applicationStatus: applicationStatus,
     users: users,
+    allUsers: allUsers,
     userPage: safeUserPage,
     userTotalPages: userTotalPages,
     allUsersCount: allUsers.length,
