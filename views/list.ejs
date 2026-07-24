@@ -17,6 +17,8 @@
       </h1>
       <p class="text-white/30 text-lg max-w-xl mb-8" data-i18n="leaderboard.listSub">The ranking of the hardest Geometry Dash levels.</p>
 
+      <%- include('partials/submit-bar') %>
+
       <div id="usl-toast" class="fixed left-1/2 -translate-x-1/2 bottom-6 z-[10001] hidden rounded-xl bg-white text-dark text-sm font-semibold px-5 py-3 shadow-2xl" style="display:none"></div>
 
       <div data-leaderboard="list" data-api="/api/demons" class="flex flex-col lg:flex-row gap-6 items-start">
