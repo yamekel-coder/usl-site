@@ -56,13 +56,13 @@
         visible++;
         var o = document.createElement('div');
         o.className = 'usl-select__opt' + (opt.name === current ? ' selected' : '');
-        o.dataset.value = opt.name;
+        o.dataset.value = opt.code;
         var fe = flagEmoji(opt.code);
         var label = opt.label || opt.name;
         o.innerHTML = (fe ? '<span class="usl-select__flag">' + fe + '</span>' : '') + '<span>' + label + '</span>';
         o.addEventListener('click', function () {
-          current = opt.name;
-          hidden.value = opt.name;
+          current = opt.code;
+          hidden.value = opt.code;
           updateTrigger();
           close();
         });
@@ -80,11 +80,12 @@
       var flag = trigger.querySelector('.usl-select__flag');
       var val = trigger.querySelector('.usl-select__value');
       if (current) {
-        var found = options.filter(function (o) { return o.name === current; })[0];
+        var found = options.filter(function (o) { return o.code === current; })[0];
+        if (!found) found = options.filter(function (o) { return o.name === current; })[0];
         var fe = flagEmoji(found ? found.code : '');
         flag.textContent = fe;
         flag.style.display = fe ? '' : 'none';
-        val.textContent = current;
+        val.textContent = found ? found.name : current;
       } else {
         flag.textContent = '';
         flag.style.display = 'none';

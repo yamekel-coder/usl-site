@@ -294,128 +294,10 @@ function getPlayerRecords(userId) {
 }
 
 function normalizeCountry(c) {
-  if (!c) return null;
-  var t = c.trim();
-  if (!t) return null;
-  var low = t.toLowerCase();
-  var up = t.toUpperCase();
-  // Russia
-  if (low === 'russia' || up === 'RU' || low === 'россия' || low === 'российская федерация') return 'RU';
-  // Ukraine
-  if (low === 'ukraine' || low === 'украина' || up === 'UA') return 'UA';
-  // Belarus
-  if (low === 'belarus' || low === 'беларусь' || low === 'belorussia' || up === 'BY') return 'BY';
-  // Kazakhstan
-  if (low === 'kazakhstan' || low === 'казахстан' || up === 'KZ') return 'KZ';
-  // Uzbekistan
-  if (low === 'uzbekistan' || low === 'узбекистан' || up === 'UZ') return 'UZ';
-  // Armenia
-  if (low === 'armenia' || low === 'армения' || up === 'AM') return 'AM';
-  // Georgia
-  if (low === 'georgia' || low === 'грузия' || up === 'GE') return 'GE';
-  // Moldova
-  if (low === 'moldova' || low === 'молдова' || low === 'moldavia' || up === 'MD') return 'MD';
-  // Latvia
-  if (low === 'latvia' || low === 'латвия' || up === 'LV') return 'LV';
-  // Lithuania
-  if (low === 'lithuania' || low === 'литва' || up === 'LT') return 'LT';
-  // Estonia
-  if (low === 'estonia' || low === 'эстония' || up === 'EE') return 'EE';
-  // Poland
-  if (low === 'poland' || low === 'польша' || up === 'PL') return 'PL';
-  // Germany
-  if (low === 'germany' || low === 'германия' || up === 'DE') return 'DE';
-  // France
-  if (low === 'france' || low === 'франция' || up === 'FR') return 'FR';
-  // United Kingdom
-  if (low === 'united kingdom' || low === 'great britain' || low === 'великобритания' || up === 'GB') return 'GB';
-  // Spain
-  if (low === 'spain' || low === 'испания' || up === 'ES') return 'ES';
-  // Italy
-  if (low === 'italy' || low === 'италия' || up === 'IT') return 'IT';
-  // Netherlands
-  if (low === 'netherlands' || low === 'нидерланды' || low === 'holland' || up === 'NL') return 'NL';
-  // Turkey
-  if (low === 'turkey' || low === 'türkiye' || low === 'турция' || up === 'TR') return 'TR';
-  // United States
-  if (low === 'united states' || low === 'usa' || low === 'us' || low === 'америка' || low === 'сша' || up === 'US') return 'US';
-  // Canada
-  if (low === 'canada' || low === 'канада' || up === 'CA') return 'CA';
-  // Brazil
-  if (low === 'brazil' || low === 'бразилия' || up === 'BR') return 'BR';
-  // Australia
-  if (low === 'australia' || low === 'австралия' || up === 'AU') return 'AU';
-  // Japan
-  if (low === 'japan' || low === 'япония' || up === 'JP') return 'JP';
-  // South Korea
-  if (low === 'south korea' || low === 'корея' || low === 'korea' || up === 'KR') return 'KR';
-  // China
-  if (low === 'china' || low === 'китай' || up === 'CN') return 'CN';
-  // Indonesia
-  if (low === 'indonesia' || low === 'индонезия' || up === 'ID') return 'ID';
-  // Philippines
-  if (low === 'philippines' || low === 'филиппины' || up === 'PH') return 'PH';
-  // India
-  if (low === 'india' || low === 'индия' || up === 'IN') return 'IN';
-  // Argentina
-  if (low === 'argentina' || low === 'аргентина' || up === 'AR') return 'AR';
-  // Mexico
-  if (low === 'mexico' || low === 'мексика' || up === 'MX') return 'MX';
-  // Colombia
-  if (low === 'colombia' || low === 'колумбия' || up === 'CO') return 'CO';
-  // Chile
-  if (low === 'chile' || low === 'чили' || up === 'CL') return 'CL';
-  // Peru
-  if (low === 'peru' || low === 'перу' || up === 'PE') return 'PE';
-  // Portugal
-  if (low === 'portugal' || low === 'португалия' || up === 'PT') return 'PT';
-  // Czech Republic
-  if (low === 'czech republic' || low === 'czechia' || low === 'чехия' || up === 'CZ') return 'CZ';
-  // Romania
-  if (low === 'romania' || low === 'румыния' || low === 'românia' || up === 'RO') return 'RO';
-  // Hungary
-  if (low === 'hungary' || low === 'венгрия' || up === 'HU') return 'HU';
-  // Bulgaria
-  if (low === 'bulgaria' || low === 'болгария' || up === 'BG') return 'BG';
-  // Serbia
-  if (low === 'serbia' || low === 'сербия' || up === 'RS') return 'RS';
-  // Croatia
-  if (low === 'croatia' || low === 'хорватия' || up === 'HR') return 'HR';
-  // Thailand
-  if (low === 'thailand' || low === 'таиланд' || up === 'TH') return 'TH';
-  // Vietnam
-  if (low === 'vietnam' || low === 'вьетнам' || up === 'VN') return 'VN';
-  // Malaysia
-  if (low === 'malaysia' || low === 'малайзия' || up === 'MY') return 'MY';
-  // Singapore
-  if (low === 'singapore' || low === 'сингапур' || up === 'SG') return 'SG';
-  // Finland
-  if (low === 'finland' || low === 'финляндия' || up === 'FI') return 'FI';
-  // Sweden
-  if (low === 'sweden' || low === 'швеция' || up === 'SE') return 'SE';
-  // Norway
-  if (low === 'norway' || low === 'норвегия' || up === 'NO') return 'NO';
-  // Denmark
-  if (low === 'denmark' || low === 'дания' || up === 'DK') return 'DK';
-  // Israel
-  if (low === 'israel' || low === 'израиль' || up === 'IL') return 'IL';
-  // Egypt
-  if (low === 'egypt' || low === 'египет' || up === 'EG') return 'EG';
-  // South Africa
-  if (low === 'south africa' || up === 'ZA') return 'ZA';
-  // Pakistan
-  if (low === 'pakistan' || low === 'пакистан' || up === 'PK') return 'PK';
-  // Bangladesh
-  if (low === 'bangladesh' || low === 'бангладеш' || up === 'BD') return 'BD';
-  // Nigeria
-  if (low === 'nigeria' || low === 'нигерия' || up === 'NG') return 'NG';
-  // Ukraine aliases
-  if (low === 'украинa' || low === 'ukr' || up === 'UKR') return 'UA';
-  // Russia aliases
-  if (up === 'RUS' || low === 'ru') return 'RU';
-  // Fallback: if it's a 2-letter code, use uppercase
-  if (t.length === 2 && /^[a-zA-Z]+$/.test(t)) return up;
-  return up;
+  if (!c || !c.trim()) return null;
+  var countries = require('./countries');
+  var r = countries.resolve(c.trim());
+  return r ? r.code : null;
 }
 
 function getCountries() {
@@ -799,11 +681,7 @@ function recordRegistration(ip) {
 }
 
 function getCountryFlag(code) {
-  if (!code || code.length !== 2) return '';
-  const base = 0x1F1E6;
-  const a = code.toUpperCase().charCodeAt(0) - 65;
-  const b = code.toUpperCase().charCodeAt(1) - 65;
-  return String.fromCodePoint(base + a) + String.fromCodePoint(base + b);
+  return require('./countries').flagEmoji(code);
 }
 
 function youtubeId(input) {

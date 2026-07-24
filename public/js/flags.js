@@ -2,6 +2,23 @@
   'use strict';
 
   var countryCodes = {
+    'RU': 'RU', 'UA': 'UA', 'BY': 'BY', 'KZ': 'KZ', 'UZ': 'UZ',
+    'KG': 'KG', 'TJ': 'TJ', 'TM': 'TM', 'AM': 'AM', 'AZ': 'AZ',
+    'GE': 'GE', 'MD': 'MD', 'LV': 'LV', 'LT': 'LT', 'EE': 'EE',
+    'US': 'US', 'GB': 'GB', 'DE': 'DE', 'FR': 'FR', 'ES': 'ES',
+    'IT': 'IT', 'PL': 'PL', 'CZ': 'CZ', 'RO': 'RO', 'HU': 'HU',
+    'BG': 'BG', 'RS': 'RS', 'HR': 'HR', 'SI': 'SI', 'SK': 'SK',
+    'NL': 'NL', 'BE': 'BE', 'CH': 'CH', 'AT': 'AT', 'SE': 'SE',
+    'NO': 'NO', 'FI': 'FI', 'DK': 'DK', 'IS': 'IS', 'IE': 'IE',
+    'PT': 'PT', 'GR': 'GR', 'TR': 'TR', 'IL': 'IL', 'EG': 'EG',
+    'ZA': 'ZA', 'NG': 'NG', 'KE': 'KE', 'MA': 'MA', 'TN': 'TN',
+    'DZ': 'DZ', 'CN': 'CN', 'JP': 'JP', 'KR': 'KR', 'KP': 'KP',
+    'IN': 'IN', 'PK': 'PK', 'BD': 'BD', 'TH': 'TH', 'VN': 'VN',
+    'ID': 'ID', 'MY': 'MY', 'PH': 'PH', 'SG': 'SG', 'AU': 'AU',
+    'NZ': 'NZ', 'CA': 'CA', 'MX': 'MX', 'BR': 'BR', 'AR': 'AR',
+    'CO': 'CO', 'CL': 'CL', 'PE': 'PE', 'VE': 'VE', 'UY': 'UY',
+    'EC': 'EC', 'PY': 'PY', 'BO': 'BO', 'CU': 'CU', 'DO': 'DO',
+    'PR': 'PR',
     'Россия': 'RU', 'Russia': 'RU',
     'Украина': 'UA', 'Ukraine': 'UA',
     'Беларусь': 'BY', 'Belarus': 'BY', 'Белоруссия': 'BY',
@@ -86,7 +103,7 @@
   };
 
   function codeToFlag(code) {
-    if (!code || code.length !== 2) return '';
+    if (!code) return '';
     var c = code.toUpperCase();
     return String.fromCodePoint(0x1F1E6 + c.charCodeAt(0) - 65, 0x1F1E6 + c.charCodeAt(1) - 65);
   }
