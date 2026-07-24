@@ -645,11 +645,15 @@
                     <td class="px-5 py-3">
                       <% if (user && user.role === 'admin' && u.id !== user.id) { %>
                         <form method="POST" action="/admin/users/<%= u.id %>/role" class="flex items-center gap-1.5">
-                          <div class="usl-select usl-select--sm" data-name="role" data-current="<%= u.role %>" data-options='[{"code":"","name":"user"},{"code":"","name":"moderator"},{"code":"","name":"admin"}]'></div>
+                          <select name="role" class="h-8 w-28 px-2 rounded-lg border border-white/10 bg-white/5 text-white text-xs focus:outline-none focus:border-white/20" style="background:rgba(255,255,255,0.05);border-color:rgba(255,255,255,0.1)">
+                            <option value="user" <%= u.role === 'user' ? 'selected' : '' %>>user</option>
+                            <option value="moderator" <%= u.role === 'moderator' ? 'selected' : '' %>>moderator</option>
+                            <option value="admin" <%= u.role === 'admin' ? 'selected' : '' %>>admin</option>
+                          </select>
                           <button type="submit" class="h-8 px-2 rounded-lg bg-white/10 text-white/80 text-[11px] font-medium hover:bg-white/20 transition-all" data-i18n="admin.setBtn">Set</button>
                         </form>
                       <% } else { %>
-                        <span class="text-[11px] uppercase tracking-wider px-2.5 py-1 rounded-full border text-white/60
+                        <span class="inline-block text-[11px] uppercase tracking-wider px-2.5 py-1 rounded-full border text-white/60
                           <% if (u.role === 'admin') { %>border-red-500/30 bg-red-500/10 text-red-300<% } else if (u.role === 'moderator') { %>border-yellow-500/30 bg-yellow-500/10 text-yellow-300<% } else { %>border-white/10<% } %>" style="border-color:<%= u.role === 'admin' ? 'rgba(239,68,68,0.3)' : u.role === 'moderator' ? 'rgba(234,179,8,0.3)' : 'rgba(255,255,255,0.1)' %>;background:<%= u.role === 'admin' ? 'rgba(239,68,68,0.1)' : u.role === 'moderator' ? 'rgba(234,179,8,0.1)' : 'transparent' %>"><%= u.role %></span>
                       <% } %>
                     </td>
