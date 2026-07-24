@@ -22,7 +22,7 @@
         <span class="inline-flex px-2.5 py-0.5 rounded-full border text-[11px] uppercase tracking-wider <%= rc %>" data-i18n="<%= roleKey %>"><%= player.role %></span>
       </div>
       <% if (player.country) { %>
-        <div class="mt-1 text-sm text-white/40"><span class="text-white/25" data-i18n="profile.country">Country</span> <span data-country="<%= player.country %>"><%= flag(player.country) %> <%= countryName(player.country) %></span></div>
+        <div class="mt-1 text-sm text-white/40"><span class="text-white/25" data-i18n="profile.country">Country</span> <span><%= flag(player.country) %> <%= countryName(player.country) %></span></div>
       <% } %>
     </div>
   </div>
